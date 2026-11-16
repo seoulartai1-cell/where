@@ -6,6 +6,7 @@
 <title>JIKS 통학버스 주거지 찾기</title>
 <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
 <style>
+.leaflet-tile-pane{filter:grayscale(1) contrast(.9) brightness(1.04)}
 :root{--surface-0:#f6f5f1;--surface-1:#efede6;--surface-2:#ffffff;--text-primary:#1f1e1c;--text-secondary:#5b5a55;--text-muted:#8b8a84;--border:rgba(0,0,0,.12);--border-strong:rgba(0,0,0,.25);--border-stronger:rgba(0,0,0,.4);--fill-accent:#185FA5;--on-accent:#ffffff;--fill-danger:#C0392B;--bg-success:#EAF3DE;--text-success:#27500A;--bg-danger:#FCEBEB;--text-danger:#791F1F;--text-accent:#185FA5;--radius:8px}
 @media (prefers-color-scheme:dark){:root{--surface-0:#1c1c1a;--surface-1:#262624;--surface-2:#30302d;--text-primary:#f2f1ec;--text-secondary:#b9b8b0;--text-muted:#8d8c85;--border:rgba(255,255,255,.14);--border-strong:rgba(255,255,255,.28);--border-stronger:rgba(255,255,255,.45);--fill-accent:#5B9BE0;--on-accent:#10161d;--fill-danger:#E8695C;--bg-success:#27500A;--text-success:#C0DD97;--bg-danger:#791F1F;--text-danger:#F7C1C1;--text-accent:#85B7EB}}
 *{box-sizing:border-box}
@@ -570,7 +571,7 @@ if(lay('kn')&&z>=14)KEL.forEach(k=>lg.addLayer(L.marker(k.c,{icon:L.divIcon({htm
 if(lay('nm')&&lay('zl'))TG.forEach(t=>{if(!t.c0||!catOn(t.cat))return;lg.addLayer(L.marker(t.c0,{icon:L.divIcon({html:'<div class="tgn" style="border-color:'+t.c+'"><span style="color:'+t.c+'">●</span> '+t.n+'<small>'+t.ko+'</small><small>'+tgSub(t)+'</small></div>',className:'',iconSize:[0,0]}),interactive:lay('zd'),keyboard:false,zIndexOffset:-800}).bindPopup(()=>tgHtml(t),{maxWidth:340,maxHeight:430}))})}
 function initMap(){
 map=L.map('map',{zoomControl:true});
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(map);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:20,attribution:'© OpenStreetMap contributors © CARTO'}).addTo(map);
 zg=L.layerGroup().addTo(map);lg=L.layerGroup().addTo(map);trg=L.layerGroup().addTo(map);bsg=L.layerGroup().addTo(map);ig=L.layerGroup().addTo(map);mk=L.layerGroup().addTo(map);ln=L.layerGroup().addTo(map);
 map.on('popupclose',()=>{ln.clearLayers();sel=null});
 map.on('zoomend',()=>{zc();labelsUpd()});map.on('moveend',()=>{drawInfra();drawBus()});}
