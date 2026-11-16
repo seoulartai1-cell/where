@@ -66,10 +66,11 @@ input[type=range]{width:100%}
 #tlg{margin-top:6px;border-top:0.5px solid var(--border);padding-top:6px}
 .zc{border-left:4px solid var(--border-strong);cursor:pointer}
 .kt{font-size:11px;line-height:1.15;text-align:center;white-space:nowrap;color:var(--text-primary);text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 4px #fff;pointer-events:none}
-.kt small{display:block;font-size:10px;color:#444}
-.kcn{font-size:14px;font-weight:700;line-height:1.2;text-align:center;white-space:nowrap;text-shadow:0 0 4px #fff,0 0 4px #fff,0 0 6px #fff;pointer-events:none}
+.kt small{display:block;font-size:10px;color:#666}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin:0 3px 0 6px;vertical-align:-2px;border:0.5px solid rgba(0,0,0,.25)}
+.kcn{color:#555;font-size:13px;font-weight:600;letter-spacing:.02em;line-height:1.2;text-align:center;white-space:nowrap;text-shadow:0 0 4px #fff,0 0 4px #fff,0 0 6px #fff;pointer-events:none}
 .kcn small{display:block;font-size:11px;font-weight:500}
-.tgn{font-size:13px;font-weight:700;white-space:nowrap;text-align:center;background:rgba(255,255,255,.82);border:1.5px solid;border-radius:6px;padding:1px 6px;pointer-events:none;color:#222}
+.tgn{font-size:12px;font-weight:600;white-space:nowrap;text-align:center;background:rgba(255,255,255,.9);border:1px solid;border-radius:999px;padding:2px 9px;pointer-events:none;color:#333;box-shadow:0 1px 3px rgba(0,0,0,.15)}
 .tgn small{display:block;font-size:10px;font-weight:500}
 details.dz{border:0.5px solid var(--border);border-radius:10px;background:var(--surface-2);margin-bottom:6px;padding:6px 12px}
 details.dz summary{cursor:pointer;font-size:14px;padding:4px 0}
@@ -231,7 +232,8 @@ details.g>summary,details.g>.gb,#fvp,#lstw,.note{padding-left:12px;padding-right
 <label class="ch"><input type="checkbox" data-l="zn"> 구역 원(대략)</label>
 <label class="ch"><input type="checkbox" data-l="zl" checked> 구역 이름</label>
 <label class="ch"><input type="checkbox" data-l="zd" checked> 구역 설명</label>
-<label class="ch"><input type="checkbox" data-l="kc" checked> 구(Kecamatan) 색·경계</label>
+<label class="ch"><input type="checkbox" data-l="tp" checked> 특징별 색칠</label>
+<label class="ch"><input type="checkbox" data-l="kc" checked> 구(Kecamatan) 경계·이름</label>
 <label class="ch"><input type="checkbox" data-l="kl" checked> 동(Kelurahan) 경계</label>
 <label class="ch"><input type="checkbox" data-l="kn" checked> 동 이름</label>
 <label class="ch"><input type="checkbox" data-l="nm" checked> 통칭→소속 동 표시</label>
@@ -292,6 +294,7 @@ details.g>summary,details.g>.gb,#fvp,#lstw,.note{padding-left:12px;padding-right
 <span style="color:var(--fill-accent)">●</span> 조건 통과 · <span style="color:var(--text-muted)">●</span> 제외 · <span style="color:var(--fill-danger)">★</span> JIKS<br>
 <span style="color:#D85A30">◆</span> 빠델 · <span style="color:#D4537E">▲</span> 발레 · <span style="color:#378ADD">■</span> 영어학원<br>
 점선 원 · <span style="color:#5D6D7E">중부</span> <span style="color:#1F618D">남부</span> <span style="color:#148F77">북부</span> <span style="color:#CA6F1E">서부</span> <span style="color:#239B56">동부</span> <span style="color:#6C3483">섬</span>
+<div id="clg"></div>
 <div id="tlg"></div></div></details>
 </main>
 </div>
@@ -483,6 +486,11 @@ const TG=[
 {id:'bin',n:'Bintaro',ko:'빈따로',mem:['Bintaro','Petukangan Selatan','Petukangan Utara'],c:'#C0392B',d:'자카르타 서남쪽 끝 주거지. 경계 너머 Bintaro Jaya와 함께 불림.',pt:['자카르타 쪽은 Pesanggrahan 구','Bintaro Jaya는 자카르타 밖(Tangerang Selatan)']},
 {id:'jik',n:'Cipayung (JIKS)',ko:'찌빠융 (JIKS)',mem:['Ceger'],c:'#D35400',d:'JIKS가 있는 동자카르타 지역. 남부 거주지에서 버스로 통학함.',pt:['JIKS는 Ceger 동, Cipayung 구','조사 목록 단지는 모두 남자카르타']}
 ];
+const CAT={biz:['상업·업무','#F6D58E','#A67C00','오피스·몰·상점이 밀집한 곳. 낮에 붐비고 주거는 고층 아파트 위주.'],lux:['고급 주거','#CDB8E8','#7E57C2','대형 주택과 고급 단지. 조용하고 녹지가 많으며 월세가 높음.'],exp:['외국인·카페','#F5C6B0','#C0714C','외국인·카페·식당 중심 동네. 활기차지만 정체와 침수에 주의.'],res:['일반 주거','#C5E3BC','#5E9E58','일반 주거지. 생활 시설은 대로변 몰·시장을 이용.'],hub:['교통·시설','#B4D4EC','#4A88B8','지하철·철도·공원·학교 등 시설로 알려진 곳.'],out:['외곽 주거','#E6DFCF','#9A8C70','도심에서 멀고 저밀한 주거지. 이동 시간이 길어짐.']};
+const KCAT={'Kuningan Barat':'biz','Kuningan Timur':'biz','Karet Kuningan':'biz','Karet Semanggi':'biz','Senayan':'biz','Melawai':'biz','Kebayoran Lama Utara':'biz','Setia Budi':'biz','Pondok Pinang':'lux','Gunung':'lux','Selong':'lux','Grogol Selatan':'lux','Grogol Utara':'lux','Cipete Utara':'lux','Gandaria Utara':'lux','Petogogan':'lux','Rawa Barat':'lux','Kramat Pela':'lux','Bangka':'exp','Pela Mampang':'exp','Lebak Bulus':'hub','Cawang':'hub','Cililitan':'hub','Halim Perdana Kusumah':'hub','Ragunan':'hub','Kalibata':'hub','Ceger':'hub','Manggarai':'hub'};
+const OUTK=['Jagakarsa','Cipayung','Pasar Rebo','Ciracas','Makasar','Kramat Jati'];
+const catOf=k=>KCAT[k.k]||(OUTK.includes(k.kc)||k.k==='Pondok Labu'||k.k==='Kebagusan'?'out':'res');
+const chipC=c=>'<span class="bd" style="background:'+CAT[c][1]+';color:#333">'+CAT[c][0]+'</span>';
 const kdist=k=>KC[k.kc]?KC[k.kc][0]:'';
 function pip(lat,lng,rg){let c=false;for(let i=0,j=rg.length-1;i<rg.length;j=i++){const yi=rg[i][0],xi=rg[i][1],yj=rg[j][0],xj=rg[j][1];if((xi>lng)!==(xj>lng)&&lat<(yj-yi)*(lng-xi)/(xj-xi)+yi)c=!c}return c}
 const kfind=(lat,lng)=>KEL.find(k=>k.g.some(rg=>pip(lat,lng,rg)))||null;
@@ -490,10 +498,10 @@ const kkey=k=>k.k+'|'+k.kc;
 function initKel(){R.forEach(r=>r.kl=kfind(r.lat,r.lng));PO.forEach(p=>p.kl=kfind(p.lat,p.lng));ST.forEach(t=>t.kl=kfind(t.lat,t.lng));JK.kl=kfind(JK.lat,JK.lng);
 KEL.forEach(k=>{k.rs=R.filter(r=>r.kl===k);k.ps=PO.filter(p=>p.kl===k);k.ms=ST.filter(t=>t.kl===k)});
 TG.forEach(t=>{t.ks=KEL.filter(k=>t.mem.includes(k.k));t.rs=R.filter(r=>r.kl&&t.mem.includes(r.kl.k));if(t.ks.length){t.c0=[t.ks.reduce((a,k)=>a+k.c[0],0)/t.ks.length,t.ks.reduce((a,k)=>a+k.c[1],0)/t.ks.length]}});
-KEL.forEach(k=>{k.tg=TG.filter(t=>t.mem.includes(k.k))})}
+KEL.forEach(k=>{k.tg=TG.filter(t=>t.mem.includes(k.k));k.cat=catOf(k)});TG.forEach(t=>{if(t.ks.length)t.c=CAT[t.ks[0].cat][2]})}
 const kname=k=>k.k+(KR[k.k]?' <span class="un">'+KR[k.k]+'</span>':'');
 const klab=k=>(KR[k.k]?'<small>'+KR[k.k]+'</small>':'');
-function kelHtml(k){const kc=KC[k.kc]||['',''];let h='<div><b style="font-weight:500;font-size:15px">'+k.k+'</b> '+(KR[k.k]||'')+'</div><div style="color:var(--text-secondary)">Kelurahan(동) · Kecamatan(구) '+k.kc+' '+kc[0]+' · Kota '+k.kt+'</div>';
+function kelHtml(k){const kc=KC[k.kc]||['',''];let h='<div><b style="font-weight:500;font-size:15px">'+k.k+'</b> '+(KR[k.k]||'')+'</div><div style="color:var(--text-secondary)">Kelurahan(동) · Kecamatan(구) '+k.kc+' '+kc[0]+' · Kota '+k.kt+'</div><div style="margin-top:6px">'+chipC(k.cat)+'</div><div style="margin-top:2px">'+CAT[k.cat][3]+'</div>';
 if(k.tg.length)h+='<div style="margin-top:4px">통칭: '+k.tg.map(t=>'<span class="bd" style="border:1px solid '+t.c+'">'+t.n+' '+t.ko+'</span>').join('')+'</div>';
 if(KNOTE[k.k])h+='<div style="margin-top:4px">'+KNOTE[k.k]+'</div>';
 if(k.rs.length)h+='<h4>조사 단지</h4>'+k.rs.map(r=>'<div>'+r.i+'. '+r.nm+'</div>').join('');
@@ -508,17 +516,17 @@ const q=kq.toLowerCase();
 let h='<div style="font-size:15px;font-weight:500;margin-bottom:8px">지역 공부 패널</div>';
 h+='<details class="dz" open><summary><b style="font-weight:500">행정구역 체계</b></summary><table class="tbl"><tr><th>단계</th><th>인도네시아어</th><th>우리 식으로 대략</th><th>예</th></tr><tr><td>1</td><td>Provinsi</td><td>광역 단위</td><td>DKI Jakarta (법령상 2024년부터 Daerah Khusus Jakarta)</td></tr><tr><td>2</td><td>Kota Administrasi</td><td>시</td><td>Jakarta Selatan(남), Jakarta Timur(동)</td></tr><tr><td>3</td><td>Kecamatan</td><td>구</td><td>Cilandak, Kebayoran Baru</td></tr><tr><td>4</td><td>Kelurahan</td><td>동</td><td>Cilandak Barat, Bangka</td></tr><tr><td>5</td><td>RW · RT</td><td>통·반</td><td>주소의 RT 03/RW 05</td></tr></table><div style="font-size:13px;margin-top:6px;color:var(--text-secondary)">끄망, 폰독 인다, 빠꾸부워노처럼 자주 쓰는 이름은 대부분 행정구역이 아니라 통칭입니다. 부동산 사이트와 주소에는 통칭과 동 이름이 섞여 나옵니다. 한글 표기는 대략적인 소리입니다.</div></details>';
 h+='<details class="dz" open><summary><b style="font-weight:500">통칭 지역 → 소속 동</b></summary><table class="tbl"><tr><th style="width:24%">통칭</th><th style="width:30%">소속 동(구)</th><th>특징</th></tr>'+TG.map(t=>'<tr><td><b style="font-weight:500;color:'+t.c+'">'+t.n+'</b><div class="un">'+t.ko+'</div></td><td>'+t.ks.map(k=>'<a href="#" data-kz="'+kkey(k)+'">'+k.k+'</a> <span class="un">('+k.kc+')</span>').join('<br>')+'</td><td>'+t.d+(t.rs.length?'<div class="un">조사 단지 '+t.rs.length+'곳</div>':'')+'</td></tr>').join('')+'</table></details>';
-h+='<input type="text" id="kq" placeholder="동·구 이름 검색 (예: Pondok, 끄망)" value="'+kq.replace(/"/g,'')+'" style="width:100%;margin:6px 0">';
+h+='<details class="dz" open><summary><b style="font-weight:500">지역 특징별 보기</b></summary>'+Object.keys(CAT).map(c=>{const ks=KEL.filter(k=>k.cat===c);return '<div style="padding:6px 0;border-top:0.5px solid var(--border)">'+chipC(c)+' <span style="font-size:13px;color:var(--text-secondary)">'+CAT[c][3]+'</span><div style="font-size:13px;margin-top:4px">'+ks.map(k=>'<a href="#" data-kz="'+kkey(k)+'">'+k.k+'</a>').join(' · ')+'</div></div>'}).join('')+'<div class="un" style="font-size:12px;margin-top:4px">특징 구분은 일반적인 인상에 따른 대략적 분류입니다. 현지 확인이 필요합니다.</div></details><input type="text" id="kq" placeholder="동·구 이름 검색 (예: Pondok, 끄망)" value="'+kq.replace(/"/g,'')+'" style="width:100%;margin:6px 0">';
 const by={};KEL.forEach(k=>{(by[k.kt+'|'+k.kc]=by[k.kt+'|'+k.kc]||[]).push(k)});
 Object.keys(by).sort().forEach(key=>{const [kt,kc]=key.split('|');const ks=by[key].filter(k=>!q||(k.k+' '+(KR[k.k]||'')+' '+kc+' '+(KC[kc]?KC[kc][0]:'')+' '+k.tg.map(t=>t.n+t.ko).join(' ')).toLowerCase().includes(q));if(!ks.length)return;
-h+='<details class="dz"'+(q?' open':'')+'><summary><b style="font-weight:500;color:'+KC[kc][1]+'">'+kc+'</b> '+KC[kc][0]+' <span class="un">· '+kt+' · 동 '+ks.length+'개</span></summary>'+ks.map(k=>'<div style="padding:4px 0;border-top:0.5px solid var(--border)"><a href="#" data-kz="'+kkey(k)+'"><b style="font-weight:500">'+k.k+'</b></a> '+(KR[k.k]||'')+(k.tg.length?' '+k.tg.map(t=>'<span class="bd" style="border:1px solid '+t.c+'">'+t.ko.split(' ')[0]+'</span>').join(''):'')+(k.rs.length?' <span class="bd ok">단지 '+k.rs.length+'</span>':'')+(KNOTE[k.k]?'<div style="font-size:13px;color:var(--text-secondary)">'+KNOTE[k.k]+'</div>':'')+'</div>').join('')+'</details>'});
+h+='<details class="dz"'+(q?' open':'')+'><summary><b style="font-weight:500">'+kc+'</b> '+KC[kc][0]+' <span class="un">· '+kt+' · 동 '+ks.length+'개</span></summary>'+ks.map(k=>'<div style="padding:4px 0;border-top:0.5px solid var(--border)"><span class="sw" style="margin-left:0;background:'+CAT[k.cat][1]+'"></span><a href="#" data-kz="'+kkey(k)+'"><b style="font-weight:500">'+k.k+'</b></a> '+(KR[k.k]||'')+' <span class="un" style="font-size:12px">'+CAT[k.cat][0]+'</span>'+(k.tg.length?' '+k.tg.map(t=>'<span class="bd" style="border:1px solid '+t.c+'">'+t.ko.split(' ')[0]+'</span>').join(''):'')+(k.rs.length?' <span class="bd ok">단지 '+k.rs.length+'</span>':'')+(KNOTE[k.k]?'<div style="font-size:13px;color:var(--text-secondary)">'+KNOTE[k.k]+'</div>':'')+'</div>').join('')+'</details>'});
 h+='<div class="un" style="font-size:12px;margin-top:6px">경계 출처: GADM v3.6(2019)을 단순화. 최신 행정 개편이 반영되지 않았을 수 있고, GADM은 비영리 용도로 쓰는 데이터입니다.</div>';
 const keep=document.activeElement&&document.activeElement.id==='kq';el.innerHTML=h;if(keep){const i=$('kq');i.focus();i.setSelectionRange(i.value.length,i.value.length)}}
 function labelsUpd(){lg.clearLayers();const z=map.getZoom();
 if(true){
-if(lay('kc')&&z<=14)KCG.forEach(g=>{const c=KC[g.kc];lg.addLayer(L.marker(g.c,{icon:L.divIcon({html:'<div class="kcn" style="color:'+c[1]+'">'+g.kc+'<small>'+c[0]+'</small></div>',className:'',iconSize:[0,0]}),interactive:false,keyboard:false,zIndexOffset:-900}))});
+if(lay('kc')&&z<=14)KCG.forEach(g=>{const c=KC[g.kc];lg.addLayer(L.marker(g.c,{icon:L.divIcon({html:'<div class="kcn">'+g.kc+'<small>'+c[0]+'</small></div>',className:'',iconSize:[0,0]}),interactive:false,keyboard:false,zIndexOffset:-900}))});
 if(lay('kn')&&z>=14)KEL.forEach(k=>lg.addLayer(L.marker(k.c,{icon:L.divIcon({html:'<div class="kt">'+k.k+klab(k)+'</div>',className:'',iconSize:[0,0]}),interactive:false,keyboard:false,zIndexOffset:-900})))}
-if(lay('nm'))TG.forEach(t=>{if(!t.c0)return;lg.addLayer(L.marker(t.c0,{icon:L.divIcon({html:'<div class="tgn" style="border-color:'+t.c+'">'+t.n+'<small>'+t.ko+'</small></div>',className:'',iconSize:[0,0]}),interactive:lay('zd'),keyboard:false,zIndexOffset:-800}).bindPopup(()=>tgHtml(t),{maxWidth:340,maxHeight:430}))})}
+if(lay('nm'))TG.forEach(t=>{if(!t.c0)return;lg.addLayer(L.marker(t.c0,{icon:L.divIcon({html:'<div class="tgn" style="border-color:'+t.c+'"><span style="color:'+t.c+'">●</span> '+t.n+'<small>'+t.ko+'</small></div>',className:'',iconSize:[0,0]}),interactive:lay('zd'),keyboard:false,zIndexOffset:-800}).bindPopup(()=>tgHtml(t),{maxWidth:340,maxHeight:430}))})}
 function initMap(){
 map=L.map('map',{zoomControl:true});
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(map);
@@ -534,12 +542,13 @@ ln.addLayer(L.polyline([[r.lat,r.lng],[JK.lat,JK.lng]],{color:'#C0392B',weight:1
 function render(){
 mk.clearLayers();ln.clearLayers();zg.clearLayers();rm={};
 kpoly={};
-if(lay('kc'))KCG.forEach(g=>{const c=KC[g.kc][1];zg.addLayer(L.polygon(g.g,{color:c,weight:3,opacity:.85,fillColor:c,fillOpacity:.14,interactive:false}))});
-KEL.forEach(k=>{const kl=lay('kl'),zd=lay('zd');const pl=L.polygon(k.g,{color:kl?'#555':'transparent',weight:kl?.8:0,opacity:.7,fillColor:'#000',fillOpacity:0.01,interactive:zd});if(zd)pl.bindPopup(()=>kelHtml(k),{maxWidth:340,maxHeight:430});kpoly[kkey(k)]=pl;zg.addLayer(pl)});
-if(lay('nm'))TG.forEach(t=>t.ks.forEach(k=>zg.addLayer(L.polygon(k.g,{color:t.c,weight:3,dashArray:'7 5',opacity:.95,fillColor:t.c,fillOpacity:.12,interactive:false}))));
+if(lay('kc'))KCG.forEach(g=>zg.addLayer(L.polygon(g.g,{color:'#8a8a8a',weight:1.8,opacity:.75,fill:false,interactive:false})));
+KEL.forEach(k=>{const kl=lay('kl'),zd=lay('zd');const tp=lay('tp');const pl=L.polygon(k.g,{color:kl?'#777':'transparent',weight:kl?.7:0,opacity:.5,fillColor:tp?CAT[k.cat][1]:'#000',fillOpacity:tp?.4:0.01,interactive:zd});if(zd)pl.bindPopup(()=>kelHtml(k),{maxWidth:340,maxHeight:430});kpoly[kkey(k)]=pl;zg.addLayer(pl)});
+if(lay('nm'))TG.forEach(t=>t.ks.forEach(k=>zg.addLayer(L.polygon(k.g,{color:'#555',weight:2,dashArray:'2 5',opacity:.8,fill:false,interactive:false}))));
+$('clg').innerHTML=lay('tp')?'<div style="margin-top:4px">지역 특징 · '+Object.keys(CAT).map(c=>'<span class="sw" style="background:'+CAT[c][1]+'"></span>'+CAT[c][0]).join(' ')+'</div>':'';
 labelsUpd();study();
 ZN.forEach(z=>{if(lay('zn')){const c=L.circle([z.lat,z.lng],{radius:z.r,color:z.c,weight:1.5,dashArray:'6 4',fillColor:z.c,fillOpacity:.1,interactive:lay('zd')});if(lay('zd'))c.bindPopup(()=>znHtml(z),{maxWidth:340,maxHeight:430});zg.addLayer(c)}
-if(lay('zl'))zg.addLayer(L.marker([z.lat,z.lng],{icon:L.divIcon({html:'<div class="zt" style="color:'+z.c+'">'+z.n.split(' ')[0]+'<small>'+(z.n.split(' ').slice(1).join(' '))+'</small>'+(lay('zk')&&z.kr?'<small>≈ '+z.kr+'</small>':'')+'</div>',className:'',iconSize:[0,0]}),interactive:false,keyboard:false,zIndexOffset:-1000}))});
+if(lay('zl')&&!lay('nm'))zg.addLayer(L.marker([z.lat,z.lng],{icon:L.divIcon({html:'<div class="zt" style="color:'+z.c+'">'+z.n.split(' ')[0]+'<small>'+(z.n.split(' ').slice(1).join(' '))+'</small>'+(lay('zk')&&z.kr?'<small>≈ '+z.kr+'</small>':'')+'</div>',className:'',iconSize:[0,0]}),interactive:false,keyboard:false,zIndexOffset:-1000}))});
 if(lay('jd'))JD.forEach(d=>{const c=CITY[d.c].c;
 if(lay('zn')){const o=L.circle([d.lat,d.lng],{radius:d.r,color:c,weight:1.5,dashArray:'2 5',fillColor:c,fillOpacity:.08,interactive:lay('zd')});if(lay('zd'))o.bindPopup(()=>jdHtml(d),{maxWidth:340,maxHeight:430});zg.addLayer(o)}
 if(lay('zl'))zg.addLayer(L.marker([d.lat,d.lng],{icon:L.divIcon({html:'<div class="zt jt" style="color:'+c+'">'+d.n+(lay('zk')?'<small>≈ '+d.kr+'</small>':'')+'</div>',className:'',iconSize:[0,0]}),interactive:false,keyboard:false,zIndexOffset:-1000}))});
