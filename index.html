@@ -56,6 +56,17 @@ input[type=range]{width:100%}
 .leaflet-tooltip.bt{background:var(--surface-2);color:var(--text-primary);border:0.5px solid var(--border-strong);font-size:12px;font-weight:500;padding:1px 6px}
 .leaflet-tooltip.dt{background:var(--surface-2);color:var(--text-primary);border:0.5px solid var(--border-strong);font-size:12px;padding:1px 5px}
 .zlow .bt{display:none}
+.zc{border-left:4px solid var(--border-strong);cursor:pointer}
+.kt{font-size:11px;line-height:1.15;text-align:center;white-space:nowrap;color:var(--text-primary);text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 4px #fff;pointer-events:none}
+.kt small{display:block;font-size:10px;color:#444}
+.kcn{font-size:14px;font-weight:700;line-height:1.2;text-align:center;white-space:nowrap;text-shadow:0 0 4px #fff,0 0 4px #fff,0 0 6px #fff;pointer-events:none}
+.kcn small{display:block;font-size:11px;font-weight:500}
+.tgn{font-size:13px;font-weight:700;white-space:nowrap;text-align:center;background:rgba(255,255,255,.82);border:1.5px solid;border-radius:6px;padding:1px 6px;pointer-events:none;color:#222}
+.tgn small{display:block;font-size:10px;font-weight:500}
+details.dz{border:0.5px solid var(--border);border-radius:10px;background:var(--surface-2);margin-bottom:6px;padding:6px 12px}
+details.dz summary{cursor:pointer;font-size:14px;padding:4px 0}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed;word-break:break-word}
+.tbl td,.tbl th{border-bottom:0.5px solid var(--border);padding:6px 6px;text-align:left;vertical-align:top;font-weight:400}
 .zt{font-size:13px;font-weight:600;white-space:nowrap;text-align:center;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 5px #fff;pointer-events:none}
 .zt small{display:block;font-size:11px;font-weight:400}
 .jt{transform:translate(-50%,-50%)}
@@ -209,9 +220,13 @@ details.g>summary,details.g>.gb,#fvp,#lstw,.note{padding-left:12px;padding-right
 <details class="g"><summary>지도 표시</summary><div class="gb">
 <div class="rowl">
 <span style="font-size:13px;color:var(--text-secondary);margin-right:6px">지도 표시</span>
-<label class="ch"><input type="checkbox" data-l="zn" checked> 구역 범위</label>
+<label class="ch"><input type="checkbox" data-l="zn"> 구역 원(대략)</label>
 <label class="ch"><input type="checkbox" data-l="zl" checked> 구역 이름</label>
 <label class="ch"><input type="checkbox" data-l="zd" checked> 구역 설명</label>
+<label class="ch"><input type="checkbox" data-l="kc" checked> 구(Kecamatan) 색·경계</label>
+<label class="ch"><input type="checkbox" data-l="kl" checked> 동(Kelurahan) 경계</label>
+<label class="ch"><input type="checkbox" data-l="kn" checked> 동 이름</label>
+<label class="ch"><input type="checkbox" data-l="nm" checked> 통칭→소속 동 표시</label>
 <label class="ch"><input type="checkbox" data-l="zk" checked> 한국 비유</label>
 <label class="ch"><input type="checkbox" data-l="jd" checked> 자카르타 동네</label>
 <label class="ch"><input type="checkbox" data-l="st" checked> MRT</label>
@@ -227,6 +242,7 @@ details.g>summary,details.g>.gb,#fvp,#lstw,.note{padding-left:12px;padding-right
 </div>
 <details class="g"><summary>구역·동네 안내</summary><div class="gb">
 <div id="zinfo" style="margin-bottom:14px"></div>
+<div id="kinfo" style="margin-bottom:14px"></div>
 </div></details>
 <details class="g"><summary>버스 시간표 (S2 2026-2027)</summary><div class="gb">
 <input type="text" id="tq" placeholder="정류장 이름 검색" style="width:100%;margin-bottom:8px">
@@ -257,6 +273,7 @@ details.g>summary,details.g>.gb,#fvp,#lstw,.note{padding-left:12px;padding-right
 </div>
 </div>
 <script src="vendor/leaflet/leaflet.js"></script>
+<script src="kel.js"></script>
 <script>
 const $=i=>document.getElementById(i);
 const hav=(a,b,c,d)=>{const t=Math.PI/180,x=(c-a)*t,y=(d-b)*t,q=Math.sin(x/2)**2+Math.cos(a*t)*Math.cos(c*t)*Math.sin(y/2)**2;return 12742*Math.asin(Math.sqrt(q))};
@@ -323,7 +340,7 @@ const fd1=d=>d.toFixed(1)+'km';
 const tm=t=>{const a=t.split(':');return +a[0]*60+ +a[1]};
 const GRL={golf:'골프장 뷰',garden:'정원·녹지',city:'도시 뷰'};
 const SMIN=12,SMAX=500;
-let sel=null,HT=620,map,mk,ln,zg,ig,rm={},pass={};
+let sel=null,HT=620,map,mk,ln,zg,ig,lg,rm={},pass={};
 const FK='jiks-fav-v1',STS=['관심','방문 예정','연락함','계약 가능','탈락'];
 let FV={};
 try{const o=JSON.parse(localStorage.getItem(FK)||'{}');if(o&&typeof o==='object')FV=o}catch(e){}
@@ -423,12 +440,67 @@ function zinfo(){const el=$('zinfo');if(!lay('zd')){el.innerHTML='';return}
 let h='<div style="font-size:15px;font-weight:500;margin-bottom:8px">구역 안내</div>'+ZN.map(z=>{const st=znStat(z);return '<div class="cd zc" data-z="'+z.id+'" style="border-left-color:'+z.c+'"><b style="font-weight:500;color:'+z.c+'">'+z.n+'</b>'+(z.kr&&lay('zk')?' <span class="bd ok">'+z.kr+' 느낌</span>':'')+'<div style="font-size:13px;color:var(--text-secondary)">'+z.d+'</div><div style="font-size:13px">'+(st?'단지 '+st.n+'곳 · 최저 '+fm(st.min)+' · 버스 '+st.b0+'~'+st.b1:'조사 단지 없음')+'</div></div>'}).join('');
 if(lay('jd'))h+='<div style="font-size:15px;font-weight:500;margin:14px 0 8px">자카르타 주요 동네</div><table class="tt"><thead><tr><th style="width:27%">동네</th><th>특성·이미지</th>'+(lay('zk')?'<th style="width:26%">한국 비유</th>':'')+'</tr></thead><tbody>'+JD.map(d=>{const c=CITY[d.c];return '<tr data-z="'+d.id+'" style="cursor:pointer"><td style="border-left:4px solid '+c.c+'"><b style="font-weight:500;color:'+c.c+'">'+d.n+'</b><div class="un">'+c.n+'</div></td><td>'+d.im+'</td>'+(lay('zk')?'<td>'+d.kr+'</td>':'')+'</tr>'}).join('')+'</tbody></table>';
 el.innerHTML=h}
+const KC={'Cilandak':['찔란닥','#16A085'],'Jagakarsa':['자가까르사','#8E7CC3'],'Kebayoran Baru':['끄바요란 바루','#E67E22'],'Kebayoran Lama':['끄바요란 라마','#2980B9'],'Mampang Prapatan':['맘빵 쁘라빠딴','#D4537E'],'Pancoran':['빤쪼란','#7F8C8D'],'Pasar Minggu':['빠사르 밍구','#27AE60'],'Pesanggrahan':['쁘상그라한','#C0392B'],'Setia Budi':['스띠아 부디','#B7950B'],'Tebet':['뜨벳','#6C5CE7'],'Cipayung':['찌빠융','#D35400'],'Pasar Rebo':['빠사르 레보','#1ABC9C'],'Ciracas':['찌라짜스','#5D6D7E'],'Makasar':['마까사르','#A04000'],'Kramat Jati':['끄라맛 자띠','#2E86C1']};
+const KR={'Cilandak Barat':'찔란닥 바랏','Cipete Selatan':'찌쁘떼 슬라딴','Gandaria Selatan':'간다리아 슬라딴','Lebak Bulus':'르박 불루스','Pondok Labu':'폰독 라부','Ciganjur':'찌간주르','Cipedak':'찌쁘닥','Jagakarsa':'자가까르사','Lenteng Agung':'른뗑 아궁','Srengseng Sawah':'스렝승 사와','Tanjung Barat':'딴중 바랏','Cipete Utara':'찌쁘떼 우따라','Gandaria Utara':'간다리아 우따라','Gunung':'구눙','Kramat Pela':'끄라맛 쁠라','Melawai':'믈라와이','Petogogan':'쁘또고간','Pulo':'뿔로','Rawa Barat':'라와 바랏','Selong':'슬롱','Senayan':'스나얀','Cipulir':'찌뿔리르','Grogol Selatan':'그로골 슬라딴','Grogol Utara':'그로골 우따라','Kebayoran Lama Selatan':'끄바요란 라마 슬라딴','Kebayoran Lama Utara':'끄바요란 라마 우따라','Pondok Pinang':'폰독 삐낭','Bangka':'방까','Kuningan Barat':'꾸닝안 바랏','Mampang Prapatan':'맘빵 쁘라빠딴','Pela Mampang':'쁠라 맘빵','Tegal Parang':'뜨갈 빠랑','Cikoko':'찌꼬꼬','Duren Tiga':'두렌 띠가','Kalibata':'깔리바따','Pancoran':'빤쪼란','Pengadegan':'쁭아드간','Rawajati':'라와자띠','Cilandak Timur':'찔란닥 띠무르','Jati Padang':'자띠 빠당','Kebagusan':'끄바구산','Pasar Minggu':'빠사르 밍구','Pejaten Barat':'쁘자뗀 바랏','Pejaten Timur':'쁘자뗀 띠무르','Ragunan':'라구난','Bintaro':'빈따로','Pesanggrahan':'쁘상그라한','Petukangan Selatan':'쁘뚜깡안 슬라딴','Petukangan Utara':'쁘뚜깡안 우따라','Ulujami':'울루자미','Guntur':'군뚜르','Karet':'까렛','Karet Semanggi':'까렛 스망기','Pasar Manggis':'빠사르 망기스','Setia Budi':'스띠아 부디','Karet Kuningan':'까렛 꾸닝안','Kuningan Timur':'꾸닝안 띠무르','Menteng Atas':'믄뗑 아따스','Bukit Duri':'부킷 두리','Kebon Baru':'끄본 바루','Manggarai':'망가라이','Manggarai Selatan':'망가라이 슬라딴','Menteng Dalam':'믄뗑 달람','Tebet Barat':'뜨벳 바랏','Tebet Timur':'뜨벳 띠무르','Bambu Apus':'밤부 아뿌스','Ceger':'쯔게르','Cilangkap':'찔랑깝','Cipayung':'찌빠융','Lubang Buaya':'루방 부아야','Munjul':'문줄','Pondok Ranggon':'폰독 랑곤','Setu':'스뚜','Baru':'바루','Cijantung':'찌잔뚱','Gedong':'그동','Kalisari':'깔리사리','Pekayon':'쁘까욘','Cibubur':'찌부부르','Ciracas':'찌라짜스','Kelapa Dua Wetan':'끌라빠 두아 웨딴','Rambutan':'람부딴','Susukan':'수수깐','Cipinang Melayu':'찌삐낭 믈라유','Halim Perdana Kusumah':'할림 쁘르다나 꾸수마','Kebon Pala':'끄본 빨라','Makasar':'마까사르','Pinang Ranti':'삐낭 란띠','Bale Kambang':'발레 깜방','Batu Ampar':'바뚜 암빠르','Cawang':'짜왕','Cililitan':'찌릴리딴','Dukuh':'두꾸','Kampung Tengah':'깜뿡 뜽아','Kramat Jati':'끄라맛 자띠'};
+const KNOTE={'Bangka':'끄망 중심부. 끄망 빌리지와 Lippo Mall Kemang이 이 동 안에 있음','Pela Mampang':'끄망 북서쪽과 이어지는 주거지','Cilandak Barat':'Cilandak Town Square 등 상권과 빠델 코트가 모인 주거지. 테로공(Terogong) 거리 포함','Cipete Selatan':'MRT Cipete Raya·Haji Nawi역이 있는 주거·상권','Cipete Utara':'다르마와사(Darmawangsa) 일대 고급 주거지와 접함','Pondok Pinang':'폰독 인다 쇼핑몰·골프 단지가 있는 고급 주거지','Lebak Bulus':'MRT 남쪽 종점·차량기지가 있는 지명. 역 좌표는 이웃 동 경계에 걸릴 수 있음','Gunung':'빠꾸부워노 단지가 모인 곳','Selong':'세노빠띠·빠꾸부워노 인근 고급 주거지','Grogol Selatan':'심프룩(Simprug) 단지 일대','Kebayoran Lama Utara':'Gandaria City 몰이 속한 동','Gandaria Utara':'간다리아 주거지(Kebayoran Baru 소속)','Melawai':'블록 M 상권과 MRT Blok M역','Senayan':'겔로라 붕 까르노(GBK) 경기장 단지','Kuningan Barat':'꾸닝안 업무지구(CBD) 일부','Kuningan Timur':'꾸닝안 업무지구(CBD) 일부','Ragunan':'라구난 동물원','Bintaro':'남쪽으로 땅그랑슬라딴의 Bintaro Jaya와 접함. 그쪽은 자카르타 밖','Kalibata':'깔리바따 영웅 묘지가 있는 동','Cawang':'톨게이트·LRT가 만나는 교통 요충','Halim Perdana Kusumah':'할림 공군기지가 있는 동','Ceger':'JIKS 학교 소재 동','Cipayung':'동네 이름이자 구(Kecamatan) 이름이기도 함','Lenteng Agung':'KRL 통근열차역이 있는 동','Pondok Labu':'남쪽 외곽 주거지','Setia Budi':'동 이름과 구 이름이 같음'};
+const TG=[
+{id:'kem',n:'Kemang',ko:'끄망',mem:['Bangka','Pela Mampang'],c:'#E67E22',d:'외국인·카페·식당 밀집 지역. Lippo Mall Kemang을 중심으로 상권이 넓고 한식당도 많음.',pt:['행정구역 이름이 아니라 통칭. 주로 Bangka 동에 해당','발레·빠델 시설 가까움','주말·퇴근 시간 정체 심하고 우기 침수 이력','MRT에서 멀어 차량 이동 중심']},
+{id:'cil',n:'Cilandak · Terogong',ko:'찔란닥 · 테로공',mem:['Cilandak Barat'],c:'#16A085',d:'조용한 주거지. 빠델 코트가 모여 있고 Fatmawati·Cipete Raya·Lebak Bulus MRT가 가까움.',pt:['Terogong은 Cilandak Barat 안의 거리·동네 이름','월세가 비교적 낮은 중저가 단지 많음','단지 내 몰은 드물고 Cilandak Town Square, PIM 이용','골프장·정원 조망 단지 있음']},
+{id:'cip',n:'Cipete',ko:'찌쁘떼',mem:['Cipete Utara','Cipete Selatan'],c:'#7F8C8D',d:'MRT Cipete Raya역 일대 주거·상권. 대로변은 MRT, 안쪽은 조용한 주거지.',pt:['Cipete Selatan은 Cilandak 구, Cipete Utara는 Kebayoran Baru 구로 갈림','Essence Darmawangsa는 끄망이 아니라 Cipete Utara']},
+{id:'pi',n:'Pondok Indah',ko:'폰독 인다',mem:['Pondok Pinang'],c:'#2980B9',d:'고급 주거 지역. Pondok Indah Mall 1·2·3과 골프장, 국제학교·학원이 많음.',pt:['행정구역상 이름은 Pondok Pinang. Pondok Indah는 개발 단지 이름','몰 직결 단지, 영어학원 밀집','골프 뷰·녹지 풍부','2BR 이상은 예산 초과 단지 많음']},
+{id:'gan',n:'Gandaria',ko:'간다리아',mem:['Gandaria Utara','Gandaria Selatan'],c:'#8E44AD',d:'Gandaria City 몰을 낀 도심형 고층 단지 지역. 생활 편의가 좋음.',pt:['Gandaria City·Gandaria Heights는 Kebayoran Lama Utara 동에 있음','몰 직결, 헬스·수영·테니스 갖춘 단지','도시 뷰 위주']},
+{id:'pak',n:'Pakubuwono',ko:'빠꾸부워노',mem:['Gunung','Selong'],c:'#C0392B',d:'고급 아파트가 모인 지역. 월세가 가장 높은 편이고 녹지가 많음.',pt:['대부분 예산 초과','실내외 수영장·정원 단지','버스 탑승 시각이 가장 이름']},
+{id:'sim',n:'Simprug',ko:'심프룩',mem:['Grogol Selatan'],c:'#B03A2E',d:'빠꾸부워노 서쪽의 녹지 많은 주거지. 저층 단지와 아파트가 섞여 있음.',pt:['행정구역상 Grogol Selatan','Simprug Indah는 1BR·3BR이 예산 안']},
+{id:'blm',n:'Blok M',ko:'블록 엠',mem:['Melawai','Pulo'],c:'#E74C3C',d:'한국인 식당·상점이 모인 상권. MRT Blok M역과 버스 환승 거점.',pt:['Melawai 동 중심','자카르타 한인 생활권으로 알려진 곳']},
+{id:'sen',n:'Senayan · SCBD',ko:'스나얀 · 에스씨비디',mem:['Senayan'],c:'#F39C12',d:'경기장 단지와 업무·쇼핑 지구가 이어진 곳.',pt:['GBK 경기장, 포스트 블록 등']},
+{id:'kun',n:'Kuningan',ko:'꾸닝안',mem:['Kuningan Barat','Kuningan Timur','Karet Kuningan'],c:'#B7950B',d:'대사관과 고층 업무지구가 모인 지역.',pt:['세 동에 걸쳐 있음','주거지 조사 대상 아님']},
+{id:'leb',n:'Lebak Bulus',ko:'르박 불루스',mem:['Lebak Bulus'],c:'#27AE60',d:'MRT 남쪽 종점과 차량기지가 있는 지역. 남쪽으로 이어지는 교통 거점.',pt:['MRT 시발·종착','Parama 단지가 가까움']},
+{id:'pbl',n:'Pondok Labu',ko:'폰독 라부',mem:['Pondok Labu'],c:'#2E86C1',d:'남쪽 외곽 주거지. JIKS 방향으로 가까워지는 쪽.',pt:['Cilandak 구 소속']},
+{id:'bin',n:'Bintaro',ko:'빈따로',mem:['Bintaro','Petukangan Selatan','Petukangan Utara'],c:'#C0392B',d:'자카르타 서남쪽 끝 주거지. 경계 너머 Bintaro Jaya와 함께 불림.',pt:['자카르타 쪽은 Pesanggrahan 구','Bintaro Jaya는 자카르타 밖(Tangerang Selatan)']},
+{id:'jik',n:'Cipayung (JIKS)',ko:'찌빠융 (JIKS)',mem:['Ceger'],c:'#D35400',d:'JIKS가 있는 동자카르타 지역. 남부 거주지에서 버스로 통학함.',pt:['JIKS는 Ceger 동, Cipayung 구','조사 목록 단지는 모두 남자카르타']}
+];
+const kdist=k=>KC[k.kc]?KC[k.kc][0]:'';
+function pip(lat,lng,rg){let c=false;for(let i=0,j=rg.length-1;i<rg.length;j=i++){const yi=rg[i][0],xi=rg[i][1],yj=rg[j][0],xj=rg[j][1];if((xi>lng)!==(xj>lng)&&lat<(yj-yi)*(lng-xi)/(xj-xi)+yi)c=!c}return c}
+const kfind=(lat,lng)=>KEL.find(k=>k.g.some(rg=>pip(lat,lng,rg)))||null;
+const kkey=k=>k.k+'|'+k.kc;
+function initKel(){R.forEach(r=>r.kl=kfind(r.lat,r.lng));PO.forEach(p=>p.kl=kfind(p.lat,p.lng));ST.forEach(t=>t.kl=kfind(t.lat,t.lng));JK.kl=kfind(JK.lat,JK.lng);
+KEL.forEach(k=>{k.rs=R.filter(r=>r.kl===k);k.ps=PO.filter(p=>p.kl===k);k.ms=ST.filter(t=>t.kl===k)});
+TG.forEach(t=>{t.ks=KEL.filter(k=>t.mem.includes(k.k));t.rs=R.filter(r=>r.kl&&t.mem.includes(r.kl.k));if(t.ks.length){t.c0=[t.ks.reduce((a,k)=>a+k.c[0],0)/t.ks.length,t.ks.reduce((a,k)=>a+k.c[1],0)/t.ks.length]}});
+KEL.forEach(k=>{k.tg=TG.filter(t=>t.mem.includes(k.k))})}
+const kname=k=>k.k+(KR[k.k]?' <span class="un">'+KR[k.k]+'</span>':'');
+const klab=k=>(KR[k.k]?'<small>'+KR[k.k]+'</small>':'');
+function kelHtml(k){const kc=KC[k.kc]||['',''];let h='<div><b style="font-weight:500;font-size:15px">'+k.k+'</b> '+(KR[k.k]||'')+'</div><div style="color:var(--text-secondary)">Kelurahan(동) · Kecamatan(구) '+k.kc+' '+kc[0]+' · Kota '+k.kt+'</div>';
+if(k.tg.length)h+='<div style="margin-top:4px">통칭: '+k.tg.map(t=>'<span class="bd" style="border:1px solid '+t.c+'">'+t.n+' '+t.ko+'</span>').join('')+'</div>';
+if(KNOTE[k.k])h+='<div style="margin-top:4px">'+KNOTE[k.k]+'</div>';
+if(k.rs.length)h+='<h4>조사 단지</h4>'+k.rs.map(r=>'<div>'+r.i+'. '+r.nm+'</div>').join('');
+if(k.ps.length)h+='<h4>빠델·발레·영어학원</h4>'+k.ps.map(p=>'<div><span style="color:'+KN[p.k].c+'">●</span> '+p.n.split(' (')[0]+'</div>').join('');
+if(k.ms.length)h+='<h4>MRT</h4>'+k.ms.map(t=>'<div>'+t.n+'</div>').join('');
+if(!k.rs.length&&!k.ps.length&&!k.ms.length)h+='<div class="un" style="margin-top:4px">조사 대상 시설 없음</div>';
+return h+'<div class="un" style="margin-top:6px">경계는 약식입니다. 경계 근처 시설은 이웃 동으로 표시될 수 있습니다.</div>'}
+function tgHtml(t){return '<div><b style="font-weight:500;font-size:15px;color:'+t.c+'">'+t.n+'</b> '+t.ko+'</div><div style="margin-top:4px">'+t.d+'</div>'+t.pt.map(x=>'<div>· '+x+'</div>').join('')+'<h4>소속 동(Kelurahan)</h4><div>'+t.ks.map(k=>k.k+' '+(KR[k.k]||'')+' ('+k.kc+')').join(', ')+'</div>'+(t.rs.length?'<h4>조사 단지 '+t.rs.length+'곳</h4><div>'+t.rs.map(r=>r.i+'.'+r.sn).join(', ')+'</div><div>최저 월세 '+fm(Math.min(...t.rs.flatMap(r=>Object.values(r.p).filter(v=>v!=null))))+' · 버스 '+t.rs.map(r=>r.b[0]).sort()[0]+'~'+t.rs.map(r=>r.b[0]).sort().slice(-1)[0]+'</div>':'<div class="un" style="margin-top:4px">조사 목록에 단지 없음</div>')+'<div class="un" style="margin-top:4px">통칭 범위와 설명은 일반 특성이며 현지 확인이 필요합니다.</div>'}
+let kpoly={},kq='';
+function study(){const el=$('kinfo');if(!lay('zd')){el.innerHTML='';return}
+const q=kq.toLowerCase();
+let h='<div style="font-size:15px;font-weight:500;margin-bottom:8px">지역 공부 패널</div>';
+h+='<details class="dz" open><summary><b style="font-weight:500">행정구역 체계</b></summary><table class="tbl"><tr><th>단계</th><th>인도네시아어</th><th>우리 식으로 대략</th><th>예</th></tr><tr><td>1</td><td>Provinsi</td><td>광역 단위</td><td>DKI Jakarta (법령상 2024년부터 Daerah Khusus Jakarta)</td></tr><tr><td>2</td><td>Kota Administrasi</td><td>시</td><td>Jakarta Selatan(남), Jakarta Timur(동)</td></tr><tr><td>3</td><td>Kecamatan</td><td>구</td><td>Cilandak, Kebayoran Baru</td></tr><tr><td>4</td><td>Kelurahan</td><td>동</td><td>Cilandak Barat, Bangka</td></tr><tr><td>5</td><td>RW · RT</td><td>통·반</td><td>주소의 RT 03/RW 05</td></tr></table><div style="font-size:13px;margin-top:6px;color:var(--text-secondary)">끄망, 폰독 인다, 빠꾸부워노처럼 자주 쓰는 이름은 대부분 행정구역이 아니라 통칭입니다. 부동산 사이트와 주소에는 통칭과 동 이름이 섞여 나옵니다. 한글 표기는 대략적인 소리입니다.</div></details>';
+h+='<details class="dz" open><summary><b style="font-weight:500">통칭 지역 → 소속 동</b></summary><table class="tbl"><tr><th style="width:24%">통칭</th><th style="width:30%">소속 동(구)</th><th>특징</th></tr>'+TG.map(t=>'<tr><td><b style="font-weight:500;color:'+t.c+'">'+t.n+'</b><div class="un">'+t.ko+'</div></td><td>'+t.ks.map(k=>'<a href="#" data-kz="'+kkey(k)+'">'+k.k+'</a> <span class="un">('+k.kc+')</span>').join('<br>')+'</td><td>'+t.d+(t.rs.length?'<div class="un">조사 단지 '+t.rs.length+'곳</div>':'')+'</td></tr>').join('')+'</table></details>';
+h+='<input type="text" id="kq" placeholder="동·구 이름 검색 (예: Pondok, 끄망)" value="'+kq.replace(/"/g,'')+'" style="width:100%;margin:6px 0">';
+const by={};KEL.forEach(k=>{(by[k.kt+'|'+k.kc]=by[k.kt+'|'+k.kc]||[]).push(k)});
+Object.keys(by).sort().forEach(key=>{const [kt,kc]=key.split('|');const ks=by[key].filter(k=>!q||(k.k+' '+(KR[k.k]||'')+' '+kc+' '+(KC[kc]?KC[kc][0]:'')+' '+k.tg.map(t=>t.n+t.ko).join(' ')).toLowerCase().includes(q));if(!ks.length)return;
+h+='<details class="dz"'+(q?' open':'')+'><summary><b style="font-weight:500;color:'+KC[kc][1]+'">'+kc+'</b> '+KC[kc][0]+' <span class="un">· '+kt+' · 동 '+ks.length+'개</span></summary>'+ks.map(k=>'<div style="padding:4px 0;border-top:0.5px solid var(--border)"><a href="#" data-kz="'+kkey(k)+'"><b style="font-weight:500">'+k.k+'</b></a> '+(KR[k.k]||'')+(k.tg.length?' '+k.tg.map(t=>'<span class="bd" style="border:1px solid '+t.c+'">'+t.ko.split(' ')[0]+'</span>').join(''):'')+(k.rs.length?' <span class="bd ok">단지 '+k.rs.length+'</span>':'')+(KNOTE[k.k]?'<div style="font-size:13px;color:var(--text-secondary)">'+KNOTE[k.k]+'</div>':'')+'</div>').join('')+'</details>'});
+h+='<div class="un" style="font-size:12px;margin-top:6px">경계 출처: GADM v3.6(2019)을 단순화. 최신 행정 개편이 반영되지 않았을 수 있고, GADM은 비영리 용도로 쓰는 데이터입니다.</div>';
+const keep=document.activeElement&&document.activeElement.id==='kq';el.innerHTML=h;if(keep){const i=$('kq');i.focus();i.setSelectionRange(i.value.length,i.value.length)}}
+function labelsUpd(){lg.clearLayers();const z=map.getZoom();
+if(true){
+if(lay('kc')&&z<=14)KCG.forEach(g=>{const c=KC[g.kc];lg.addLayer(L.marker(g.c,{icon:L.divIcon({html:'<div class="kcn" style="color:'+c[1]+'">'+g.kc+'<small>'+c[0]+'</small></div>',className:'',iconSize:[0,0]}),interactive:false,keyboard:false,zIndexOffset:-900}))});
+if(lay('kn')&&z>=14)KEL.forEach(k=>lg.addLayer(L.marker(k.c,{icon:L.divIcon({html:'<div class="kt">'+k.k+klab(k)+'</div>',className:'',iconSize:[0,0]}),interactive:false,keyboard:false,zIndexOffset:-900})))}
+if(lay('nm'))TG.forEach(t=>{if(!t.c0)return;lg.addLayer(L.marker(t.c0,{icon:L.divIcon({html:'<div class="tgn" style="border-color:'+t.c+'">'+t.n+'<small>'+t.ko+'</small></div>',className:'',iconSize:[0,0]}),interactive:lay('zd'),keyboard:false,zIndexOffset:-800}).bindPopup(()=>tgHtml(t),{maxWidth:340,maxHeight:430}))})}
 function initMap(){
 map=L.map('map',{zoomControl:true});
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(map);
-zg=L.layerGroup().addTo(map);ig=L.layerGroup().addTo(map);mk=L.layerGroup().addTo(map);ln=L.layerGroup().addTo(map);
+zg=L.layerGroup().addTo(map);lg=L.layerGroup().addTo(map);ig=L.layerGroup().addTo(map);mk=L.layerGroup().addTo(map);ln=L.layerGroup().addTo(map);
 map.on('popupclose',()=>{ln.clearLayers();sel=null});
-map.on('zoomend',zc);map.on('moveend',drawInfra);}
+map.on('zoomend',()=>{zc();labelsUpd()});map.on('moveend',drawInfra);}
 function zc(){$('map').classList.toggle('zlow',map.getZoom()<15)}
 function lines(r){ln.clearLayers();
 ln.addLayer(L.circle([r.lat,r.lng],{radius:+$('ir').value,color:'#2E8B57',weight:1,dashArray:'3 4',fillColor:'#2E8B57',fillOpacity:.05,interactive:false}));
@@ -437,6 +509,11 @@ tg.forEach(t=>ln.addLayer(L.polyline([[r.lat,r.lng],[t[0].lat,t[0].lng]],{color:
 ln.addLayer(L.polyline([[r.lat,r.lng],[JK.lat,JK.lng]],{color:'#C0392B',weight:1.5,dashArray:'2 5'}))}
 function render(){
 mk.clearLayers();ln.clearLayers();zg.clearLayers();rm={};
+kpoly={};
+if(lay('kc'))KCG.forEach(g=>{const c=KC[g.kc][1];zg.addLayer(L.polygon(g.g,{color:c,weight:3,opacity:.85,fillColor:c,fillOpacity:.14,interactive:false}))});
+KEL.forEach(k=>{const kl=lay('kl'),zd=lay('zd');const pl=L.polygon(k.g,{color:kl?'#555':'transparent',weight:kl?.8:0,opacity:.7,fillColor:'#000',fillOpacity:0.01,interactive:zd});if(zd)pl.bindPopup(()=>kelHtml(k),{maxWidth:340,maxHeight:430});kpoly[kkey(k)]=pl;zg.addLayer(pl)});
+if(lay('nm'))TG.forEach(t=>t.ks.forEach(k=>zg.addLayer(L.polygon(k.g,{color:t.c,weight:3,dashArray:'7 5',opacity:.95,fillColor:t.c,fillOpacity:.12,interactive:false}))));
+labelsUpd();study();
 ZN.forEach(z=>{if(lay('zn')){const c=L.circle([z.lat,z.lng],{radius:z.r,color:z.c,weight:1.5,dashArray:'6 4',fillColor:z.c,fillOpacity:.1,interactive:lay('zd')});if(lay('zd'))c.bindPopup(()=>znHtml(z),{maxWidth:340,maxHeight:430});zg.addLayer(c)}
 if(lay('zl'))zg.addLayer(L.marker([z.lat,z.lng],{icon:L.divIcon({html:'<div class="zt" style="color:'+z.c+'">'+z.n.split(' ')[0]+'<small>'+(z.n.split(' ').slice(1).join(' '))+'</small>'+(lay('zk')&&z.kr?'<small>≈ '+z.kr+'</small>':'')+'</div>',className:'',iconSize:[0,0]}),interactive:false,keyboard:false,zIndexOffset:-1000}))});
 if(lay('jd'))JD.forEach(d=>{const c=CITY[d.c].c;
@@ -463,7 +540,7 @@ const gmn=n=>'https://www.google.com/maps/search/?api=1&query='+encodeURICompone
 const links=r=>'<div class="lk">'+SITES.map(s=>'<a href="'+gs(r.nm,s[1])+'" target="_blank" rel="noopener">'+s[0]+'</a>').join('')+'</div>';
 
 function popR(r){const f=F();
-let h='<div style="display:flex;justify-content:space-between;align-items:start;gap:8px"><div><span class="nb" style="margin-right:6px">'+r.i+'</span><b style="font-weight:500;font-size:15px">'+r.nm+'</b><div style="color:var(--text-secondary)">'+r.z+' · 구글 '+r.rt[0]+'점('+r.rt[1].toLocaleString('en-US')+')</div></div><button class="sm" id="px" aria-label="닫기">닫기</button></div>';
+let h='<div style="display:flex;justify-content:space-between;align-items:start;gap:8px"><div><span class="nb" style="margin-right:6px">'+r.i+'</span><b style="font-weight:500;font-size:15px">'+r.nm+'</b><div style="color:var(--text-secondary)">'+r.z+(r.kl?' · 행정구역 '+r.kl.k+' / '+r.kl.kc:'')+' · 구글 '+r.rt[0]+'점('+r.rt[1].toLocaleString('en-US')+')</div></div><button class="sm" id="px" aria-label="닫기">닫기</button></div>';
 h+='<div style="margin-top:6px">'+fbtn(r.id)+'</div>'+fform(r.id)+'<div style="margin-top:6px"><a href="'+gm(r.lat,r.lng)+'" target="_blank" rel="noopener">구글 지도(좌표)</a> · <a href="'+gmn(r.nm)+'" target="_blank" rel="noopener">구글 지도(이름)</a> · <a href="'+gd(r.lat,r.lng)+'" target="_blank" rel="noopener">JIKS까지 경로</a></div><h4>매물 검색(부동산 사이트)</h4>'+links(r);
 h+='<h4>버스 승차</h4><div style="font-size:18px;font-weight:500">'+r.b[0]+'</div><div>승차 지점: '+r.b[1]+'</div><div style="color:var(--text-secondary)">노선: '+r.b[2]+'</div><div>JIKS까지 직선 <b style="font-weight:500">'+fd1(r.jd)+'</b></div>';
 h+='<h4>월세 (루피아, 만 단위)</h4><div>'+r.pt+'</div>';
@@ -500,8 +577,8 @@ function all(){labels();const f=F();pass={};R.forEach(r=>{r.nd=need(r);pass[r.id
 
 const PRE={kem:[-6.2605,106.8095,15],cil:[-6.2840,106.7920,15],pi:[-6.2720,106.7830,15],jiks:[JK.lat,JK.lng,14],gan:[-6.2395,106.7860,15],jk:[-6.2,106.83,11]};
 document.querySelectorAll('[data-pre]').forEach(b=>b.onclick=()=>{const k=b.dataset.pre;if(k==='fit')fit();else if(k==='all')fitAll();else map.setView([PRE[k][0],PRE[k][1]],PRE[k][2])});
-$('app').addEventListener('input',e=>{const t=e.target;if(t.closest('#needp')){needInput(e);return}if(t.dataset&&t.dataset.fn){FV[t.dataset.fn]&&(FV[t.dataset.fn].n=t.value,fsv());return}if(t.dataset&&t.dataset.fs){if(FV[t.dataset.fs]){FV[t.dataset.fs].s=t.value;fsv();fpan();lst()}return}if(t.id==='fo'){render();lst();fpan();return}if(t.id==='fimp')return;if(e.target.id==='tq'){ttb();return}if(e.target.closest('[data-l]')){render();return}if(e.target.id==='sort'){lst();return}all()});
-$('app').addEventListener('click',e=>{const fb=e.target.closest('[data-fv]');if(fb){ftog(+fb.dataset.fv||fb.dataset.fv);return}if(e.target.id==='fexp'){fexp();return}if(e.target.id==='fimb'){$('fimp').click();return}if(e.target.id==='fclr'){if(Object.keys(FV).length&&confirm('즐겨찾기와 메모를 모두 지울까요?')){FV={};fsv();all()}return}const b=e.target.closest('[data-go]');if(b)go(b.dataset.go);const q=e.target.closest('[data-z]');if(q){const z=ZN.concat(JD).find(x=>x.id===q.dataset.z);map.fitBounds(L.latLng(z.lat,z.lng).toBounds(z.r*2),{padding:[20,20]});$('mw').scrollIntoView({block:'nearest',behavior:'smooth'})}});
+$('app').addEventListener('input',e=>{const t=e.target;if(t.closest('#needp')){needInput(e);return}if(t.dataset&&t.dataset.fn){FV[t.dataset.fn]&&(FV[t.dataset.fn].n=t.value,fsv());return}if(t.dataset&&t.dataset.fs){if(FV[t.dataset.fs]){FV[t.dataset.fs].s=t.value;fsv();fpan();lst()}return}if(t.id==='fo'){render();lst();fpan();return}if(t.id==='fimp')return;if(e.target.id==='kq'){kq=e.target.value;study();return}if(e.target.id==='tq'){ttb();return}if(e.target.closest('[data-l]')){render();return}if(e.target.id==='sort'){lst();return}all()});
+$('app').addEventListener('click',e=>{const kz=e.target.closest('[data-kz]');if(kz){e.preventDefault();const pl=kpoly[kz.dataset.kz];if(pl){map.fitBounds(pl.getBounds(),{padding:[30,30],maxZoom:16});setTimeout(()=>pl.openPopup(),400)}return}const fb=e.target.closest('[data-fv]');if(fb){ftog(+fb.dataset.fv||fb.dataset.fv);return}if(e.target.id==='fexp'){fexp();return}if(e.target.id==='fimb'){$('fimp').click();return}if(e.target.id==='fclr'){if(Object.keys(FV).length&&confirm('즐겨찾기와 메모를 모두 지울까요?')){FV={};fsv();all()}return}const b=e.target.closest('[data-go]');if(b)go(b.dataset.go);const q=e.target.closest('[data-z]');if(q){const z=ZN.concat(JD).find(x=>x.id===q.dataset.z);map.fitBounds(L.latLng(z.lat,z.lng).toBounds(z.r*2),{padding:[20,20]});$('mw').scrollIntoView({block:'nearest',behavior:'smooth'})}});
 
 /* 생활 조건: 필수·선호, 주변 인프라(OSM), 단지별 직접 기록 */
 const INF_CATS=[
@@ -587,7 +664,7 @@ $('fimp').onchange=e=>{const f=e.target.files[0];if(f)fimp(f);e.target.value=''}
 const setv=(id,v)=>{$(id).value=v};
 $('preset').onclick=()=>{setv('budget',15);setv('mrt',1.5);setv('pd',3);setv('bl',3);setv('en',2);setv('bus',0);document.querySelectorAll('[data-t],[data-f]').forEach(c=>{c.checked=['gym','pool','green'].includes(c.dataset.f)});$('unk').checked=false;$('q').value='';all()};
 $('reset').onclick=()=>{setv('budget',60);setv('mrt',5);setv('pd',5);setv('bl',5);setv('en',5);setv('bus',0);document.querySelectorAll('[data-t],[data-f]').forEach(c=>{c.checked=false});$('unk').checked=true;$('q').value='';needReset();all()};
-initMap();fitAll();all();ttb();
+initKel();initMap();fitAll();all();ttb();
 
 function setView(v){document.body.dataset.v=v;document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));if(map)setTimeout(()=>map.invalidateSize(),60)}
 document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>setView(b.dataset.v));
