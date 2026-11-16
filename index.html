@@ -48,6 +48,9 @@ input[type=range]{width:100%}
 .leaflet-tooltip.bt{background:var(--surface-2);color:var(--text-primary);border:0.5px solid var(--border-strong);font-size:12px;font-weight:500;padding:1px 6px}
 .leaflet-tooltip.dt{background:var(--surface-2);color:var(--text-primary);border:0.5px solid var(--border-strong);font-size:12px;padding:1px 5px}
 .zlow .bt{display:none}
+.zt{font-size:13px;font-weight:600;white-space:nowrap;text-align:center;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 5px #fff;pointer-events:none}
+.zt small{display:block;font-size:11px;font-weight:400}
+.zc{border-left:4px solid var(--border-strong);cursor:pointer}
 .lk{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:4px}
 
 </style>
@@ -91,6 +94,9 @@ input[type=range]{width:100%}
 </div>
 <div style="margin-bottom:8px">
 <span style="font-size:13px;color:var(--text-secondary);margin-right:6px">지도 표시</span>
+<label class="ch"><input type="checkbox" data-l="zn" checked> 구역 범위</label>
+<label class="ch"><input type="checkbox" data-l="zl" checked> 구역 이름</label>
+<label class="ch"><input type="checkbox" data-l="zd" checked> 구역 설명</label>
 <label class="ch"><input type="checkbox" data-l="st" checked> MRT</label>
 <label class="ch"><input type="checkbox" data-l="pd" checked> 빠델</label>
 <label class="ch"><input type="checkbox" data-l="bl" checked> 발레</label>
@@ -114,7 +120,8 @@ input[type=range]{width:100%}
 <span style="color:#D85A30">◆</span> 빠델 · <span style="color:#D4537E">▲</span> 발레 · <span style="color:#378ADD">■</span> 영어학원 · <span style="color:#7F77DD">●</span> MRT
 </div>
 </div>
-<div style="font-size:12px;color:var(--text-muted);margin:6px 0 14px;line-height:1.6">OpenStreetMap 실제 지도입니다. 단지·학원·JIKS 팝업마다 구글 지도 링크와 부동산 사이트 검색 링크가 있습니다. 거리는 모두 직선거리입니다. 매물 링크는 각 사이트의 검색 결과이며 가격은 사이트에서 최종 확인하세요.</div>
+<div style="font-size:12px;color:var(--text-muted);margin:6px 0 14px;line-height:1.6">OpenStreetMap 실제 지도입니다. 단지·학원·JIKS 팝업마다 구글 지도 링크와 부동산 사이트 검색 링크가 있습니다. 거리는 모두 직선거리입니다. 매물 링크는 각 사이트의 검색 결과이며 가격은 사이트에서 최종 확인하세요. 구역 원은 대략적인 범위이며 행정 경계가 아닙니다.</div>
+<div id="zinfo" style="margin-bottom:14px"></div>
 <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">
 <div style="font-size:15px;font-weight:500" id="cnt"></div>
 <label class="lb" style="flex-direction:row;align-items:center;gap:8px">정렬
@@ -194,7 +201,7 @@ const fd1=d=>d.toFixed(1)+'km';
 const tm=t=>{const a=t.split(':');return +a[0]*60+ +a[1]};
 const GRL={golf:'골프장 뷰',garden:'정원·녹지',city:'도시 뷰'};
 const SMIN=12,SMAX=500;
-let sel=null,HT=620,map,mk,ln,rm={},pass={};
+let sel=null,HT=620,map,mk,ln,zg,rm={},pass={};
 function F(){return{b:+$('budget').value,ty:[...document.querySelectorAll('[data-t]:checked')].map(x=>x.dataset.t),fc:[...document.querySelectorAll('[data-f]:checked')].map(x=>x.dataset.f),mrt:+$('mrt').value,pd:+$('pd').value,bl:+$('bl').value,en:+$('en').value,bus:+$('bus').value,unk:$('unk').checked,q:$('q').value.trim().toLowerCase()}}
 function lay(k){return document.querySelector('[data-l="'+k+'"]').checked}
 function ok(r,f){
@@ -218,10 +225,25 @@ function labels(){const f=F();$('bv').textContent=Math.round(f.b*100).toLocaleSt
 
 const mkIcon=(h,c,s)=>L.divIcon({html:h,className:c,iconSize:[s,s],iconAnchor:[s/2,s/2]});
 const strip=h=>h.replace(/<button class="sm" id="px"[^>]*>닫기<\/button>/,'');
+
+const ZN=[
+{id:'kem',n:'끄망 Kemang',z:'끄망',lat:-6.2605,lng:106.8125,r:1250,c:'#E67E22',d:'외국인·카페·식당 밀집 지역. Lippo Mall Kemang 중심으로 상권이 넓고 한식당도 많음.',pt:['단지 몰 직결 가능, 발레·빠델 시설 가까움','주말·퇴근 시간 정체 심하고 우기 침수 이력','MRT에서 멀어 차량 이동 중심']},
+{id:'cil',n:'찔란닥 Cilandak · Terogong',z:'Cilandak · Terogong',lat:-6.2870,lng:106.7985,r:1500,c:'#16A085',d:'조용한 주거지. 빠델 코트가 모여 있고 Fatmawati·Cipete Raya·Lebak Bulus MRT가 가까움.',pt:['월세가 비교적 낮은 중저가 단지 많음','단지 내 몰은 드물고 Cilandak Town Square, PIM 이용','초록 조망 단지(골프장·정원) 있음']},
+{id:'pi',n:'폰독 인다 Pondok Indah',z:'Pondok Indah',lat:-6.2700,lng:106.7830,r:1700,c:'#2980B9',d:'고급 주거 지역. Pondok Indah Mall 1·2·3과 골프장, 국제학교·학원이 많음.',pt:['몰 직결 단지, 영어학원 밀집','골프 뷰·녹지 풍부','월세는 2BR 이상에서 예산 초과 단지 많음']},
+{id:'gan',n:'간다리아 Gandaria',z:'Gandaria',lat:-6.2450,lng:106.7870,r:950,c:'#8E44AD',d:'Gandaria City 몰을 낀 도심형 고층 단지 지역. 생활 편의가 좋음.',pt:['몰 직결, 헬스·수영·테니스 갖춘 단지','도시 뷰 위주','MRT 직선 약 2km']},
+{id:'pak',n:'빠꾸부워노 · 심프룩 Pakubuwono · Simprug',z:'Pakubuwono · Simprug',lat:-6.2350,lng:106.7870,r:1000,c:'#C0392B',d:'고급 아파트와 저층 고급 단지가 모인 지역. 월세가 가장 높은 편이고 녹지가 많음.',pt:['대부분 예산 초과, Simprug Indah는 예외','실내외 수영장·정원 단지','버스 탑승 시각이 가장 이름']},
+{id:'cip',n:'찌쁘떼 Cipete',z:null,lat:-6.2745,lng:106.7995,r:750,c:'#7F8C8D',d:'MRT Cipete Raya역 일대 주거·상권. 대로변은 MRT, 안쪽은 조용한 주거지.',pt:['MRT 접근 좋음','Bumimas·Hampton\'s Park가 인접']},
+{id:'leb',n:'르박불루스 Lebak Bulus',z:null,lat:-6.2895,lng:106.7752,r:800,c:'#27AE60',d:'MRT 남쪽 종점과 차량기지가 있는 지역. 남쪽으로 이어지는 교통 거점.',pt:['MRT 시발·종착','Parama 단지 가까움']},
+{id:'jik',n:'찌뿌용 Cipayung (JIKS)',z:null,lat:JK.lat,lng:JK.lng,r:1200,c:'#D35400',d:'JIKS가 있는 동자카르타 지역. 남부 거주지에서 버스로 통학하며 이른 시각에 탑승함.',pt:['학교 주변 거주 가능 단지는 조사 목록에 없음']}
+];
+const znStat=z=>{const a=R.filter(r=>r.z===z.z);if(!z.z||!a.length)return null;const pr=a.flatMap(r=>Object.values(r.p).filter(v=>v!=null));const bs=a.map(r=>r.b[0]).sort();return{n:a.length,min:pr.length?Math.min(...pr):null,b0:bs[0],b1:bs[bs.length-1],jd:a.reduce((t,r)=>t+r.jd,0)/a.length,names:a.map(r=>r.i+'.'+r.sn).join(', ')}};
+const znHtml=z=>{const st=znStat(z);return '<div><b style="font-weight:500;font-size:15px;color:'+z.c+'">'+z.n+'</b></div><div style="margin-top:4px">'+z.d+'</div>'+z.pt.map(x=>'<div>· '+x+'</div>').join('')+(st?'<h4>조사 단지 '+st.n+'곳</h4><div>'+st.names+'</div><div>최저 월세 '+fm(st.min)+' · 버스 '+st.b0+'~'+st.b1+' · JIKS 평균 직선 '+fd1(st.jd)+'</div>':'<div class="un" style="margin-top:4px">조사 목록에 단지 없음</div>')+'<div class="un" style="margin-top:4px">일반 특성 설명이며 원문 조사 외 내용은 현지 확인이 필요합니다.</div>'};
+function zinfo(){const el=$('zinfo');if(!lay('zd')){el.innerHTML='';return}
+el.innerHTML='<div style="font-size:15px;font-weight:500;margin-bottom:8px">구역 안내</div>'+ZN.map(z=>{const st=znStat(z);return '<div class="cd zc" data-z="'+z.id+'" style="border-left-color:'+z.c+'"><b style="font-weight:500;color:'+z.c+'">'+z.n+'</b><div style="font-size:13px;color:var(--text-secondary)">'+z.d+'</div><div style="font-size:13px">'+(st?'단지 '+st.n+'곳 · 최저 '+fm(st.min)+' · 버스 '+st.b0+'~'+st.b1:'조사 단지 없음')+'</div></div>'}).join('')}
 function initMap(){
 map=L.map('map',{zoomControl:true});
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(map);
-mk=L.layerGroup().addTo(map);ln=L.layerGroup().addTo(map);
+zg=L.layerGroup().addTo(map);mk=L.layerGroup().addTo(map);ln=L.layerGroup().addTo(map);
 map.on('popupclose',()=>{ln.clearLayers();sel=null});
 map.on('zoomend',zc);}
 function zc(){$('map').classList.toggle('zlow',map.getZoom()<15)}
@@ -230,7 +252,10 @@ const tg=[[r.mrt[0].s,r.mrt[0].d,'#7F77DD']];['pd','bl','en'].forEach(k=>{const 
 tg.forEach(t=>ln.addLayer(L.polyline([[r.lat,r.lng],[t[0].lat,t[0].lng]],{color:t[2],weight:2,dashArray:'5 4'}).bindTooltip(fd(t[1]),{permanent:true,className:'dt'})));
 ln.addLayer(L.polyline([[r.lat,r.lng],[JK.lat,JK.lng]],{color:'#C0392B',weight:1.5,dashArray:'2 5'}))}
 function render(){
-mk.clearLayers();ln.clearLayers();rm={};
+mk.clearLayers();ln.clearLayers();zg.clearLayers();rm={};
+ZN.forEach(z=>{if(lay('zn')){const c=L.circle([z.lat,z.lng],{radius:z.r,color:z.c,weight:1.5,dashArray:'6 4',fillColor:z.c,fillOpacity:.1,interactive:lay('zd')});if(lay('zd'))c.bindPopup(()=>znHtml(z),{maxWidth:340,maxHeight:430});zg.addLayer(c)}
+if(lay('zl'))zg.addLayer(L.marker([z.lat,z.lng],{icon:L.divIcon({html:'<div class="zt" style="color:'+z.c+'">'+z.n.split(' ')[0]+'<small>'+(z.n.split(' ').slice(1).join(' '))+'</small></div>',className:'',iconSize:[0,0]}),interactive:false,keyboard:false,zIndexOffset:-1000}))});
+zinfo();
 if(lay('st')){mk.addLayer(L.polyline(ST.map(t=>[t.lat,t.lng]),{color:'#7F77DD',weight:3,opacity:.55}));
 ST.forEach(t=>mk.addLayer(L.circleMarker([t.lat,t.lng],{radius:6,color:'#fff',weight:2,fillColor:'#7F77DD',fillOpacity:1}).bindTooltip('MRT '+t.n)))}
 PO.forEach((p,i)=>{if(!lay(p.k))return;const c=KN[p.k].c,s=p.k==='pd'?'◆':p.k==='bl'?'▲':'■';
@@ -289,7 +314,7 @@ $('msz').onclick=()=>{HT=HT===620?860:620;$('mw').style.height=HT+'px';$('msz').
 const PRE={kem:[-6.2605,106.8095,15],cil:[-6.2840,106.7920,15],pi:[-6.2720,106.7830,15],jiks:[JK.lat,JK.lng,14],gan:[-6.2395,106.7860,15]};
 document.querySelectorAll('[data-pre]').forEach(b=>b.onclick=()=>{const k=b.dataset.pre;if(k==='fit')fit();else if(k==='all')fitAll();else map.setView([PRE[k][0],PRE[k][1]],PRE[k][2])});
 $('app').addEventListener('input',e=>{if(e.target.id==='tq'){ttb();return}if(e.target.closest('[data-l]')){render();return}if(e.target.id==='sort'){lst();return}all()});
-$('app').addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b)go(b.dataset.go)});
+$('app').addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b)go(b.dataset.go);const q=e.target.closest('[data-z]');if(q){const z=ZN.find(x=>x.id===q.dataset.z);map.fitBounds(L.latLng(z.lat,z.lng).toBounds(z.r*2),{padding:[20,20]});$('mw').scrollIntoView({block:'nearest',behavior:'smooth'})}});
 
 const setv=(id,v)=>{$(id).value=v};
 $('preset').onclick=()=>{setv('budget',15);setv('mrt',1.5);setv('pd',3);setv('bl',3);setv('en',2);setv('bus',0);document.querySelectorAll('[data-t],[data-f]').forEach(c=>{c.checked=['gym','pool','green'].includes(c.dataset.f)});$('unk').checked=false;$('q').value='';all()};
