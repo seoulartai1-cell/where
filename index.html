@@ -42,7 +42,15 @@ input[type=range]{width:100%}
 .leaflet-popup-content h4{margin:10px 0 4px;font-size:13px;color:var(--text-secondary);font-weight:500}
 .leaflet-div-icon{background:none;border:0}
 .rm{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;border:1.5px solid var(--border-stronger);background:var(--surface-2);color:var(--text-muted)}
+.rm{position:relative}
 .rm.on{background:var(--fill-accent);border-color:var(--fill-accent);color:var(--on-accent)}
+.rm.fv{box-shadow:0 0 0 3px #F5C518}
+.rm.fv::after{content:'★';position:absolute;top:-12px;right:-9px;font-size:15px;line-height:1;color:#E0A800;text-shadow:0 0 2px #fff,0 0 2px #fff}
+.fb{font-size:15px;line-height:1;padding:4px 10px;color:var(--text-secondary)}
+.fb.on{color:#B8860B;border-color:#E0A800;background:rgba(245,197,24,.18)}
+.fn{width:100%;min-height:54px;resize:vertical;font:inherit;font-size:13px;color:var(--text-primary);background:var(--surface-2);border:0.5px solid var(--border-strong);border-radius:var(--radius);padding:6px 8px}
+.fc{border-left:4px solid #E0A800}
+.fx{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:6px}
 .pin{font-size:18px;line-height:20px;text-align:center;text-shadow:0 0 3px #fff,0 0 3px #fff}
 .jk{font-size:30px;line-height:30px;text-align:center;color:var(--fill-danger);text-shadow:0 0 3px #fff,0 0 3px #fff}
 .leaflet-tooltip.bt{background:var(--surface-2);color:var(--text-primary);border:0.5px solid var(--border-strong);font-size:12px;font-weight:500;padding:1px 6px}
@@ -146,6 +154,8 @@ input[type=range]{width:100%}
 </div>
 </div>
 <div style="font-size:12px;color:var(--text-muted);margin:6px 0 14px;line-height:1.6">OpenStreetMap 실제 지도입니다. 단지·학원·JIKS 팝업마다 구글 지도 링크와 부동산 사이트 검색 링크가 있습니다. 거리는 모두 직선거리입니다. 매물 링크는 각 사이트의 검색 결과이며 가격은 사이트에서 최종 확인하세요. 구역 원은 대략적인 범위이며 행정 경계가 아닙니다.</div>
+<div id="fvp" style="margin-bottom:14px"></div>
+<input type="file" id="fimp" accept="application/json,.json" style="display:none">
 <div id="zinfo" style="margin-bottom:14px"></div>
 <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">
 <div style="font-size:15px;font-weight:500" id="cnt"></div>
@@ -227,6 +237,38 @@ const tm=t=>{const a=t.split(':');return +a[0]*60+ +a[1]};
 const GRL={golf:'골프장 뷰',garden:'정원·녹지',city:'도시 뷰'};
 const SMIN=12,SMAX=500;
 let sel=null,HT=620,map,mk,ln,zg,ig,rm={},pass={};
+const FK='jiks-fav-v1',STS=['관심','방문 예정','연락함','계약 가능','탈락'];
+let FV={};
+try{const o=JSON.parse(localStorage.getItem(FK)||'{}');if(o&&typeof o==='object')FV=o}catch(e){}
+const fsv=()=>{try{localStorage.setItem(FK,JSON.stringify(FV))}catch(e){}};
+const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fonly=()=>$('fo')&&$('fo').checked;
+const fsc=s=>s==='계약 가능'?' ok':s==='탈락'?' no':'';
+const fbtn=id=>'<button class="fb'+(FV[id]?' on':'')+'" data-fv="'+id+'" title="즐겨찾기">'+(FV[id]?'★ 즐겨찾기됨':'☆ 즐겨찾기')+'</button>';
+const fform=id=>{const v=FV[id];if(!v)return '';return '<div class="fx"><select data-fs="'+id+'" class="sm" style="height:30px">'+STS.map(x=>'<option'+(x===v.s?' selected':'')+'>'+x+'</option>').join('')+'</select></div><textarea class="fn" data-fn="'+id+'" placeholder="메모 (방문 후기, 연락처, 가격 등)" style="margin-top:6px">'+esc(v.n)+'</textarea>'};
+const rIcon=r=>mkIcon('<div class="rm'+(pass[r.id]?' on':'')+(FV[r.id]?' fv':'')+'">'+r.i+'</div>','',26);
+function ftog(id){
+if(FV[id])delete FV[id];else FV[id]={s:'관심',n:''};
+fsv();fupd(id)}
+function fupd(id){
+const mm=rm[id],open=mm&&mm.isPopupOpen&&mm.isPopupOpen();
+if(fonly())render();else if(mm)mm.setIcon(rIcon(R.find(q=>q.id===id)));
+lst();fpan();
+if(open&&!fonly()){mm.closePopup();mm.openPopup()}}
+function fpan(){
+const ids=R.filter(r=>FV[r.id]),n=ids.length,f=F();
+let h='<div class="cd fc"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><div style="font-size:15px;font-weight:500"><span style="color:#E0A800">★</span> 즐겨찾기 '+n+'곳</div><div class="fx" style="margin:0"><label class="ch" style="margin:0"><input type="checkbox" id="fo"'+(fonly()?' checked':'')+'> 즐겨찾기만 보기</label><button class="sm" id="fexp">내보내기</button><button class="sm" id="fimb">가져오기</button><button class="sm" id="fclr">전체 해제</button></div></div>';
+if(!n)h+='<div style="font-size:13px;color:var(--text-secondary);margin-top:8px">지도 마커 팝업이나 아래 단지 목록의 ☆ 버튼을 누르면 여기서 상태와 메모를 관리할 수 있습니다. 저장은 이 브라우저에만 되며, 다른 기기로 옮길 때는 내보내기·가져오기를 쓰세요.</div>';
+else{ids.sort((a,b)=>STS.indexOf(FV[a.id].s)-STS.indexOf(FV[b.id].s)||a.i-b.i);
+h+=ids.map(r=>{const v=FV[r.id],l=lo(r,f);return '<div style="border-top:0.5px solid var(--border);margin-top:10px;padding-top:10px"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap"><div style="display:flex;align-items:center;gap:8px"><span class="nb">'+r.i+'</span><b style="font-weight:500">'+esc(r.nm)+'</b><span class="bd'+fsc(v.s)+'">'+esc(v.s)+'</span>'+(pass[r.id]?'':'<span class="bd un">현재 조건 제외</span>')+'</div><div class="fx" style="margin:0"><button class="sm" data-go="'+r.id+'">지도에서 보기</button>'+fbtn(r.id)+'</div></div><div style="font-size:13px;color:var(--text-secondary);margin:4px 0">'+esc(r.z)+' · '+esc(r.pt)+' · 버스 '+r.b[0]+' · 최저 '+fm(l)+' · JIKS '+fd1(r.jd)+'</div>'+links(r)+fform(r.id)+'</div>'}).join('')}
+h+='</div>';$('fvp').innerHTML=h}
+function fexp(){
+const b=new Blob([JSON.stringify({v:1,saved:new Date().toISOString(),fav:FV},null,1)],{type:'application/json'});
+const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='jiks-favorites.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function fimp(file){
+const rd=new FileReader();rd.onload=()=>{try{const o=JSON.parse(rd.result),src=o.fav||o;let c=0;
+Object.keys(src).forEach(k=>{if(R.some(r=>String(r.id)===k)){const v=src[k]||{};FV[k]={s:STS.includes(v.s)?v.s:'관심',n:typeof v.n==='string'?v.n:''};c++}});
+fsv();all();alert('즐겨찾기 '+c+'곳을 가져왔습니다.')}catch(e){alert('가져오지 못했습니다. 내보내기로 만든 JSON 파일인지 확인하세요.')}};rd.readAsText(file)}
 function F(){return{b:+$('budget').value,ty:[...document.querySelectorAll('[data-t]:checked')].map(x=>x.dataset.t),fc:[...document.querySelectorAll('[data-f]:checked')].map(x=>x.dataset.f),mrt:+$('mrt').value,pd:+$('pd').value,bl:+$('bl').value,en:+$('en').value,bus:+$('bus').value,unk:$('unk').checked,q:$('q').value.trim().toLowerCase()}}
 function lay(k){return document.querySelector('[data-l="'+k+'"]').checked}
 function ok(r,f){
@@ -288,8 +330,8 @@ ST.forEach(t=>mk.addLayer(L.circleMarker([t.lat,t.lng],{radius:6,color:'#fff',we
 PO.forEach((p,i)=>{if(!lay(p.k))return;const c=KN[p.k].c,s=p.k==='pd'?'◆':p.k==='bl'?'▲':'■';
 const m=L.marker([p.lat,p.lng],{icon:mkIcon('<span style="color:'+c+'">'+s+'</span>','pin',22),title:p.n});
 m.bindPopup(()=>strip(popP(p)),{maxWidth:340,maxHeight:430});m.on('popupopen',()=>{sel={k:'p',id:i}});mk.addLayer(m)});
-R.forEach(r=>{const on=pass[r.id];
-const m=L.marker([r.lat,r.lng],{icon:mkIcon('<div class="rm'+(on?' on':'')+'">'+r.i+'</div>','',26),zIndexOffset:on?600:300,title:r.i+'. '+r.nm});
+R.forEach(r=>{const on=pass[r.id];if(fonly()&&!FV[r.id])return;
+const m=L.marker([r.lat,r.lng],{icon:rIcon(r),zIndexOffset:FV[r.id]?700:on?600:300,title:r.i+'. '+r.nm});
 m.bindPopup(()=>strip(popR(r)),{maxWidth:340,maxHeight:430});
 m.on('popupopen',()=>{sel={k:'r',id:r.id};lines(r)});
 if(lay('bus'))m.bindTooltip(r.b[0],{permanent:true,direction:'bottom',offset:[0,10],className:'bt'});
@@ -304,7 +346,7 @@ const links=r=>'<div class="lk">'+SITES.map(s=>'<a href="'+gs(r.nm,s[1])+'" targ
 
 function popR(r){const f=F();
 let h='<div style="display:flex;justify-content:space-between;align-items:start;gap:8px"><div><span class="nb" style="margin-right:6px">'+r.i+'</span><b style="font-weight:500;font-size:15px">'+r.nm+'</b><div style="color:var(--text-secondary)">'+r.z+' · 구글 '+r.rt[0]+'점('+r.rt[1].toLocaleString('en-US')+')</div></div><button class="sm" id="px" aria-label="닫기">닫기</button></div>';
-h+='<div style="margin-top:6px"><a href="'+gm(r.lat,r.lng)+'" target="_blank" rel="noopener">구글 지도(좌표)</a> · <a href="'+gmn(r.nm)+'" target="_blank" rel="noopener">구글 지도(이름)</a> · <a href="'+gd(r.lat,r.lng)+'" target="_blank" rel="noopener">JIKS까지 경로</a></div><h4>매물 검색(부동산 사이트)</h4>'+links(r);
+h+='<div style="margin-top:6px">'+fbtn(r.id)+'</div>'+fform(r.id)+'<div style="margin-top:6px"><a href="'+gm(r.lat,r.lng)+'" target="_blank" rel="noopener">구글 지도(좌표)</a> · <a href="'+gmn(r.nm)+'" target="_blank" rel="noopener">구글 지도(이름)</a> · <a href="'+gd(r.lat,r.lng)+'" target="_blank" rel="noopener">JIKS까지 경로</a></div><h4>매물 검색(부동산 사이트)</h4>'+links(r);
 h+='<h4>버스 승차</h4><div style="font-size:18px;font-weight:500">'+r.b[0]+'</div><div>승차 지점: '+r.b[1]+'</div><div style="color:var(--text-secondary)">노선: '+r.b[2]+'</div><div>JIKS까지 직선 <b style="font-weight:500">'+fd1(r.jd)+'</b></div>';
 h+='<h4>월세 (루피아, 만 단위)</h4><div>'+r.pt+'</div>';
 if(r.ls.length){h+='<div style="margin-top:4px">';r.ls.forEach(l=>{h+='<div>· <a href="'+l[3]+'" target="_blank" rel="noopener">'+l[0]+'</a> '+l[1]+' <span class="bd '+(l[2]>f.b?'no':'ok')+'">'+fm(l[2])+'</span></div>'});h+='</div>'}else h+='<div class="un">링크할 매물을 못 찾음</div>';
@@ -326,23 +368,23 @@ function bounds(a){map.fitBounds(L.latLngBounds(a),{padding:[40,40]})}
 function fit(){bounds(R.map(r=>[r.lat,r.lng]).concat(ST.map(s=>[s.lat,s.lng])))}
 function fitAll(){bounds(R.map(r=>[r.lat,r.lng]).concat(ST.map(s=>[s.lat,s.lng]),[[JK.lat,JK.lng]]))}
 
-function lst(){const f=F();let a=R.filter(r=>pass[r.id]);const so=$('sort').value;
+function lst(){const f=F();let a=R.filter(r=>pass[r.id]&&(!fonly()||FV[r.id]));const so=$('sort').value;
 a.sort((p,q)=>so==='s'?(q.nd.pm-p.nd.pm||(lo(p,f)==null?999:lo(p,f))-(lo(q,f)==null?999:lo(q,f))):so==='p'?((lo(p,f)==null?999:lo(p,f))-(lo(q,f)==null?999:lo(q,f))):so==='m'?p.mrt[0].d-q.mrt[0].d:so==='j'?p.jd-q.jd:so==='b'?tm(q.b[0])-tm(p.b[0]):p.i-q.i);
 $('cnt').textContent='조건에 맞는 단지 '+a.length+' / '+R.length;
 if(!a.length){$('list').innerHTML='<div class="cd" style="color:var(--text-secondary)">조건에 맞는 단지가 없습니다. 예산이나 거리 제한을 늘려 보세요.</div>';return}
-$('list').innerHTML=a.map(r=>{const l=lo(r,f);return '<div class="cd"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap"><div style="display:flex;align-items:center;gap:8px"><span class="nb">'+r.i+'</span><b style="font-weight:500">'+r.nm+'</b></div><button class="sm" data-go="'+r.id+'">지도에서 보기</button></div><div style="font-size:13px;color:var(--text-secondary);margin:6px 0 4px">'+r.z+' · '+r.pt+'</div><div><span class="bd ok">버스 '+r.b[0]+'</span><span class="bd">'+r.b[1]+'</span><span class="bd">최저 '+fm(l)+'</span><span class="bd">JIKS '+fd1(r.jd)+'</span><span class="bd">MRT '+r.mrt[0].s.n+' '+fd(r.mrt[0].d)+'</span><span class="bd">빠델 '+fd(r.nb.pd[0].d)+'</span><span class="bd">발레 '+fd(r.nb.bl[0].d)+'</span><span class="bd">영어 '+fd(r.nb.en[0].d)+'</span><span class="bd">'+(GRL[r.gr]||'뷰 미확인')+'</span></div>'+cardNeed(r)+links(r)+'</div>'}).join('')}
+$('list').innerHTML=a.map(r=>{const l=lo(r,f);return '<div class="cd'+(FV[r.id]?' fc':'')+'"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap"><div style="display:flex;align-items:center;gap:8px"><span class="nb">'+r.i+'</span><b style="font-weight:500">'+r.nm+'</b></div><div class="fx" style="margin:0"><button class="sm" data-go="'+r.id+'">지도에서 보기</button>'+fbtn(r.id)+'</div></div><div style="font-size:13px;color:var(--text-secondary);margin:6px 0 4px">'+r.z+' · '+r.pt+'</div><div><span class="bd ok">버스 '+r.b[0]+'</span><span class="bd">'+r.b[1]+'</span><span class="bd">최저 '+fm(l)+'</span><span class="bd">JIKS '+fd1(r.jd)+'</span><span class="bd">MRT '+r.mrt[0].s.n+' '+fd(r.mrt[0].d)+'</span><span class="bd">빠델 '+fd(r.nb.pd[0].d)+'</span><span class="bd">발레 '+fd(r.nb.bl[0].d)+'</span><span class="bd">영어 '+fd(r.nb.en[0].d)+'</span><span class="bd">'+(GRL[r.gr]||'뷰 미확인')+'</span></div>'+cardNeed(r)+links(r)+'</div>'}).join('')}
 function ttb(){const q=$('tq').value.trim().toLowerCase();
 const rows=R.map(r=>[r.b[0],r.nm,r.b[1],r.z,r.b[2],r.i]).concat(X.map(x=>[x[1],x[0],x[2],x[3],'-',0]));
 rows.sort((a,b)=>tm(a[0])-tm(b[0])||a[1].localeCompare(b[1]));
 const f=rows.filter(x=>!q||(x[1]+x[3]).toLowerCase().includes(q));
 $('tt').innerHTML='<table class="tt"><thead><tr><th style="width:15%">시각</th><th style="width:27%">정류장</th><th style="width:24%">승차 지점</th><th style="width:20%">구역</th><th style="width:14%">지도</th></tr></thead><tbody>'+f.map(x=>'<tr><td><b style="font-weight:500">'+x[0]+'</b></td><td>'+x[1]+'</td><td>'+x[2]+'</td><td>'+x[3]+(x[4]!=='-'?'<div style="color:var(--text-muted)">'+x[4]+'</div>':'')+'</td><td>'+(x[5]?'<button class="sm" data-go="'+R[x[5]-1].id+'">'+x[5]+'번</button>':'<span class="un">없음</span>')+'</td></tr>').join('')+'</tbody></table>'}
-function all(){labels();const f=F();pass={};R.forEach(r=>{r.nd=need(r);pass[r.id]=ok(r,f)});render();lst()}
+function all(){labels();const f=F();pass={};R.forEach(r=>{r.nd=need(r);pass[r.id]=ok(r,f)});render();lst();fpan()}
 
 $('msz').onclick=()=>{HT=HT===620?860:620;$('mw').style.height=HT+'px';$('msz').textContent=HT===620?'지도 크게':'지도 작게';map.invalidateSize()};
 const PRE={kem:[-6.2605,106.8095,15],cil:[-6.2840,106.7920,15],pi:[-6.2720,106.7830,15],jiks:[JK.lat,JK.lng,14],gan:[-6.2395,106.7860,15]};
 document.querySelectorAll('[data-pre]').forEach(b=>b.onclick=()=>{const k=b.dataset.pre;if(k==='fit')fit();else if(k==='all')fitAll();else map.setView([PRE[k][0],PRE[k][1]],PRE[k][2])});
-$('app').addEventListener('input',e=>{if(e.target.closest('#needp')){needInput(e);return}if(e.target.id==='tq'){ttb();return}if(e.target.closest('[data-l]')){render();return}if(e.target.id==='sort'){lst();return}all()});
-$('app').addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b)go(b.dataset.go);const q=e.target.closest('[data-z]');if(q){const z=ZN.find(x=>x.id===q.dataset.z);map.fitBounds(L.latLng(z.lat,z.lng).toBounds(z.r*2),{padding:[20,20]});$('mw').scrollIntoView({block:'nearest',behavior:'smooth'})}});
+$('app').addEventListener('input',e=>{const t=e.target;if(t.closest('#needp')){needInput(e);return}if(t.dataset&&t.dataset.fn){FV[t.dataset.fn]&&(FV[t.dataset.fn].n=t.value,fsv());return}if(t.dataset&&t.dataset.fs){if(FV[t.dataset.fs]){FV[t.dataset.fs].s=t.value;fsv();fpan();lst()}return}if(t.id==='fo'){render();lst();fpan();return}if(t.id==='fimp')return;if(e.target.id==='tq'){ttb();return}if(e.target.closest('[data-l]')){render();return}if(e.target.id==='sort'){lst();return}all()});
+$('app').addEventListener('click',e=>{const fb=e.target.closest('[data-fv]');if(fb){ftog(+fb.dataset.fv||fb.dataset.fv);return}if(e.target.id==='fexp'){fexp();return}if(e.target.id==='fimb'){$('fimp').click();return}if(e.target.id==='fclr'){if(Object.keys(FV).length&&confirm('즐겨찾기와 메모를 모두 지울까요?')){FV={};fsv();all()}return}const b=e.target.closest('[data-go]');if(b)go(b.dataset.go);const q=e.target.closest('[data-z]');if(q){const z=ZN.find(x=>x.id===q.dataset.z);map.fitBounds(L.latLng(z.lat,z.lng).toBounds(z.r*2),{padding:[20,20]});$('mw').scrollIntoView({block:'nearest',behavior:'smooth'})}});
 
 /* 생활 조건: 필수·선호, 주변 인프라(OSM), 단지별 직접 기록 */
 const INF_CATS=[
@@ -388,7 +430,7 @@ return h}
 function buildNeed(){$('nlist').innerHTML=NG.map(g=>'<div class="ng">'+g.g+'</div><div class="ni">'+g.i.map(i=>{const m=NS[i.id]|0;return '<div class="nr'+(m===1?' m':m===2?' p':'')+'"><div>'+i.l+'<small>'+i.h+'</small></div><select data-n="'+i.id+'">'+['무관','필수','선호'].map((x,v)=>'<option value="'+v+'"'+(v===m?' selected':'')+'>'+x+'</option>').join('')+'</select></div>'}).join('')+'</div>').join('');
 $('ilay').innerHTML=INF_CATS.map((c,k)=>'<label class="ch"><input type="checkbox" data-il="'+k+'"> <span style="color:'+c.c+'">●</span> '+c.l+'</label>').join('')}
 function refresh(id){const f=F();R.forEach(r=>{r.nd=need(r);pass[r.id]=ok(r,f)});
-R.forEach(r=>{const m=rm[r.id];if(m){const on=pass[r.id];m.setIcon(mkIcon('<div class="rm'+(on?' on':'')+'">'+r.i+'</div>','',26));m.setZIndexOffset(on?600:300)}});
+R.forEach(r=>{const m=rm[r.id];if(m){const on=pass[r.id];m.setIcon(rIcon(r));m.setZIndexOffset(FV[r.id]?700:on?600:300)}});
 lst();const m=rm[id],p=m&&m.getPopup();if(p&&p.isOpen()){const c=p.getElement().querySelector('.leaflet-popup-content'),y=c.scrollTop;p.update();c.scrollTop=y}}
 const OV=['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter'];
 const OQ=['["shop"="supermarket"]','["shop"="convenience"]','["amenity"~"^(hospital|clinic|doctors)$"]','["amenity"="pharmacy"]','["shop"~"^(laundry|dry_cleaning)$"]','["leisure"="park"]','["amenity"="restaurant"]["cuisine"~"korean"]','["amenity"~"^(bank|atm)$"]'];
@@ -424,6 +466,7 @@ if(e.target.id==='iload')loadInfra(true)});
 $('npreset').onclick=()=>{NS={};NPRE.must.forEach(k=>NS[k]=1);NPRE.pref.forEach(k=>NS[k]=2);sv('where.ns',NS);buildNeed();ensureInfra();all()};
 $('nclear').onclick=()=>{NS={};sv('where.ns',NS);buildNeed();all()};
 buildNeed();
+$('fimp').onchange=e=>{const f=e.target.files[0];if(f)fimp(f);e.target.value=''};
 const setv=(id,v)=>{$(id).value=v};
 $('preset').onclick=()=>{setv('budget',15);setv('mrt',1.5);setv('pd',3);setv('bl',3);setv('en',2);setv('bus',0);document.querySelectorAll('[data-t],[data-f]').forEach(c=>{c.checked=['gym','pool','green'].includes(c.dataset.f)});$('unk').checked=false;$('q').value='';all()};
 $('reset').onclick=()=>{setv('budget',60);setv('mrt',5);setv('pd',5);setv('bl',5);setv('en',5);setv('bus',0);document.querySelectorAll('[data-t],[data-f]').forEach(c=>{c.checked=false});$('unk').checked=true;$('q').value='';needReset();all()};
