@@ -44,12 +44,3 @@ ASIB007:CF+'unit/38517/bedroom-thumb-wA3yYWqvekwJuSRp4ZyVfbh6aRnUDsEh7XNOBc5x.pn
 ASID009:CF+'unit/500/bedroom-thumb-aEQMBWE3Xy6Y661MKJzZZjlziEHHJN3t54BYps9x.png',
 ASID010:CF+'unit/55062/bedroom-1-thumb-hsL9NTmYUvz1hdEItwGZAto41tJkpOJDmjYP7n57.jpg'
 };
-// 사진 표시 도우미 (사진이 안 뜨면 링크째 숨김)
-const phImg=(u,c)=>'<img class="'+c+'" src="'+u+'" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="(this.closest(\'a.ph\')||this).remove()">';
-const phLink=(u,c,href)=>'<a class="ph" href="'+(href||u)+'" target="_blank" rel="noopener">'+phImg(u,c)+'</a>';
-const phU=l=>PHU[l[0]]||l.ph||null;
-const phOf=(r,l)=>phU(l)||(PHB[r.id]||[])[0]||null;
-const phCover=r=>(PHB[r.id]||[])[0]||r.ls.map(phU).find(Boolean)||null;
-function phGal(r){const a=[];(PHB[r.id]||[]).forEach(u=>a.push([u,u]));r.ls.forEach(l=>{if(!l.dead&&phU(l))a.push([phU(l),l[3]])});
-const s=new Set();const b=a.filter(x=>!s.has(x[0])&&s.add(x[0]));
-return b.length?'<div class="gal">'+b.map(x=>phLink(x[0],'gi',x[1])).join('')+'</div>':'<div class="sub">사진 못 찾음</div>'}

@@ -9,14 +9,14 @@ lst();fpan();
 if(open&&!fonly()){mm.closePopup();mm.openPopup()}}
 function fpan(){
 const ids=R.filter(r=>FV[r.id]),n=ids.length,f=F();
-let h='<div class="cd fc"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><div style="font-size:15px;font-weight:500"><span style="color:#E0A800">★</span> 즐겨찾기 '+n+'곳</div><div class="fx" style="margin:0"><label class="ch" style="margin:0"><input type="checkbox" id="fo"'+(fonly()?' checked':'')+'> 즐겨찾기만 보기</label><button class="sm" id="fexp" title="단지·매물 즐겨찾기, 메모, 생활 조건, 설비 기록, 공과금 단가">전체 백업</button><button class="sm" id="fimb">백업 가져오기</button><button class="sm" id="fclr">전체 해제</button></div></div>';
+let h='<div class="cd fc"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><div style="font-size:15px;font-weight:500"><span style="color:#E0A800">★</span> 즐겨찾기 '+n+'곳</div><div class="fx" style="margin:0"><label class="ch" style="margin:0"><input type="checkbox" id="fo"'+(fonly()?' checked':'')+'> 즐겨찾기만 보기</label><button class="sm" id="fexp" title="단지·매물 즐겨찾기, 메모, 생활 조건, 설비 기록, 공과금 단가, 계약 체크리스트">전체 백업</button><button class="sm" id="fimb">백업 가져오기</button><button class="sm" id="fclr">전체 해제</button></div></div>';
 if(!n)h+='<div style="font-size:13px;color:var(--text-secondary);margin-top:8px">지도 마커 팝업이나 "찾기" 목록의 ☆ 버튼을 누르면 여기서 상태와 메모를 관리합니다. 저장은 이 브라우저에만 되며, 다른 기기로 옮길 때는 전체 백업·백업 가져오기를 쓰세요.</div>';
 else{ids.sort((a,b)=>STS.indexOf(FV[a.id].s)-STS.indexOf(FV[b.id].s)||a.i-b.i);
 h+=ids.map(r=>{const v=FV[r.id],l=lo(r,f);return '<div style="border-top:0.5px solid var(--border);margin-top:10px;padding-top:10px"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap"><div style="display:flex;align-items:center;gap:8px"><span class="nb">'+r.i+'</span><b style="font-weight:500">'+esc(r.nm)+'</b><span class="bd'+fsc(v.s)+'">'+esc(v.s)+'</span>'+(pass[r.id]?'':'<span class="bd un">현재 조건 제외</span>')+'</div><div class="fx" style="margin:0"><button class="sm" data-go="'+r.id+'">지도에서 보기</button>'+fbtn(r.id)+'</div></div><div style="font-size:13px;color:var(--text-secondary);margin:4px 0">'+esc(r.z)+' · '+esc(r.pt)+' · 버스 '+r.b[0]+' · 최저 '+fm(l)+' · JIKS '+fd1(r.jd)+'</div>'+links(r)+fform(r.id)+'</div>'}).join('')}
 h+='</div>';$('fvp').innerHTML=h;mcnt()}
 function mcnt(){const e=$('mcnt');if(e)e.textContent=(Object.keys(FV).length+FL.size)||''}
 // 전체 백업: 이 앱이 저장하는 사용자 데이터 키를 한 파일로 내보내고 가져온다
-const BK=['jiks-fav-v1','jiks_fl','jiks_cost','where.ns','where.ck'];
+const BK=['jiks-fav-v1','jiks_fl','jiks_cost','where.ns','where.ck','id-housing-check-v1'];
 function fexp(){
 const data={};BK.forEach(k=>{const v=localStorage.getItem(k);if(v!==null)data[k]=v});
 const b=new Blob([JSON.stringify({v:2,app:'where',saved:new Date().toISOString(),data},null,1)],{type:'application/json'});

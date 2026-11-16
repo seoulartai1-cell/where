@@ -23,32 +23,40 @@
 
 ## 2. 새 구조
 
-### 화면 흐름
+### 사이트 맵 (2026-11-17)
+하나의 웹앱(`index.html`)이 주소의 `#` 경로로 화면을 나눈다. 탭 순서는 쓰는 순서(찾는다 → 고른다 → 주변을 본다 → 계약한다)를 따른다.
 ```
-헤더: 앱 이름 · 검색 · 프리셋 · 매물 갱신 상태
-├─ 찾기      조건(기본 / 생활) → 결과 목록(정렬)          ← 첫 화면
-├─ 내 후보    단지 즐겨찾기 · 매물 즐겨찾기 · 환율·공과금 · 전체 백업
-├─ 지도 표시  지역 구분 · 교통 · 통학버스 노선 · 인프라 점
-└─ 자료      매물 갱신 현황 · 버스 시간표 · 구역·동네 안내 · 계약 가이드
-지도(PC 오른쪽 / 모바일 "지도" 탭)
+/                         앱 하나
+├─ #/find                 찾기      조건(기본·생활) → 결과 목록, 매물 자동 확인 현황   ← 첫 화면
+├─ #/mine                 내 후보    단지·매물 즐겨찾기, 환율·공과금, 전체 백업
+├─ #/area                 지역·교통  지역 구분·동네 안내, 철도·BRT, 통학버스 노선·시간표
+├─ #/guide                계약 가이드 안내(선납금·전기 계산기)
+│   └─ #/guide/check                확인 체크리스트
+├─ #/map                  모바일 지도(PC는 찾기·내 후보·지역·교통 옆에 늘 지도)
+└─ #/c/<단지 id>           단지로 이동(공유 링크)
+/housing-guide/           예전 주소 → #/guide로 넘김
 ```
-사용 순서(찾는다 → 고른다 → 지도에서 본다 → 확인한다)와 탭 순서를 맞췄다.
+- 지역 데이터와 그 설명(동네 안내)을 한 탭에, 통학버스 노선과 시간표를 한 탭에 모았다.
+- 매물 확인 현황은 매물을 고르는 "찾기"에 두고, 헤더의 상태 버튼이 그곳을 연다.
+- 계약 가이드는 별도 페이지가 아니라 앱의 한 화면이다. 헤더·탭·색·저장(백업)을 공유한다.
+- 뒤로 가기, 새로고침, 링크 공유가 화면 단위로 동작한다.
 
 ### 파일
 ```
-index.html                 화면 뼈대
-css/app.css                스타일
-js/core/util.js            공통 도우미($, 거리, 포맷, 저장소 S)
-js/data/places.js          단지(R)·학원(PO)·역(ST)·시간표 보충(X)
-js/data/regions.js         지역(ZN·JD·TG·분류)
-kel.js · routes.js · photos.js   경계·노선·사진(기존 그대로)
-js/features/*.js           기능별 로직(favorites, filter, map, regions, list, needs, transit, busroutes, listings)
-js/main.js                 초기화 순서
-data/listings.json         매물 자동 수집 결과
-scripts/update-listings.mjs  매물 수집기
-.github/workflows/pages.yml  수집 + 배포(6시간마다, 푸시 때)
-housing-guide/             계약 가이드(앱 "자료" 탭에서 연결)
+index.html                     화면 뼈대(맨 위 주석에 사이트 맵)
+css/app.css · css/guide.css    스타일(가이드는 #gv 안에서만)
+js/core/base.js                공통 도우미·기준점
+js/core/router.js              # 경로 → 화면 전환
+js/data/                       데이터만: places(단지·매물), regions(지역), kelurahan(경계), routes(버스·철도), photos(사진)
+js/features/                   기능: model, favorites, filter, regions, map, list, needs, transit, busroutes, photos, listings, guide
+js/main.js                     초기화 순서
+data/listings.json             매물 자동 확인 결과(배포 때 생성)
+scripts/update-listings.mjs    매물 확인기
+.github/workflows/pages.yml    확인 + 배포(6시간마다, 푸시 때)
+housing-guide/index.html       예전 주소 넘김
+docs/ARCHITECTURE.md           이 문서
 ```
+데이터 파일은 함수가 없고, 기능 파일은 데이터를 고치지 않는다(파생값 계산 제외).
 
 ### 저장소
 모든 사용자 데이터는 `S`(js/core/util.js)를 거친다. 키는 그대로 두어 기존 기록을 잃지 않고, "전체 백업"이 모든 키(단지·매물 즐겨찾기, 메모, 생활 조건, 설비 기록, 공과금 단가)를 한 파일로 내보내고 가져온다.
@@ -70,6 +78,6 @@ GitHub Actions (6시간마다, 수동 실행 가능)
       1. data/listings.json을 캐시 없이 읽음(열 때, 탭 복귀 때, 30분마다)
       2. 내려간 매물 표시, 바뀐 가격 반영, 새 매물을 단지 팝업·목록에 추가
       3. 필터의 최저 월세를 살아 있는 매물 가격으로 다시 계산
-      4. 헤더에 "매물 갱신 n시간 전" 표시, 자료 탭에 사이트별 수집 결과
+      4. 헤더에 "매물 n시간 전 확인" 표시, 찾기 탭 "매물 자동 확인 현황"에 사이트별 결과
 ```
 수집이 실패한 사이트는 이전 값을 유지하고 실패로 표시한다. 사이트 구조가 바뀌면 `scripts/update-listings.mjs`의 추출 규칙(`extract*`)을 고친다.

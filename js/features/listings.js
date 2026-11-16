@@ -31,6 +31,7 @@ if(LVERR&&!LIVE){el.textContent='매물 상태 못 불러옴';el.className='sm l
 else if(!LIVE||!LIVE.updated){el.textContent='매물 자동 확인 대기';el.className='sm lvs'}
 else{const s=lvSum();el.textContent='매물 '+ago(LIVE.updated)+' 확인'+(s.nw?' · 새 '+s.nw:'')+(s.dead?' · 내려감 '+s.dead:'');el.className='sm lvs'+(Date.now()-Date.parse(LIVE.updated)>864e5?' old':' ok')}
 const p=$('lvp');if(!p)return;
+if($('lvsum'))$('lvsum').textContent=LIVE&&LIVE.updated?ago(LIVE.updated):'';
 let h='<div class="fxb"><b>'+(LIVE&&LIVE.updated?'마지막 확인 '+fdt(LIVE.updated)+' ('+ago(LIVE.updated)+')':'아직 자동 확인 기록 없음')+'</b><div>6시간마다 GitHub에서 매물 페이지를 열어 게시 여부·가격을 확인하고 새 매물을 찾습니다. 앱은 열 때와 30분마다 결과를 다시 읽습니다'+(LVAT?' (앱이 읽은 시각 '+new Date(LVAT).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})+')':'')+'.</div>'+(LVERR?'<div style="color:var(--text-danger)">불러오기 실패: '+esc(LVERR)+'</div>':'')+'<div class="fx"><button class="sm" id="lvr">결과 다시 읽기</button><a class="sm lnk" href="'+LV_ACT+'" target="_blank" rel="noopener">지금 수집 실행(GitHub)</a></div></div>';
 if(LIVE){const s=lvSum();h+='<div class="cg"><div><small>게시 확인</small><b>'+s.live+'</b></div><div><small>새 매물</small><b>'+s.nw+'</b></div><div><small>내려감</small><b>'+s.dead+'</b></div></div><div class="cs">가격 변동 '+s.chg+' · 확인 못 함 '+s.unk+' (사이트 차단·시간 초과는 이전 상태 유지)</div>';
 const S=LIVE.sites||{};if(Object.keys(S).length)h+='<table class="tt"><thead><tr><th>사이트</th><th>게시</th><th>내려감</th><th>새 매물</th><th>확인 못 함</th></tr></thead><tbody>'+Object.keys(S).map(k=>{const x=S[k];return '<tr><td>'+esc(k)+'</td><td>'+(x.live|0)+'</td><td>'+(x.gone|0)+'</td><td>'+(x.found|0)+'</td><td>'+((x.blocked|0)+(x.error|0))+'</td></tr>'}).join('')+'</tbody></table>';
@@ -47,6 +48,6 @@ return '<div class="lr'+(l.dead?' dd':'')+'"><button class="st'+(on?' on':'')+'"
 +(LIVE&&LIVE.updated?'<div class="sub">매물 상태 자동 확인 '+ago(LIVE.updated)+'</div>':'')}
 function lvCard(r){if(!LIVE)return '';const n=r.ls.filter(l=>!l.dead).length,nw=r.ls.filter(l=>l.nw).length,d=r.ls.filter(l=>l.dead).length;
 return '<div style="margin-top:2px"><span class="bd">매물 '+n+'</span>'+(nw?'<span class="bd ok">새 '+nw+'</span>':'')+(d?'<span class="bd no">내려감 '+d+'</span>':'')+'</div>'}
-document.addEventListener('click',e=>{if(e.target.id==='lvr'||e.target.id==='lvs'){if(e.target.id==='lvs')openPanel('info');lvLoad(true)}});
+document.addEventListener('click',e=>{if(e.target.id==='lvs'){location.hash='#/find';const d=$('lvd');d.open=true;setTimeout(()=>d.scrollIntoView({block:'start'}),80);return}if(e.target.id==='lvr')lvLoad(true)});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-LVAT>5*6e4)lvLoad(false)});
 setInterval(()=>{if(!document.hidden)lvLoad(false)},30*6e4);

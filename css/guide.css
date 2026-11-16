@@ -1,0 +1,58 @@
+/* 계약 가이드 화면 (#gv 안에서만 적용) */
+#gv{--bg:var(--surface-0);--card:var(--surface-2);--ink:var(--text-primary);--sub:var(--text-secondary);--line:var(--border);--accent:var(--fill-accent);--accent-bg:#e8f0f8;--warn:#9a3b12;--warn-bg:#fbeee6;}
+@media(prefers-color-scheme:dark){#gv{--accent-bg:#1a2633;--warn:#f0a982;--warn-bg:#2d2019;}}
+#gv *{box-sizing:border-box}
+#gv{margin:0;background:var(--bg);color:var(--ink);line-height:1.65;font-size:16px}
+#gv .wrap{max-width:760px;margin:0 auto;padding:0 16px 80px}
+#gv .gh{padding:24px 0 8px}
+#gv h1{font-size:25px;margin:0 0 4px;letter-spacing:-.02em}
+#gv .date{color:var(--sub);font-size:13px}
+#gv .gnav{position:sticky;top:0;text-decoration:none;z-index:10;background:var(--bg);padding:10px 0;display:flex;gap:8px;border-bottom:1px solid var(--line)}
+#gv .gnav a{flex:1;padding:11px 8px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;font:inherit;font-weight:600;cursor:pointer}
+#gv .gnav a.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+@media(prefers-color-scheme:dark){#gv .gnav a.on{color:#0c1620}}
+#gv section.page{display:none}#gv section.page.on{display:block}
+#gv h2{font-size:20px;margin:34px 0 10px;letter-spacing:-.01em}
+#gv h3{font-size:16px;margin:18px 0 6px}
+#gv .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin:10px 0}
+#gv .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+#gv .grid .card{margin:0}
+#gv .k{font-size:13px;color:var(--sub)}
+#gv .v{font-size:18px;font-weight:700}
+#gv ul{margin:6px 0;padding-left:20px}#gv li{margin:3px 0}
+#gv table{width:100%;border-collapse:collapse;font-size:14.5px;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+#gv th,#gv td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+#gv th{background:var(--accent-bg);color:var(--accent);font-weight:700}
+#gv tr:last-child td{border-bottom:0}
+#gv .tw{overflow-x:auto}
+#gv .warn{background:var(--warn-bg);color:var(--warn);border-radius:12px;padding:12px 14px;margin:10px 0}
+#gv .steps{counter-reset:s;list-style:none;padding:0}
+#gv .steps li{counter-increment:s;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px 12px 50px;margin:8px 0;position:relative}
+#gv .steps li::before{content:counter(s);position:absolute;left:14px;top:12px;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;text-align:center;line-height:26px;font-weight:700;font-size:14px}
+@media(prefers-color-scheme:dark){#gv .steps li::before{color:#0c1620}}
+#gv label.f{display:block;font-size:13px;color:var(--sub);margin:10px 0 4px}
+#gv input[type=number],#gv select{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+#gv .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#gv .res{margin-top:14px;padding:14px;border-radius:12px;background:var(--accent-bg)}
+#gv .res b{font-size:19px}
+#gv .src a{color:var(--accent)}
+#gv .src li{font-size:14px}
+#gv .prog{position:sticky;top:61px;background:var(--bg);padding:10px 0;z-index:5}
+#gv .bar{height:10px;background:var(--line);border-radius:6px;overflow:hidden}
+#gv .bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .25s}
+#gv .ptxt{display:flex;justify-content:space-between;font-size:14px;margin-top:6px;color:var(--sub)}
+#gv .grp{margin-top:22px}
+#gv .grp h2{margin:0 0 8px;display:flex;justify-content:space-between;align-items:baseline}
+#gv .grp h2 small{font-size:13px;color:var(--sub);font-weight:400}
+#gv .item{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:7px 0;cursor:pointer}
+#gv .item input{width:22px;height:22px;flex:none;margin:2px 0 0;accent-color:var(--accent)}
+#gv .item .t{font-weight:600}
+#gv .item .d{font-size:14px;color:var(--sub)}
+#gv .item.done{opacity:.55}#gv .item.done .t{text-decoration:line-through}
+#gv .reset{margin-top:24px;padding:10px 16px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;font:inherit;cursor:pointer}
+#gv .gnav a{text-align:center;text-decoration:none}
+#gv .gnav a.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+@media(prefers-color-scheme:dark){#gv .gnav a.on{color:#0c1620}}
+#gv input[type=number],#gv select{height:auto}
+#gv button.reset:hover{background:var(--card)}
+

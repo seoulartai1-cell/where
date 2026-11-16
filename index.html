@@ -6,18 +6,33 @@
 <title>JIKS 통학버스 주거지 찾기</title>
 <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
 <link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/guide.css">
 </head>
-<body data-v="map" data-p="find">
+<body data-m="app" data-v="map" data-p="find">
+<!--
+사이트 구조 (주소는 # 뒤 경로)
+  #/find         찾기: 조건 → 결과 목록, 매물 자동 확인 현황
+  #/mine         내 후보: 단지·매물 즐겨찾기, 환율·공과금, 전체 백업
+  #/area         지역·교통: 지역 구분·동네 안내, 철도·BRT, 통학버스 노선·시간표
+  #/guide        계약 가이드: 안내 (#/guide/check 확인 체크리스트)
+  #/map          모바일 지도 화면
+  #/c/<단지 id>   단지로 바로 이동 (공유용)
+-->
 <div id="shell">
 <div id="app" style="display:contents">
-<header id="top"><h1>JIKS 통학버스 주거지 찾기</h1>
-<input type="text" id="q" placeholder="단지 이름 또는 구역 검색">
-<button class="sm" id="preset">내 조건 프리셋</button>
-<button class="sm" id="reset">필터 초기화</button>
+<header id="top"><h1><a href="#/find">JIKS 통학버스 주거지 찾기</a></h1>
+<input class="am" type="text" id="q" placeholder="단지 이름 또는 구역 검색">
+<button class="sm am" id="preset">내 조건 프리셋</button>
+<button class="sm am" id="reset">필터 초기화</button>
 <button class="sm lvs" id="lvs" title="매물 자동 확인 현황 보기">매물 확인 중…</button>
-<a class="sm lnk" href="housing-guide/">계약 가이드</a>
 </header>
-<nav id="ptabs" aria-label="화면"><button class="mo" data-v="map">지도</button><button data-p="find" class="on">찾기</button><button data-p="mine">내 후보 <span id="mcnt"></span></button><button data-p="layers">지도 표시</button><button data-p="info">자료</button></nav>
+<nav id="ptabs" aria-label="화면">
+<a class="mo" href="#/map" data-r="map">지도</a>
+<a href="#/find" data-r="find">찾기</a>
+<a href="#/mine" data-r="mine">내 후보 <span id="mcnt"></span></a>
+<a href="#/area" data-r="area">지역·교통</a>
+<a href="#/guide" data-r="guide">계약 가이드</a>
+</nav>
 <aside id="side">
 <section class="pn" data-p="find">
 <div id="sbar">
@@ -25,6 +40,7 @@
 <label class="lb" style="flex-direction:row;align-items:center;gap:8px">정렬
 <select id="sort"><option value="p">월세 낮은 순</option><option value="s">선호 충족 많은 순</option><option value="m">MRT 가까운 순</option><option value="j">JIKS 가까운 순</option><option value="b">버스 탑승 늦은 순</option><option value="n">번호 순</option></select></label>
 </div>
+<details class="g" id="lvd"><summary>매물 자동 확인 현황 <span id="lvsum" style="font-weight:400;font-size:12px;color:var(--text-muted)"></span></summary><div class="gb" id="lvp"></div></details>
 <details class="g" open><summary>기본 조건</summary><div class="gb">
 <div class="sgr">
 <label class="lb">예산(월세 상한) <b id="bv"></b><input type="range" id="budget" min="5" max="60" step="0.5" value="15"></label>
@@ -80,7 +96,7 @@
 <input type="file" id="fimp" accept="application/json,.json" style="display:none">
 <details class="g" id="fp" open><summary>★ 즐겨찾기 매물 · 환율·공과금</summary><div class="gb"><div class="fxb"><b id="fxl"></b><div id="fxs"></div><button class="sm" id="fxr" style="margin-top:6px">환율 새로고침</button></div><div class="sgr"><label class="lb">관리비(IPL) Rp/㎡<input type="number" data-cost="ipl" step="1000" min="0"></label><label class="lb">전기 단가 Rp/kWh<input type="number" data-cost="kwh" step="10" min="0"></label></div><div id="fpl"></div><div class="sub">공과금은 면적 기준 추정입니다. 전기 약 5.2kWh/㎡, 물 Rp 100,000 + 1,500/㎡. 관리비·전기·물은 단지와 사용량에 따라 달라 실제 청구액과 다릅니다.</div></div></details>
 </section>
-<section class="pn" data-p="layers">
+<section class="pn" data-p="area">
 <details class="g" open><summary>지역 구분 (켜고 끄기)</summary><div class="gb">
 <div class="rowl"><button class="sm" data-rp="feat">특징 지역만</button><button class="sm" data-rp="admin">행정구역(구·동)만</button><button class="sm" data-rp="all">모두 켜기</button><button class="sm" data-rp="none">모두 끄기</button></div>
 <div class="sg">① 지역 특징<small>색 = 지역 특징. 칩을 눌러 켜고 끕니다</small></div>
@@ -110,6 +126,10 @@
 <label class="ch"><input type="checkbox" data-l="bus" checked> 버스 시각</label>
 </div>
 </div></details>
+<details class="g" open><summary>구역·동네 안내</summary><div class="gb">
+<div id="zinfo" style="margin-bottom:14px"></div>
+<div id="kinfo" style="margin-bottom:14px"></div>
+</div></details>
 <details class="g" open><summary>교통 (철도·BRT)</summary><div class="gb">
 <div class="rowl">
 <button class="sm" id="tall">교통 전체 켜기</button><button class="sm" id="tnone">교통 전체 끄기</button><button class="sm" id="trl">교통 다시 불러오기</button>
@@ -134,19 +154,11 @@
 <div id="rtlist"></div>
 <div class="note" style="padding:6px 0 0">정류장을 시간 순서로 이어 JIKS까지 간 도로 경로 추정입니다(OSRM·OpenStreetMap, 내장 데이터). 실제 경로와 다를 수 있고 노선 번호는 시간표 블록 순서로 추정한 값입니다.</div>
 </div></details>
-</section>
-<section class="pn" data-p="info">
-<details class="g" open><summary>매물 실시간 현황</summary><div class="gb" id="lvp"></div></details>
 <details class="g"><summary>버스 시간표 (S2 2026-2027)</summary><div class="gb">
 <input type="text" id="tq" placeholder="정류장 이름 검색" style="width:100%;margin-bottom:8px">
 <div id="tt"></div>
 <div style="font-size:12px;color:var(--text-muted);margin-top:8px;line-height:1.6">시간표 텍스트가 뒤섞여 있어 정류장과 시각의 짝은 읽은 순서입니다. 노선 번호는 원문에서 확인되는 경우만 적었습니다. 학교 원본 PDF로 대조하세요. 가격은 사이트 표기 그대로이며 문의 때 최종 확인이 필요합니다.</div>
 </div></details>
-<details class="g" open><summary>구역·동네 안내</summary><div class="gb">
-<div id="zinfo" style="margin-bottom:14px"></div>
-<div id="kinfo" style="margin-bottom:14px"></div>
-</div></details>
-<details class="g" open><summary>계약 가이드</summary><div class="gb"><div class="cs">인도네시아 임대차 계약 절차, 확인할 조항, 방문 체크리스트.</div><a class="sm lnk" href="housing-guide/">계약 가이드 열기</a></div></details>
 <div class="note">OpenStreetMap 실제 지도입니다. 단지·학원·JIKS 팝업마다 구글 지도 링크와 부동산 사이트 검색 링크가 있습니다. 거리는 모두 직선거리입니다. 매물은 Jendela360·Travelio·Rumah123·99.co·Mamikos에서 직접 찾아 정리한 목록이며 실시간 연동이 아닙니다. 사진은 각 사이트 이미지로, 매물이 내려가면 안 보입니다. 가격은 사이트에서 최종 확인하세요. 구역 원은 대략적인 범위이며 행정 경계가 아닙니다. 한국 비유는 분위기 기준의 대략적 대응입니다.</div>
 </section>
 </aside>
@@ -170,14 +182,252 @@
 <div id="tlg"></div></div></details>
 </main>
 </div>
+<main id="gv">
+<div class="wrap">
+<header class="gh">
+<h1>인도네시아 주거 계약 가이드</h1>
+<div class="date">자카르타 등 인도네시아 임대차 기준 · 2026-11-16 확인</div>
+</header>
+<nav class="gnav" aria-label="계약 가이드">
+<a href="#/guide" data-gp="guide" class="on">안내</a>
+<a href="#/guide/check" data-gp="check">확인 체크리스트</a>
+</nav>
+
+<!-- ============ 안내 ============ -->
+<section class="page on" id="g-guide">
+
+<h2>한국과 다른 점</h2>
+<div class="grid">
+<div class="card"><div class="k">임대료 지급</div><div class="v">기간 전체 선납</div><div class="k">1~2년, 길게는 3년치</div></div>
+<div class="card"><div class="k">보증금</div><div class="v">1~3개월치</div><div class="k">법적 보호 제도 없음</div></div>
+<div class="card"><div class="k">전기</div><div class="v">누진제 없음</div><div class="k">용량(VA)별 kWh 단가</div></div>
+<div class="card"><div class="k">계약서</div><div class="v">인도네시아어 필수</div><div class="k">이중언어본 권장</div></div>
+</div>
+
+<div class="warn"><b>가장 큰 위험은 선납금이다.</b> 임대료를 1년 이상 먼저 내므로, 집주인이 소유자가 맞는지와 중도 해지 때 돌려받는 방법을 계약 전에 확인한다.</div>
+
+<h2>계약 흐름</h2>
+<ol class="steps">
+<li><b>집 찾기</b><br>Rumah123, 99.co, Jendela360 같은 포털이나 중개인. 통학버스 노선은 <a href="#/find" style="color:var(--accent)">주거지 지도</a>에서 확인.</li>
+<li><b>집 보기·의향서</b><br>마음에 들면 의향서와 예약금(보통 1개월치)을 낸다. 환불 조건을 서면으로 받는다.</li>
+<li><b>서류 확인</b><br>소유 증명, 건축 허가, 세금·공과금 영수증, 임대인 신분증.</li>
+<li><b>계약서 작성</b><br>인도네시아어 계약서(Perjanjian Sewa). 이중언어본 권장. 변호사나 현지 지인 검토.</li>
+<li><b>선납·인도(Serah Terima)</b><br>임대료는 소유자 계좌로 송금. 입주 상태 사진과 서명한 인수 체크리스트.</li>
+<li><b>입주 후 신고</b><br>이웃 단위(RT/RW)와 관리사무소에 입주 신고.</li>
+</ol>
+
+<h2>필요 서류</h2>
+<div class="card">
+<h3>임차인(외국인)</h3>
+<ul>
+<li>여권 사본, 체류 허가(KITAS/KITAP) 사본</li>
+<li>재직·주소 증빙(요청 시)</li>
+<li>이중언어 임대 계약서, 지급 영수증</li>
+</ul>
+<p class="k">KITAS·KITAP 소지자는 본인 명의로 임대할 수 있다. 외국인은 토지 소유 대신 임대권(Hak Sewa)이나 사용권(Hak Pakai) 형태로 쓴다.</p>
+<h3>임대인에게 요구할 서류</h3>
+<ul>
+<li><b>소유권 증서</b> SHM 또는 HGB. 소유자 이름이 임대인과 같은지 확인</li>
+<li><b>건축 허가</b> PBG(구 IMB). 주거 용도로 합법인지 확인</li>
+<li><b>토지건물세(PBB)</b> 납부 영수증</li>
+<li><b>전기·수도 영수증</b> 미납 없음 확인</li>
+<li>임대인 신분증(KTP). 대리인이면 위임장과 임대인 본인 확인</li>
+</ul>
+</div>
+
+<h2>임대료·보증금·중개 수수료</h2>
+<div class="card"><ul>
+<li><b>표시 통화</b> 임대료는 USD 월 단위로 광고해도 지급은 루피아다. 환율 기준일을 계약일로 정하는 경우가 많다. 기준일을 계약서에 쓴다.</li>
+<li><b>선납</b> 보통 1년치. 시장이 공급 과잉이면 6개월치 선납에 응하는 집주인도 있다.</li>
+<li><b>보증금</b> 1~3개월치. 임대 종료 때 조건을 지키면 돌려받는 구조다. 공제 조건과 반환 기한을 계약서에 쓴다.</li>
+<li><b>월 단위 계약</b> 연 단위보다 20~30% 비싼 경우가 있다.</li>
+<li><b>중개 수수료</b> 임대는 임대료 총액의 5%가 흔하고, 5~8% 범위로 설명하는 자료도 있다. 임대인이 내는 경우가 많지만 반반 부담도 있다. 계약 전에 누가 낼지 정한다.</li>
+<li><b>임대료 송금</b> 중개인은 임대료를 받을 권한이 없다. 소유자(또는 개발사) 계좌로 보낸다.</li>
+</ul></div>
+
+<div class="card">
+<h3>선납금 계산기</h3>
+<div class="row">
+<div><label class="f" for="r-rent">연 임대료 (백만 Rp)</label><input id="r-rent" type="number" inputmode="decimal" min="0" placeholder="예: 60"></div>
+<div><label class="f" for="r-years">계약 기간</label><select id="r-years"><option value="1">1년</option><option value="2">2년</option><option value="3">3년</option></select></div>
+</div>
+<div class="row">
+<div><label class="f" for="r-comm">중개 수수료율</label><select id="r-comm"><option value="0">0% (직접 계약)</option><option value="5" selected>5%</option><option value="8">8%</option></select></div>
+<div><label class="f" for="r-dep">보증금</label><select id="r-dep"><option value="1">1개월치</option><option value="2" selected>2개월치</option><option value="3">3개월치</option></select></div>
+</div>
+<label class="f" for="r-fx">환율: 100만 Rp = 몇 원? (선택)</label>
+<input id="r-fx" type="number" inputmode="decimal" min="0" placeholder="예: 80000">
+<div class="res" id="r-res">연 임대료를 입력하면 계산한다.</div>
+<p class="k">보증금은 연 임대료 ÷ 12 × 개월 수로 계산했다. 수수료는 임대료 총액 기준이다.</p>
+</div>
+
+<h2>계약서·특약</h2>
+<div class="card">
+<h3>계약서 확인 항목</h3>
+<ul>
+<li>임대인·임차인 신원, 주소(동·호), 면적, 포함된 가구·가전 목록</li>
+<li>임대료, 지급 방식, 환율 기준일, 계약 기간, 입주일</li>
+<li>보증금 금액, 공제 조건, 반환 기한</li>
+<li>갱신 조건. 종료·갱신 통보는 30~60일 전이 흔하다</li>
+<li>중도 해지, 전대(sublease) 조항. 임대인 승인 아래 전대가 가장 흔한 회수 방법이다</li>
+<li>수리 책임, 공과금·관리비 부담 주체, 세금 부담 주체</li>
+</ul>
+<p class="k">임대차를 규율하는 별도의 특별법은 없고 민법(KUHPerdata 제1548~1600조)이 적용된다. 아파트는 공동주택법(UU 20/2011)도 관련된다.</p>
+<h3>특약 예시</h3>
+<ul>
+<li>조기 귀국·전근 때 임대인이 새 임차인을 찾으면 남은 기간 임대료를 비율로 환불한다.</li>
+<li>보증금은 종료일 후 14일 이내 반환하며 공제 항목은 서면으로 통지한다.</li>
+<li>입주 전 하자(누수, 에어컨, 온수기, 전기 용량)는 임대인이 수리한다.</li>
+<li>임대소득세 등 임대인에게 부과되는 세금은 임대인이 부담한다.</li>
+<li>임대인은 계약 기간 중 매매·담보 설정 때 이 계약의 승계를 조건으로 한다.</li>
+<li>입주 상태 사진·영상과 인수 체크리스트를 계약서 별지로 붙인다.</li>
+</ul>
+<p class="k">특약은 현지 변호사 검토를 권한다.</p>
+</div>
+
+<h2>주의할 점</h2>
+<div class="warn"><ul>
+<li><b>전액 선납 + 계약서 없음</b> 큰 금액 송금은 계약서 서명 뒤에 한다.</li>
+<li><b>소유자 확인</b> 임대인이 소유자인지, 소유자가 아니면 전대 허락 서류가 있는지 확인한다.</li>
+<li><b>인도네시아어 계약서</b> 영문·한글본만 믿지 말고 인도네시아어 본문을 검토한다.</li>
+<li><b>보증금 분쟁</b> 보증금 보호 제도가 없다. 입주 상태 기록이 없으면 퇴거 때 공제를 막기 어렵다.</li>
+<li><b>중도 해지</b> 해지 조항이 없으면 선납 임대료 회수가 어렵다.</li>
+<li><b>이중 계약</b> 같은 집을 여러 사람에게 세놓는 사기가 있다. 열쇠 인도 전에 잔금을 모두 내지 않는다.</li>
+<li><b>침수·정전</b> 자카르타는 우기 침수 이력과 전기 용량(VA)을 입주 전에 묻는다.</li>
+<li><b>세금</b> 임대소득세는 임대인이 신고·납부한다. 계약서에 세금 부담 주체를 쓴다.</li>
+</ul></div>
+
+<h2>전기료(PLN)</h2>
+<div class="card">
+<h3>가정용 단가 (2026년 7~9월 기준)</h3>
+<div class="tw"><table>
+<tr><th>구분</th><th>Rp/kWh</th></tr>
+<tr><td>보조 450VA</td><td>415</td></tr>
+<tr><td>보조 900VA</td><td>605</td></tr>
+<tr><td>비보조 900VA(RTM)</td><td>1,352</td></tr>
+<tr><td>1,300~2,200VA</td><td>1,444.70</td></tr>
+<tr><td>3,500VA 이상</td><td>1,699.53</td></tr>
+</table></div>
+<p>가정용 단가는 2026년 1월부터 오르지 않았다. PLN은 분기마다 조정 여부를 발표한다. 최신 단가는 PLN 공지를 확인한다. 한국식 누진 구간은 없고, 계약 용량(VA)이 단가를 정한다. 외국인 가구는 대부분 비보조 구간에 해당한다.</p>
+<h3>선불(Token)과 후불</h3>
+<ul>
+<li>선불은 토큰을 사서 입력한다. 후불은 다음 달에 청구된다.</li>
+<li>토큰 100,000 Rp는 1,300VA 기준 대략 56~72kWh다. 지역별 가로등세(PPJ) 3~10%와 수수료 2,500 Rp가 빠진다.</li>
+<li>토큰 잔량이 없으면 정전된다. 잔량 경고음이 나면 충전한다.</li>
+</ul>
+<h3>입주 때 할 일</h3>
+<ul>
+<li>전기 용량(VA)을 확인한다. 에어컨 여러 대면 900VA는 부족하다.</li>
+<li>미터 번호와 잔량(또는 검침값) 사진을 찍는다.</li>
+<li>PLN Mobile 앱에 미터를 등록해 잔량과 청구를 본다.</li>
+<li>아파트는 전기가 관리사무소를 거쳐 청구되는 경우가 있다. 단가·수수료를 묻는다.</li>
+</ul>
+</div>
+
+<div class="card">
+<h3>전기 계산기 (추정)</h3>
+<div class="row">
+<div><label class="f" for="e-tar">단가 구분</label><select id="e-tar"><option value="1352">900VA 비보조 · 1,352</option><option value="1444.7" selected>1,300~2,200VA · 1,444.70</option><option value="1699.53">3,500VA 이상 · 1,699.53</option></select></div>
+<div><label class="f" for="e-ppj">가로등세(PPJ)</label><select id="e-ppj"><option value="0.03">3%</option><option value="0.05" selected>5%</option><option value="0.10">10%</option></select></div>
+</div>
+<div class="row">
+<div><label class="f" for="e-kwh">월 사용량 (kWh)</label><input id="e-kwh" type="number" inputmode="decimal" min="0" placeholder="예: 300"></div>
+<div><label class="f" for="e-tok">토큰 금액 (Rp)</label><input id="e-tok" type="number" inputmode="decimal" min="0" placeholder="예: 100000"></div>
+</div>
+<div class="res" id="e-res">사용량 또는 토큰 금액을 입력하면 계산한다.</div>
+</div>
+
+<h2>관리비(아파트·클러스터)</h2>
+<div class="card"><ul>
+<li><b>IPL</b> 환경관리비. 전용 면적(㎡) × 단가. 예: 25㎡ × 30,000 Rp = 750,000 Rp.</li>
+<li><b>서비스 차지</b> 청소·경비·시설 운영비. IPL과 같은 뜻으로 쓰는 곳도 있다.</li>
+<li><b>싱킹 펀드</b> 수리용 적립금. 월 100,000~200,000 Rp 정도이고 연 1회 선납하는 곳이 있다.</li>
+<li><b>주차</b> 차량 등록 비용과 가능 대수.</li>
+<li>IPL과 싱킹 펀드를 임대료에 포함하는지, 임차인이 내는지 계약서에 쓴다. 소유자가 내는 곳도 있고 임차인이 내는 곳도 있다.</li>
+</ul></div>
+
+<h2>인터넷</h2>
+<div class="card">
+<div class="tw"><table>
+<tr><th>업체</th><th>예시 (2025.12~2026.6 보도)</th></tr>
+<tr><td>IndiHome</td><td>50Mbps 인터넷+TV 월 345,000 Rp부터. 지역별 상이. 신규 설치비 45,000 Rp(온라인) 또는 81,000 Rp(영업사원), PPN 별도. 가격에 ONT 대여 포함</td></tr>
+<tr><td>First Media</td><td>50Mbps 프로모션 월 229,000 Rp(정상가 289,000 Rp). 설치비 무료</td></tr>
+<tr><td>MyRepublic</td><td>150Mbps 월 250,000 Rp 안팎부터</td></tr>
+<tr><td>Biznet 등</td><td>도시 지역 중심. 건물에 깔린 망을 확인</td></tr>
+</table></div>
+<ul>
+<li>가격과 가능 속도는 건물·지역마다 다르다. 같은 건물 입주자나 관리사무소에 어느 망이 들어오는지 묻는다.</li>
+<li>설치는 신청 후 며칠이 걸린다. 입주 전에 접수한다.</li>
+<li>아파트는 관리사무소가 인터넷을 서비스 차지로 제공하는 경우가 있다.</li>
+<li>모뎀(ONT)은 임대 장비다. 해지 때 반납한다.</li>
+<li>명의는 임차인 본인 여권·KITAS를 요구할 수 있다.</li>
+</ul>
+</div>
+
+<h2>입주 후</h2>
+<div class="card"><ul>
+<li><b>RT/RW·관리사무소</b> 입주를 신고한다. 외국인은 특히 요구되는 경우가 있다.</li>
+<li><b>인수 체크리스트</b> 방별 사진·영상과 서명한 체크리스트. 퇴거 때 공제 분쟁의 증거다.</li>
+<li><b>열쇠·카드키</b> 수량과 분실 시 비용을 확인한다.</li>
+<li><b>갱신·퇴거</b> 종료 30~60일 전에 의사를 서면으로 알린다. 갱신 때 임대료는 5~15% 오르는 사례가 있다.</li>
+<li><b>서류 보관</b> 계약서, 송금 영수증, 인수 체크리스트를 퇴거 후까지 보관한다.</li>
+</ul></div>
+
+<h2>용어</h2>
+<div class="tw"><table>
+<tr><th>한국어</th><th>인도네시아어</th></tr>
+<tr><td>임대 계약서</td><td>Perjanjian Sewa</td></tr>
+<tr><td>보증금</td><td>Uang Jaminan / Deposit</td></tr>
+<tr><td>소유권 증서</td><td>Sertifikat (SHM, HGB)</td></tr>
+<tr><td>건축 허가</td><td>PBG (구 IMB)</td></tr>
+<tr><td>토지건물세</td><td>PBB</td></tr>
+<tr><td>관리비</td><td>IPL / Service Charge</td></tr>
+<tr><td>적립금</td><td>Sinking Fund</td></tr>
+<tr><td>전기 선불 / 후불</td><td>Prabayar (Token) / Pascabayar</td></tr>
+<tr><td>인도 인수</td><td>Serah Terima</td></tr>
+<tr><td>중개인</td><td>Agen / Perantara</td></tr>
+<tr><td>공증인</td><td>Notaris</td></tr>
+<tr><td>이웃 모임(동네 단위)</td><td>RT / RW</td></tr>
+</table></div>
+
+<h2 class="src">출처·참고</h2>
+<ul class="src">
+<li><a href="https://expat.or.id/info/residentialleasingguidelines.html" target="_blank" rel="noopener">Expat.or.id 주거 임대 지침</a> 선납, 통화, KITAS, 전대</li>
+<li><a href="https://www.rumah123.com/en/property-guide/lease-agreements-in-indonesia-for-expatriates/" target="_blank" rel="noopener">Rumah123 외국인 임대 계약</a></li>
+<li><a href="https://www.expatfocus.com/indonesia/guide/indonesia-property-rental-prices" target="_blank" rel="noopener">Expat Focus 임대 가격·보증금</a></li>
+<li><a href="https://commoner-law.com/indonesia/housing-rights/sewa-menyewa-deposit" target="_blank" rel="noopener">Commoner Law 임대·보증금 법률 가이드(2026)</a></li>
+<li><a href="https://landager.com/id/property-compliance/indonesia/national/overview" target="_blank" rel="noopener">Landager 부동산 컴플라이언스</a> 소유 서류, RT/RW 신고</li>
+<li><a href="https://www.rumah123.com/explore/tanya-properti/agen-properti/" target="_blank" rel="noopener">Rumah123 중개 수수료</a>, <a href="https://jendela360.com/info/komisi-sewa-rumah/" target="_blank" rel="noopener">Jendela360 임대 수수료</a></li>
+<li><a href="https://journalarta.com/news/2026/10/06/tarif-listrik-pln-terbaru-oktober-2026/?all=1" target="_blank" rel="noopener">JournalArta 2026년 10월 PLN 단가</a>, <a href="https://jawapos.com/energi/2608020133/daftar-tarif-listrik-pln-agustus-2026-tidak-ada-kenaikan-untuk-pelanggan-rumah-tangga" target="_blank" rel="noopener">Jawa Pos 2026년 3분기 단가</a></li>
+<li><a href="https://selular.id/2025/12/perbandingan-tarif-internet-indihome-myrepublic-first-media-dan-biznet-home/" target="_blank" rel="noopener">Selular.ID 인터넷 요금 비교</a>, <a href="https://www.telkomsel.com/indihome/addon/indihomeinfo" target="_blank" rel="noopener">IndiHome 안내</a></li>
+<li><a href="https://www.ocbc.id/id/article/2025/10/20/7-biaya-tak-terduga-saat-sewa-apartemen-jangan-kaget" target="_blank" rel="noopener">OCBC 아파트 임대 추가 비용</a>, <a href="https://jendela360.com/info/ipl-apartemen/" target="_blank" rel="noopener">Jendela360 IPL</a></li>
+</ul>
+<p class="k">정보 제공용이다. 요금·제도는 바뀔 수 있고, 계약 전 현지 변호사나 공증인(Notaris) 검토를 권한다.</p>
+</section>
+
+<!-- ============ 확인 ============ -->
+<section class="page" id="g-check">
+<div class="prog">
+<div class="bar"><i id="g-pb"></i></div>
+<div class="ptxt"><span id="g-pt">0 / 0</span><span id="g-pp">0%</span></div>
+</div>
+<div id="g-groups"></div>
+<button class="reset" id="g-reset">체크 초기화</button>
+<p class="k">체크 상태는 이 브라우저에만 저장된다.</p>
+</section>
+</div>
+</main>
 </div>
 <script src="vendor/leaflet/leaflet.js"></script>
-<script src="kel.js"></script>
-<script src="routes.js"></script>
-<script src="photos.js"></script>
+<!-- 데이터 -->
+<script src="js/data/kelurahan.js"></script>
+<script src="js/data/routes.js"></script>
+<script src="js/data/photos.js"></script>
 <script src="js/core/base.js"></script>
 <script src="js/data/places.js"></script>
 <script src="js/data/regions.js"></script>
+<!-- 기능 -->
+<script src="js/features/photos.js"></script>
 <script src="js/features/model.js"></script>
 <script src="js/features/favorites.js"></script>
 <script src="js/features/filter.js"></script>
@@ -188,6 +438,9 @@
 <script src="js/features/transit.js"></script>
 <script src="js/features/busroutes.js"></script>
 <script src="js/features/listings.js"></script>
+<script src="js/features/guide.js"></script>
+<!-- 화면 전환·초기화 -->
+<script src="js/core/router.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>
