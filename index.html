@@ -70,8 +70,19 @@ input[type=range]{width:100%}
 .sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin:0 3px 0 6px;vertical-align:-2px;border:0.5px solid rgba(0,0,0,.25)}
 .kcn{color:#555;font-size:13px;font-weight:600;letter-spacing:.02em;line-height:1.2;text-align:center;white-space:nowrap;text-shadow:0 0 4px #fff,0 0 4px #fff,0 0 6px #fff;pointer-events:none}
 .kcn small{display:block;font-size:11px;font-weight:500}
-.tgn{font-size:12px;font-weight:600;white-space:nowrap;text-align:center;background:rgba(255,255,255,.9);border:1px solid;border-radius:999px;padding:2px 9px;pointer-events:none;color:#333;box-shadow:0 1px 3px rgba(0,0,0,.15)}
-.tgn small{display:block;font-size:10px;font-weight:500}
+.tgn{width:max-content;font-size:12px;font-weight:600;white-space:nowrap;text-align:center;background:rgba(255,255,255,.94);border:1px solid;border-radius:12px;padding:2px 9px;pointer-events:auto;cursor:pointer;color:#333;line-height:1.3;box-shadow:0 1px 3px rgba(0,0,0,.15);transform:translate(-50%,-50%)}
+.tgn small{display:block;font-size:10px;font-weight:500;color:#666}
+.sg{margin:12px 0 4px;font-size:12px;font-weight:600;color:var(--text-secondary)}
+.sg small{font-weight:400;color:var(--text-muted);margin-left:6px}
+.cc{--cc:#999;display:inline-flex;align-items:center;gap:6px;font-size:13px;padding:4px 11px;border:1px solid var(--border-strong);border-radius:999px;background:var(--surface-2);cursor:pointer;margin:0 6px 6px 0;opacity:.5;user-select:none}
+.cc input{display:none}
+.cc i{width:12px;height:12px;border-radius:50%;background:var(--cc);display:inline-block;border:0.5px solid rgba(0,0,0,.25)}
+.cc:has(input:checked){opacity:1;border-color:var(--cc);background:color-mix(in srgb,var(--cc) 30%,var(--surface-2))}
+.rg{display:flex;align-items:center;gap:8px;margin:14px 0 4px;font-size:13px;font-weight:600}
+.rg i{width:12px;height:12px;border-radius:50%;display:inline-block;flex:none;border:0.5px solid rgba(0,0,0,.25)}
+.rg span{font-weight:400;color:var(--text-muted);font-size:12px}
+.rt td{cursor:pointer}
+.rt tr:hover td{background:var(--surface-1)}
 details.dz{border:0.5px solid var(--border);border-radius:10px;background:var(--surface-2);margin-bottom:6px;padding:6px 12px}
 details.dz summary{cursor:pointer;font-size:14px;padding:4px 0}
 .tbl{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed;word-break:break-word}
@@ -226,24 +237,35 @@ details.g>summary,details.g>.gb,#fvp,#lstw,.note{padding-left:12px;padding-right
 <div id="nlist"></div>
 </div>
 </details>
-<details class="g"><summary>지도 표시</summary><div class="gb">
+<details class="g" open><summary>지역 구분 (켜고 끄기)</summary><div class="gb">
+<div class="rowl"><button class="sm" data-rp="feat">특징 지역만</button><button class="sm" data-rp="admin">행정구역(구·동)만</button><button class="sm" data-rp="all">모두 켜기</button><button class="sm" data-rp="none">모두 끄기</button></div>
+<div class="sg">① 지역 특징<small>색 = 지역 특징. 칩을 눌러 켜고 끕니다</small></div>
+<div class="rowl"><span id="catchips"></span></div>
+<div class="rowl"><button class="sm" data-cp="1">특징 전체 켜기</button><button class="sm" data-cp="0">특징 전체 끄기</button></div>
+<div class="sg">② 색과 경계</div>
 <div class="rowl">
-<span style="font-size:13px;color:var(--text-secondary);margin-right:6px">지도 표시</span>
-<label class="ch"><input type="checkbox" data-l="zn"> 구역 원(대략)</label>
-<label class="ch"><input type="checkbox" data-l="zl" checked> 구역 이름</label>
-<label class="ch"><input type="checkbox" data-l="zd" checked> 구역 설명</label>
 <label class="ch"><input type="checkbox" data-l="tp" checked> 특징별 색칠</label>
 <label class="ch"><input type="checkbox" data-l="kc" checked> 구(Kecamatan) 경계·이름</label>
 <label class="ch"><input type="checkbox" data-l="kl" checked> 동(Kelurahan) 경계</label>
-<label class="ch"><input type="checkbox" data-l="kn" checked> 동 이름</label>
-<label class="ch"><input type="checkbox" data-l="nm" checked> 통칭→소속 동 표시</label>
+<label class="ch"><input type="checkbox" data-l="kn" checked> 동 이름(확대 시)</label>
+<label class="ch"><input type="checkbox" data-l="zn"> 대략 원(옛 방식)</label>
+</div>
+<div class="sg">③ 이름표와 설명</div>
+<div class="rowl">
+<label class="ch"><input type="checkbox" data-l="nm" checked> 특징 지역(통칭)</label>
+<label class="ch"><input type="checkbox" data-l="jd" checked> 그 밖의 자카르타 동네</label>
+<label class="ch"><input type="checkbox" data-l="zl" checked> 이름 라벨</label>
 <label class="ch"><input type="checkbox" data-l="zk" checked> 한국 비유</label>
-<label class="ch"><input type="checkbox" data-l="jd" checked> 자카르타 동네</label>
+<label class="ch"><input type="checkbox" data-l="zd" checked> 설명 팝업·목록</label>
+</div>
+<div class="sg">④ 장소</div>
+<div class="rowl">
 <label class="ch"><input type="checkbox" data-l="pd" checked> 빠델</label>
 <label class="ch"><input type="checkbox" data-l="bl" checked> 발레</label>
 <label class="ch"><input type="checkbox" data-l="en" checked> 영어학원</label>
 <label class="ch"><input type="checkbox" data-l="bus" checked> 버스 시각</label>
-</div></div></details>
+</div>
+</div></details>
 <details class="g" open><summary>교통 표시</summary><div class="gb">
 <div class="rowl">
 <button class="sm" id="tall">교통 전체 켜기</button><button class="sm" id="tnone">교통 전체 끄기</button><button class="sm" id="trl">교통 다시 불러오기</button>
@@ -293,7 +315,6 @@ details.g>summary,details.g>.gb,#fvp,#lstw,.note{padding-left:12px;padding-right
 <details id="lg" open><summary>범례</summary><div>
 <span style="color:var(--fill-accent)">●</span> 조건 통과 · <span style="color:var(--text-muted)">●</span> 제외 · <span style="color:var(--fill-danger)">★</span> JIKS<br>
 <span style="color:#D85A30">◆</span> 빠델 · <span style="color:#D4537E">▲</span> 발레 · <span style="color:#378ADD">■</span> 영어학원<br>
-점선 원 · <span style="color:#5D6D7E">중부</span> <span style="color:#1F618D">남부</span> <span style="color:#148F77">북부</span> <span style="color:#CA6F1E">서부</span> <span style="color:#239B56">동부</span> <span style="color:#6C3483">섬</span>
 <div id="clg"></div>
 <div id="tlg"></div></div></details>
 </main>
@@ -460,12 +481,16 @@ const JD=[
 {id:'pul',n:'풀로 가둥',e:'Pulo Gadung',c:'E',lat:-6.1850,lng:106.9120,r:1000,im:'공단과 물류 지대',kr:'구로공단',pt:['공단','물류']},
 {id:'ser',n:'끄뿔라우안 스리부',e:'Kepulauan Seribu',c:'I',lat:-5.7440,lng:106.6140,r:5000,im:'스노클링과 소형 리조트가 있는 섬 지역',kr:'통영 다도해·제주 섬',pt:['스노클링','소형 리조트']}
 ];
-const jdHtml=d=>{const c=CITY[d.c];return '<div><b style="font-weight:500;font-size:15px;color:'+c.c+'">'+d.n+'</b> <span class="un">'+d.e+' · '+c.n+'</span></div><div style="margin-top:4px">'+d.im+'</div>'+(lay('zk')?'<div style="margin-top:4px"><span class="bd ok">'+d.kr+' 느낌</span></div>':'')+d.pt.map(x=>'<div>· '+x+'</div>').join('')+(d.pl?'<h4>대표 장소</h4><div>'+d.pl+'</div>':'')+'<div style="margin-top:6px">JIKS까지 직선 <b style="font-weight:500">'+fd1(hav(d.lat,d.lng,JK.lat,JK.lng))+'</b></div><div class="un" style="margin-top:4px">조사 단지 목록과 별개인 참고 정보입니다. 한국 비유는 분위기 기준의 대략적 대응입니다.</div>'};
+const jdHtml=d=>{const c=CITY[d.c];return '<div><b style="font-weight:500;font-size:15px;color:'+ACAT[d.cat][2]+'">'+d.n+'</b> <span class="un">'+d.e+' · '+c.n+'</span></div><div style="margin-top:4px">'+chipA(d.cat)+(lay('zk')?' <span class="bd ok">'+d.kr+' 느낌</span>':'')+'</div><div style="margin-top:4px">'+d.im+'</div>'+d.pt.map(x=>'<div>· '+x+'</div>').join('')+(d.pl?'<h4>대표 장소</h4><div>'+d.pl+'</div>':'')+'<div style="margin-top:6px">JIKS까지 직선 <b style="font-weight:500">'+fd1(hav(d.lat,d.lng,JK.lat,JK.lng))+'</b></div><div class="un" style="margin-top:4px">조사 단지 목록과 별개인 참고 정보입니다. 한국 비유는 분위기 기준의 대략적 대응입니다.</div>'};
 const znStat=z=>{const a=R.filter(r=>r.z===z.z);if(!z.z||!a.length)return null;const pr=a.flatMap(r=>Object.values(r.p).filter(v=>v!=null));const bs=a.map(r=>r.b[0]).sort();return{n:a.length,min:pr.length?Math.min(...pr):null,b0:bs[0],b1:bs[bs.length-1],jd:a.reduce((t,r)=>t+r.jd,0)/a.length,names:a.map(r=>r.i+'.'+r.sn).join(', ')}};
 const znHtml=z=>{const st=znStat(z);return '<div><b style="font-weight:500;font-size:15px;color:'+z.c+'">'+z.n+'</b></div>'+(z.kr&&lay('zk')?'<div style="margin-top:4px"><span class="bd ok">'+z.kr+' 느낌</span></div>':'')+'<div style="margin-top:4px">'+z.d+'</div>'+z.pt.map(x=>'<div>· '+x+'</div>').join('')+(st?'<h4>조사 단지 '+st.n+'곳</h4><div>'+st.names+'</div><div>최저 월세 '+fm(st.min)+' · 버스 '+st.b0+'~'+st.b1+' · JIKS 평균 직선 '+fd1(st.jd)+'</div>':'<div class="un" style="margin-top:4px">조사 목록에 단지 없음</div>')+'<div class="un" style="margin-top:4px">일반 특성 설명이며 원문 조사 외 내용은 현지 확인이 필요합니다.</div>'};
 function zinfo(){const el=$('zinfo');if(!lay('zd')){el.innerHTML='';return}
-let h='<div style="font-size:15px;font-weight:500;margin-bottom:8px">구역 안내</div>'+ZN.map(z=>{const st=znStat(z);return '<div class="cd zc" data-z="'+z.id+'" style="border-left-color:'+z.c+'"><b style="font-weight:500;color:'+z.c+'">'+z.n+'</b>'+(z.kr&&lay('zk')?' <span class="bd ok">'+z.kr+' 느낌</span>':'')+'<div style="font-size:13px;color:var(--text-secondary)">'+z.d+'</div><div style="font-size:13px">'+(st?'단지 '+st.n+'곳 · 최저 '+fm(st.min)+' · 버스 '+st.b0+'~'+st.b1:'조사 단지 없음')+'</div></div>'}).join('');
-if(lay('jd'))h+='<div style="font-size:15px;font-weight:500;margin:14px 0 8px">자카르타 주요 동네</div><table class="tt"><thead><tr><th style="width:27%">동네</th><th>특성·이미지</th>'+(lay('zk')?'<th style="width:26%">한국 비유</th>':'')+'</tr></thead><tbody>'+JD.map(d=>{const c=CITY[d.c];return '<tr data-z="'+d.id+'" style="cursor:pointer"><td style="border-left:4px solid '+c.c+'"><b style="font-weight:500;color:'+c.c+'">'+d.n+'</b><div class="un">'+c.n+'</div></td><td>'+d.im+'</td>'+(lay('zk')?'<td>'+d.kr+'</td>':'')+'</tr>'}).join('')+'</tbody></table>';
+const zk=lay('zk'),rows={};Object.keys(ACAT).forEach(k=>rows[k]=[]);
+if(lay('nm'))TG.forEach(g=>{if(g.cat&&catOn(g.cat))rows[g.cat].push({id:g.id,n:g.ko,s:g.n,c:ACAT[g.cat][1],ink:ACAT[g.cat][2],im:g.d,kr:g.kr,sub:g.rs&&g.rs.length?'조사 단지 '+g.rs.length+'곳':''})});
+if(lay('jd'))JD.forEach(d=>{if(!catOn(d.cat)||(lay('nm')&&dupJ(d)))return;rows[d.cat].push({id:d.id,n:d.n,s:d.e,c:ACAT[d.cat][1],ink:ACAT[d.cat][2],im:d.im,kr:d.kr,sub:CITY[d.c].n})});
+let h='<div style="font-size:15px;font-weight:500;margin-bottom:2px">지역 특징 한눈에</div><div class="un" style="font-size:12px;margin-bottom:4px">행을 누르면 지도가 해당 지역으로 이동합니다. 켜진 특징만 보입니다.</div>',any=false;
+Object.keys(ACAT).forEach(k=>{const a=rows[k];if(!a.length)return;any=true;h+='<div class="rg"><i style="background:'+ACAT[k][1]+'"></i>'+ACAT[k][0]+'<span>'+ACAT[k][3]+' · '+a.length+'곳</span></div><table class="tbl rt"><tbody>'+a.map(r=>'<tr data-z="'+r.id+'"><td style="width:30%;border-left:4px solid '+r.c+'"><b style="font-weight:500;color:'+r.ink+'">'+r.n+'</b><div class="un">'+r.s+'</div></td><td>'+r.im+(r.sub?'<div class="un">'+r.sub+'</div>':'')+'</td>'+(zk?'<td style="width:24%">'+(r.kr?'≈ '+r.kr:'')+'</td>':'')+'</tr>').join('')+'</tbody></table>'});
+if(!any)h+='<div class="un">켜진 지역이 없습니다. 위 "지역 구분"에서 특징을 켜 보세요.</div>';
 el.innerHTML=h}
 const KC={'Cilandak':['찔란닥','#16A085'],'Jagakarsa':['자가까르사','#8E7CC3'],'Kebayoran Baru':['끄바요란 바루','#E67E22'],'Kebayoran Lama':['끄바요란 라마','#2980B9'],'Mampang Prapatan':['맘빵 쁘라빠딴','#D4537E'],'Pancoran':['빤쪼란','#7F8C8D'],'Pasar Minggu':['빠사르 밍구','#27AE60'],'Pesanggrahan':['쁘상그라한','#C0392B'],'Setia Budi':['스띠아 부디','#B7950B'],'Tebet':['뜨벳','#6C5CE7'],'Cipayung':['찌빠융','#D35400'],'Pasar Rebo':['빠사르 레보','#1ABC9C'],'Ciracas':['찌라짜스','#5D6D7E'],'Makasar':['마까사르','#A04000'],'Kramat Jati':['끄라맛 자띠','#2E86C1']};
 const KR={'Cilandak Barat':'찔란닥 바랏','Cipete Selatan':'찌쁘떼 슬라딴','Gandaria Selatan':'간다리아 슬라딴','Lebak Bulus':'르박 불루스','Pondok Labu':'폰독 라부','Ciganjur':'찌간주르','Cipedak':'찌쁘닥','Jagakarsa':'자가까르사','Lenteng Agung':'른뗑 아궁','Srengseng Sawah':'스렝승 사와','Tanjung Barat':'딴중 바랏','Cipete Utara':'찌쁘떼 우따라','Gandaria Utara':'간다리아 우따라','Gunung':'구눙','Kramat Pela':'끄라맛 쁠라','Melawai':'믈라와이','Petogogan':'쁘또고간','Pulo':'뿔로','Rawa Barat':'라와 바랏','Selong':'슬롱','Senayan':'스나얀','Cipulir':'찌뿔리르','Grogol Selatan':'그로골 슬라딴','Grogol Utara':'그로골 우따라','Kebayoran Lama Selatan':'끄바요란 라마 슬라딴','Kebayoran Lama Utara':'끄바요란 라마 우따라','Pondok Pinang':'폰독 삐낭','Bangka':'방까','Kuningan Barat':'꾸닝안 바랏','Mampang Prapatan':'맘빵 쁘라빠딴','Pela Mampang':'쁠라 맘빵','Tegal Parang':'뜨갈 빠랑','Cikoko':'찌꼬꼬','Duren Tiga':'두렌 띠가','Kalibata':'깔리바따','Pancoran':'빤쪼란','Pengadegan':'쁭아드간','Rawajati':'라와자띠','Cilandak Timur':'찔란닥 띠무르','Jati Padang':'자띠 빠당','Kebagusan':'끄바구산','Pasar Minggu':'빠사르 밍구','Pejaten Barat':'쁘자뗀 바랏','Pejaten Timur':'쁘자뗀 띠무르','Ragunan':'라구난','Bintaro':'빈따로','Pesanggrahan':'쁘상그라한','Petukangan Selatan':'쁘뚜깡안 슬라딴','Petukangan Utara':'쁘뚜깡안 우따라','Ulujami':'울루자미','Guntur':'군뚜르','Karet':'까렛','Karet Semanggi':'까렛 스망기','Pasar Manggis':'빠사르 망기스','Setia Budi':'스띠아 부디','Karet Kuningan':'까렛 꾸닝안','Kuningan Timur':'꾸닝안 띠무르','Menteng Atas':'믄뗑 아따스','Bukit Duri':'부킷 두리','Kebon Baru':'끄본 바루','Manggarai':'망가라이','Manggarai Selatan':'망가라이 슬라딴','Menteng Dalam':'믄뗑 달람','Tebet Barat':'뜨벳 바랏','Tebet Timur':'뜨벳 띠무르','Bambu Apus':'밤부 아뿌스','Ceger':'쯔게르','Cilangkap':'찔랑깝','Cipayung':'찌빠융','Lubang Buaya':'루방 부아야','Munjul':'문줄','Pondok Ranggon':'폰독 랑곤','Setu':'스뚜','Baru':'바루','Cijantung':'찌잔뚱','Gedong':'그동','Kalisari':'깔리사리','Pekayon':'쁘까욘','Cibubur':'찌부부르','Ciracas':'찌라짜스','Kelapa Dua Wetan':'끌라빠 두아 웨딴','Rambutan':'람부딴','Susukan':'수수깐','Cipinang Melayu':'찌삐낭 믈라유','Halim Perdana Kusumah':'할림 쁘르다나 꾸수마','Kebon Pala':'끄본 빨라','Makasar':'마까사르','Pinang Ranti':'삐낭 란띠','Bale Kambang':'발레 깜방','Batu Ampar':'바뚜 암빠르','Cawang':'짜왕','Cililitan':'찌릴리딴','Dukuh':'두꾸','Kampung Tengah':'깜뿡 뜽아','Kramat Jati':'끄라맛 자띠'};
@@ -491,6 +516,22 @@ const KCAT={'Kuningan Barat':'biz','Kuningan Timur':'biz','Karet Kuningan':'biz'
 const OUTK=['Jagakarsa','Cipayung','Pasar Rebo','Ciracas','Makasar','Kramat Jati'];
 const catOf=k=>KCAT[k.k]||(OUTK.includes(k.kc)||k.k==='Pondok Labu'||k.k==='Kebagusan'?'out':'res');
 const chipC=c=>'<span class="bd" style="background:'+CAT[c][1]+';color:#333">'+CAT[c][0]+'</span>';
+const JCAT={trad:['시장·옛 도심','#F4BFCB','#B34D68','전통시장·구시가·차이나타운. 서민 상권과 옛 건물이 있음.'],cul:['대학·문화','#A8DCD0','#2F8F7C','대학가와 예술 공간. 학생 상권과 저렴한 식당.'],tour:['관광·휴양','#9FD8E8','#2A8CA6','해변·테마파크·섬. 주말 나들이 중심.'],ind:['공단·물류','#D8D8D8','#666666','공단과 물류 지대. 주거 목적과는 거리가 있음.']};
+const ACAT=Object.assign({},CAT,JCAT);
+const JT={men:'lux',gam:'biz',tha:'biz',cik:'cul',tan:'trad',scb:'biz',blm:'exp',teb:'res',kun:'biz',kot:'trad',sun:'trad',anc:'tour',pik:'lux',kel:'res',glo:'trad',gro:'cul',pur:'res',jat:'trad',raw:'cul',tmi:'tour',pul:'ind',ser:'tour'};
+JD.forEach(d=>{d.cat=JT[d.id]});
+const dupJ=d=>TG.some(g=>g.id===d.id)||d.id==='scb';
+const catOn=k=>{const e=document.querySelector('[data-c="'+k+'"]');return !e||e.checked};
+const chipA=k=>'<span class="bd" style="background:'+ACAT[k][1]+';color:#333">'+ACAT[k][0]+'</span>';
+const tgSub=g=>ACAT[g.cat][0]+(lay('zk')&&g.kr?' · ≈ '+g.kr:'');
+const jdLab=d=>'<div class="tgn" style="border-color:'+ACAT[d.cat][2]+'"><span style="color:'+ACAT[d.cat][2]+'">●</span> '+d.n+'<small>'+ACAT[d.cat][0]+(lay('zk')?' · ≈ '+d.kr:'')+'</small></div>';
+function buildCats(){$('catchips').innerHTML=Object.keys(ACAT).map(k=>'<label class="cc" style="--cc:'+ACAT[k][1]+'" title="'+ACAT[k][3]+'"><input type="checkbox" data-c="'+k+'" checked><i></i>'+ACAT[k][0]+'</label>').join('')}
+function setL(k,v){const e=document.querySelector('[data-l="'+k+'"]');if(e)e.checked=v}
+function catAll(v){document.querySelectorAll('[data-c]').forEach(e=>e.checked=v);render()}
+function regPre(p){const P={feat:{tp:1,nm:1,jd:0,zl:1,zk:1,zd:1,kc:0,kl:0,kn:0,zn:0},admin:{tp:0,nm:0,jd:0,zl:0,kc:1,kl:1,kn:1,zn:0},all:{tp:1,nm:1,jd:1,zl:1,zk:1,zd:1,kc:1,kl:0,kn:1,zn:0},none:{tp:0,nm:0,jd:0,zl:0,kc:0,kl:0,kn:0,zn:0}}[p];if(!P)return;Object.keys(P).forEach(k=>setL(k,!!P[k]));if(p==='feat'||p==='all')document.querySelectorAll('[data-c]').forEach(e=>e.checked=true);render()}
+function zoomTo(id){const g=TG.find(x=>x.id===id);let b=null;if(g&&g.ks.length)b=L.latLngBounds(g.ks.flatMap(k=>k.g.flat()));else{const d=JD.find(x=>x.id===id);if(d)b=L.latLng(d.lat,d.lng).toBounds(Math.max(d.r*3,1500))}
+if(!b)return;map.fitBounds(b,{padding:[30,30],maxZoom:16});$('mw').scrollIntoView({block:'nearest',behavior:'smooth'})}
+buildCats();
 const kdist=k=>KC[k.kc]?KC[k.kc][0]:'';
 function pip(lat,lng,rg){let c=false;for(let i=0,j=rg.length-1;i<rg.length;j=i++){const yi=rg[i][0],xi=rg[i][1],yj=rg[j][0],xj=rg[j][1];if((xi>lng)!==(xj>lng)&&lat<(yj-yi)*(lng-xi)/(xj-xi)+yi)c=!c}return c}
 const kfind=(lat,lng)=>KEL.find(k=>k.g.some(rg=>pip(lat,lng,rg)))||null;
@@ -498,7 +539,7 @@ const kkey=k=>k.k+'|'+k.kc;
 function initKel(){R.forEach(r=>r.kl=kfind(r.lat,r.lng));PO.forEach(p=>p.kl=kfind(p.lat,p.lng));ST.forEach(t=>t.kl=kfind(t.lat,t.lng));JK.kl=kfind(JK.lat,JK.lng);
 KEL.forEach(k=>{k.rs=R.filter(r=>r.kl===k);k.ps=PO.filter(p=>p.kl===k);k.ms=ST.filter(t=>t.kl===k)});
 TG.forEach(t=>{t.ks=KEL.filter(k=>t.mem.includes(k.k));t.rs=R.filter(r=>r.kl&&t.mem.includes(r.kl.k));if(t.ks.length){t.c0=[t.ks.reduce((a,k)=>a+k.c[0],0)/t.ks.length,t.ks.reduce((a,k)=>a+k.c[1],0)/t.ks.length]}});
-KEL.forEach(k=>{k.tg=TG.filter(t=>t.mem.includes(k.k));k.cat=catOf(k)});TG.forEach(t=>{if(t.ks.length)t.c=CAT[t.ks[0].cat][2]})}
+KEL.forEach(k=>{k.tg=TG.filter(t=>t.mem.includes(k.k));k.cat=catOf(k)});TG.forEach(t=>{if(t.ks.length)t.c=CAT[t.ks[0].cat][2];t.cat=t.ks.length?t.ks[0].cat:'res';const s=ZN.concat(JD).find(x=>x.id===(t.id==='sen'?'scb':t.id));t.kr=s&&s.kr||null})}
 const kname=k=>k.k+(KR[k.k]?' <span class="un">'+KR[k.k]+'</span>':'');
 const klab=k=>(KR[k.k]?'<small>'+KR[k.k]+'</small>':'');
 function kelHtml(k){const kc=KC[k.kc]||['',''];let h='<div><b style="font-weight:500;font-size:15px">'+k.k+'</b> '+(KR[k.k]||'')+'</div><div style="color:var(--text-secondary)">Kelurahan(동) · Kecamatan(구) '+k.kc+' '+kc[0]+' · Kota '+k.kt+'</div><div style="margin-top:6px">'+chipC(k.cat)+'</div><div style="margin-top:2px">'+CAT[k.cat][3]+'</div>';
@@ -509,7 +550,7 @@ if(k.ps.length)h+='<h4>빠델·발레·영어학원</h4>'+k.ps.map(p=>'<div><spa
 if(k.ms.length)h+='<h4>MRT</h4>'+k.ms.map(t=>'<div>'+t.n+'</div>').join('');
 if(!k.rs.length&&!k.ps.length&&!k.ms.length)h+='<div class="un" style="margin-top:4px">조사 대상 시설 없음</div>';
 return h+'<div class="un" style="margin-top:6px">경계는 약식입니다. 경계 근처 시설은 이웃 동으로 표시될 수 있습니다.</div>'}
-function tgHtml(t){return '<div><b style="font-weight:500;font-size:15px;color:'+t.c+'">'+t.n+'</b> '+t.ko+'</div><div style="margin-top:4px">'+t.d+'</div>'+t.pt.map(x=>'<div>· '+x+'</div>').join('')+'<h4>소속 동(Kelurahan)</h4><div>'+t.ks.map(k=>k.k+' '+(KR[k.k]||'')+' ('+k.kc+')').join(', ')+'</div>'+(t.rs.length?'<h4>조사 단지 '+t.rs.length+'곳</h4><div>'+t.rs.map(r=>r.i+'.'+r.sn).join(', ')+'</div><div>최저 월세 '+fm(Math.min(...t.rs.flatMap(r=>Object.values(r.p).filter(v=>v!=null))))+' · 버스 '+t.rs.map(r=>r.b[0]).sort()[0]+'~'+t.rs.map(r=>r.b[0]).sort().slice(-1)[0]+'</div>':'<div class="un" style="margin-top:4px">조사 목록에 단지 없음</div>')+'<div class="un" style="margin-top:4px">통칭 범위와 설명은 일반 특성이며 현지 확인이 필요합니다.</div>'}
+function tgHtml(t){return '<div><b style="font-weight:500;font-size:15px;color:'+t.c+'">'+t.n+'</b> '+t.ko+'</div><div style="margin-top:4px">'+chipA(t.cat)+(lay('zk')&&t.kr?' <span class="bd ok">'+t.kr+' 느낌</span>':'')+'</div><div style="margin-top:4px">'+t.d+'</div>'+t.pt.map(x=>'<div>· '+x+'</div>').join('')+'<h4>소속 동(Kelurahan)</h4><div>'+t.ks.map(k=>k.k+' '+(KR[k.k]||'')+' ('+k.kc+')').join(', ')+'</div>'+(t.rs.length?'<h4>조사 단지 '+t.rs.length+'곳</h4><div>'+t.rs.map(r=>r.i+'.'+r.sn).join(', ')+'</div><div>최저 월세 '+fm(Math.min(...t.rs.flatMap(r=>Object.values(r.p).filter(v=>v!=null))))+' · 버스 '+t.rs.map(r=>r.b[0]).sort()[0]+'~'+t.rs.map(r=>r.b[0]).sort().slice(-1)[0]+'</div>':'<div class="un" style="margin-top:4px">조사 목록에 단지 없음</div>')+'<div class="un" style="margin-top:4px">통칭 범위와 설명은 일반 특성이며 현지 확인이 필요합니다.</div>'}
 let kpoly={},kq='';
 function study(){const el=$('kinfo');if(!lay('zd')){el.innerHTML='';return}
 const q=kq.toLowerCase();
@@ -526,7 +567,7 @@ function labelsUpd(){lg.clearLayers();const z=map.getZoom();
 if(true){
 if(lay('kc')&&z<=14)KCG.forEach(g=>{const c=KC[g.kc];lg.addLayer(L.marker(g.c,{icon:L.divIcon({html:'<div class="kcn">'+g.kc+'<small>'+c[0]+'</small></div>',className:'',iconSize:[0,0]}),interactive:false,keyboard:false,zIndexOffset:-900}))});
 if(lay('kn')&&z>=14)KEL.forEach(k=>lg.addLayer(L.marker(k.c,{icon:L.divIcon({html:'<div class="kt">'+k.k+klab(k)+'</div>',className:'',iconSize:[0,0]}),interactive:false,keyboard:false,zIndexOffset:-900})))}
-if(lay('nm'))TG.forEach(t=>{if(!t.c0)return;lg.addLayer(L.marker(t.c0,{icon:L.divIcon({html:'<div class="tgn" style="border-color:'+t.c+'"><span style="color:'+t.c+'">●</span> '+t.n+'<small>'+t.ko+'</small></div>',className:'',iconSize:[0,0]}),interactive:lay('zd'),keyboard:false,zIndexOffset:-800}).bindPopup(()=>tgHtml(t),{maxWidth:340,maxHeight:430}))})}
+if(lay('nm')&&lay('zl'))TG.forEach(t=>{if(!t.c0||!catOn(t.cat))return;lg.addLayer(L.marker(t.c0,{icon:L.divIcon({html:'<div class="tgn" style="border-color:'+t.c+'"><span style="color:'+t.c+'">●</span> '+t.n+'<small>'+t.ko+'</small><small>'+tgSub(t)+'</small></div>',className:'',iconSize:[0,0]}),interactive:lay('zd'),keyboard:false,zIndexOffset:-800}).bindPopup(()=>tgHtml(t),{maxWidth:340,maxHeight:430}))})}
 function initMap(){
 map=L.map('map',{zoomControl:true});
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(map);
@@ -543,15 +584,15 @@ function render(){
 mk.clearLayers();ln.clearLayers();zg.clearLayers();rm={};
 kpoly={};
 if(lay('kc'))KCG.forEach(g=>zg.addLayer(L.polygon(g.g,{color:'#8a8a8a',weight:1.8,opacity:.75,fill:false,interactive:false})));
-KEL.forEach(k=>{const kl=lay('kl'),zd=lay('zd');const tp=lay('tp');const pl=L.polygon(k.g,{color:kl?'#777':'transparent',weight:kl?.7:0,opacity:.5,fillColor:tp?CAT[k.cat][1]:'#000',fillOpacity:tp?.4:0.01,interactive:zd});if(zd)pl.bindPopup(()=>kelHtml(k),{maxWidth:340,maxHeight:430});kpoly[kkey(k)]=pl;zg.addLayer(pl)});
-if(lay('nm'))TG.forEach(t=>t.ks.forEach(k=>zg.addLayer(L.polygon(k.g,{color:'#555',weight:2,dashArray:'2 5',opacity:.8,fill:false,interactive:false}))));
-$('clg').innerHTML=lay('tp')?'<div style="margin-top:4px">지역 특징 · '+Object.keys(CAT).map(c=>'<span class="sw" style="background:'+CAT[c][1]+'"></span>'+CAT[c][0]).join(' ')+'</div>':'';
+KEL.forEach(k=>{const kl=lay('kl'),zd=lay('zd');const tp=lay('tp');const pl=L.polygon(k.g,{color:kl?'#777':'transparent',weight:kl?.7:0,opacity:.5,fillColor:tp?CAT[k.cat][1]:'#000',fillOpacity:tp&&catOn(k.cat)?.4:0.01,interactive:zd});if(zd)pl.bindPopup(()=>kelHtml(k),{maxWidth:340,maxHeight:430});kpoly[kkey(k)]=pl;zg.addLayer(pl)});
+if(lay('nm'))TG.forEach(t=>{if(!catOn(t.cat))return;t.ks.forEach(k=>zg.addLayer(L.polygon(k.g,{color:'#555',weight:2,dashArray:'2 5',opacity:.8,fill:false,interactive:false})))});
+$('clg').innerHTML=lay('tp')?'<div style="margin-top:4px">지역 특징 · '+Object.keys(lay('jd')?ACAT:CAT).map(c=>'<span class="sw" style="background:'+ACAT[c][1]+'"></span>'+ACAT[c][0]).join(' ')+'</div>':'';
 labelsUpd();study();
 ZN.forEach(z=>{if(lay('zn')){const c=L.circle([z.lat,z.lng],{radius:z.r,color:z.c,weight:1.5,dashArray:'6 4',fillColor:z.c,fillOpacity:.1,interactive:lay('zd')});if(lay('zd'))c.bindPopup(()=>znHtml(z),{maxWidth:340,maxHeight:430});zg.addLayer(c)}
 if(lay('zl')&&!lay('nm'))zg.addLayer(L.marker([z.lat,z.lng],{icon:L.divIcon({html:'<div class="zt" style="color:'+z.c+'">'+z.n.split(' ')[0]+'<small>'+(z.n.split(' ').slice(1).join(' '))+'</small>'+(lay('zk')&&z.kr?'<small>≈ '+z.kr+'</small>':'')+'</div>',className:'',iconSize:[0,0]}),interactive:false,keyboard:false,zIndexOffset:-1000}))});
-if(lay('jd'))JD.forEach(d=>{const c=CITY[d.c].c;
-if(lay('zn')){const o=L.circle([d.lat,d.lng],{radius:d.r,color:c,weight:1.5,dashArray:'2 5',fillColor:c,fillOpacity:.08,interactive:lay('zd')});if(lay('zd'))o.bindPopup(()=>jdHtml(d),{maxWidth:340,maxHeight:430});zg.addLayer(o)}
-if(lay('zl'))zg.addLayer(L.marker([d.lat,d.lng],{icon:L.divIcon({html:'<div class="zt jt" style="color:'+c+'">'+d.n+(lay('zk')?'<small>≈ '+d.kr+'</small>':'')+'</div>',className:'',iconSize:[0,0]}),interactive:false,keyboard:false,zIndexOffset:-1000}))});
+if(lay('jd'))JD.forEach(d=>{if(!catOn(d.cat)||(lay('nm')&&dupJ(d)))return;const f=ACAT[d.cat][1],ik=ACAT[d.cat][2];
+const o=L.circle([d.lat,d.lng],{radius:d.r,color:ik,weight:1.2,opacity:.55,fillColor:f,fillOpacity:.4,interactive:lay('zd')});if(lay('zd'))o.bindPopup(()=>jdHtml(d),{maxWidth:340,maxHeight:430});zg.addLayer(o);
+if(lay('zl')){const m=L.marker([d.lat,d.lng],{icon:L.divIcon({html:jdLab(d),className:'',iconSize:[0,0]}),interactive:lay('zd'),keyboard:false,zIndexOffset:-800});if(lay('zd'))m.bindPopup(()=>jdHtml(d),{maxWidth:340,maxHeight:430});zg.addLayer(m)}});
 zinfo();
 PO.forEach((p,i)=>{if(!lay(p.k))return;const c=KN[p.k].c,s=p.k==='pd'?'◆':p.k==='bl'?'▲':'■';
 const m=L.marker([p.lat,p.lng],{icon:mkIcon('<span style="color:'+c+'">'+s+'</span>','pin',22),title:p.n});
@@ -609,8 +650,8 @@ function all(){labels();const f=F();pass={};R.forEach(r=>{r.nd=need(r);pass[r.id
 
 const PRE={kem:[-6.2605,106.8095,15],cil:[-6.2840,106.7920,15],pi:[-6.2720,106.7830,15],jiks:[JK.lat,JK.lng,14],gan:[-6.2395,106.7860,15],jk:[-6.2,106.83,11]};
 document.querySelectorAll('[data-pre]').forEach(b=>b.onclick=()=>{const k=b.dataset.pre;if(k==='fit')fit();else if(k==='all')fitAll();else map.setView([PRE[k][0],PRE[k][1]],PRE[k][2])});
-$('app').addEventListener('input',e=>{const t=e.target;if(t.closest('#needp')){needInput(e);return}if(t.dataset&&t.dataset.fn){FV[t.dataset.fn]&&(FV[t.dataset.fn].n=t.value,fsv());return}if(t.dataset&&t.dataset.fs){if(FV[t.dataset.fs]){FV[t.dataset.fs].s=t.value;fsv();fpan();lst()}return}if(t.id==='fo'){render();lst();fpan();return}if(t.id==='fimp')return;if(e.target.id==='kq'){kq=e.target.value;study();return}if(e.target.id==='tq'){ttb();return}if(e.target.closest('[data-l]')){if(TRK.includes(e.target.dataset.l)){drawTr();drawBus()}else render();return}if(e.target.id==='sort'){lst();return}all()});
-$('app').addEventListener('click',e=>{const kz=e.target.closest('[data-kz]');if(kz){e.preventDefault();const pl=kpoly[kz.dataset.kz];if(pl){map.fitBounds(pl.getBounds(),{padding:[30,30],maxZoom:16});setTimeout(()=>pl.openPopup(),400)}return}const fb=e.target.closest('[data-fv]');if(fb){ftog(+fb.dataset.fv||fb.dataset.fv);return}if(e.target.id==='fexp'){fexp();return}if(e.target.id==='fimb'){$('fimp').click();return}if(e.target.id==='fclr'){if(Object.keys(FV).length&&confirm('즐겨찾기와 메모를 모두 지울까요?')){FV={};fsv();all()}return}const b=e.target.closest('[data-go]');if(b)go(b.dataset.go);const q=e.target.closest('[data-z]');if(q){const z=ZN.concat(JD).find(x=>x.id===q.dataset.z);map.fitBounds(L.latLng(z.lat,z.lng).toBounds(z.r*2),{padding:[20,20]});$('mw').scrollIntoView({block:'nearest',behavior:'smooth'})}});
+$('app').addEventListener('input',e=>{const t=e.target;if(t.closest('#needp')){needInput(e);return}if(t.dataset&&t.dataset.fn){FV[t.dataset.fn]&&(FV[t.dataset.fn].n=t.value,fsv());return}if(t.dataset&&t.dataset.fs){if(FV[t.dataset.fs]){FV[t.dataset.fs].s=t.value;fsv();fpan();lst()}return}if(t.id==='fo'){render();lst();fpan();return}if(t.id==='fimp')return;if(e.target.id==='kq'){kq=e.target.value;study();return}if(e.target.id==='tq'){ttb();return}if(e.target.closest('[data-c]')){render();return}if(e.target.closest('[data-l]')){if(TRK.includes(e.target.dataset.l)){drawTr();drawBus()}else render();return}if(e.target.id==='sort'){lst();return}all()});
+$('app').addEventListener('click',e=>{const rp=e.target.closest('[data-rp]');if(rp){regPre(rp.dataset.rp);return}const cp=e.target.closest('[data-cp]');if(cp){catAll(cp.dataset.cp==='1');return}const kz=e.target.closest('[data-kz]');if(kz){e.preventDefault();const pl=kpoly[kz.dataset.kz];if(pl){map.fitBounds(pl.getBounds(),{padding:[30,30],maxZoom:16});setTimeout(()=>pl.openPopup(),400)}return}const fb=e.target.closest('[data-fv]');if(fb){ftog(+fb.dataset.fv||fb.dataset.fv);return}if(e.target.id==='fexp'){fexp();return}if(e.target.id==='fimb'){$('fimp').click();return}if(e.target.id==='fclr'){if(Object.keys(FV).length&&confirm('즐겨찾기와 메모를 모두 지울까요?')){FV={};fsv();all()}return}const b=e.target.closest('[data-go]');if(b)go(b.dataset.go);const q=e.target.closest('[data-z]');if(q){zoomTo(q.dataset.z)}});
 
 /* 생활 조건: 필수·선호, 주변 인프라(OSM), 단지별 직접 기록 */
 const INF_CATS=[
