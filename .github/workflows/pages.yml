@@ -1,7 +1,9 @@
-name: Deploy to GitHub Pages
+name: Deploy to GitHub Pages (매물 자동 확인 포함)
 on:
   push:
     branches: [main]
+  schedule:
+    - cron: '17 */6 * * *'   # 6시간마다 매물 확인 후 배포 (UTC)
   workflow_dispatch:
 permissions:
   contents: read
@@ -18,7 +20,17 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/configure-pages@v5
+      - id: pages
+        uses: actions/configure-pages@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: 매물 확인 (data/listings.json)
+        continue-on-error: true
+        timeout-minutes: 25
+        env:
+          PREV_URL: ${{ steps.pages.outputs.base_url }}/data/listings.json
+        run: node scripts/update-listings.mjs
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .
