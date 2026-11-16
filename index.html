@@ -73,18 +73,95 @@ input[type=range]{width:100%}
 .ck button.on1{background:var(--bg-success);color:var(--text-success)}
 .ck button.on0{background:var(--bg-danger);color:var(--text-danger)}
 
+
+/* ===== 앱 셸: PC 2열(사이드바+지도), 모바일 탭 ===== */
+html,body{height:100%}
+body{overflow:hidden;font-size:14px;line-height:1.5}
+#shell{display:grid;grid-template-columns:clamp(340px,28vw,420px) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);height:100dvh}
+#top{grid-column:1/-1;display:flex;align-items:center;gap:8px;padding:8px 16px;background:var(--surface-2);border-bottom:0.5px solid var(--border);min-width:0}
+#top h1{font-size:16px;font-weight:600;margin:0 8px 0 0;white-space:nowrap}
+#top #q{flex:1;min-width:120px;max-width:420px}
+#top .sm{white-space:nowrap}
+#tabs{display:none}
+#side{overflow-y:auto;overscroll-behavior:contain;background:var(--surface-0);border-right:0.5px solid var(--border);min-height:0}
+#mapcol{position:relative;min-width:0;min-height:0}
+#mw{position:absolute;inset:0;background:var(--surface-1)}
+#sbar{position:sticky;top:0;z-index:5;display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:10px 16px;background:var(--surface-0);border-bottom:0.5px solid var(--border)}
+#sbar #cnt{font-size:14px;font-weight:600}
+#sbar .lb{flex-direction:row;align-items:center;gap:6px}
+#sbar select{height:32px;font-size:13px;padding:2px 8px}
+details.g{border-bottom:0.5px solid var(--border);background:var(--surface-0)}
+details.g>summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font-size:14px;font-weight:600;margin:0!important}
+details.g>summary::-webkit-details-marker{display:none}
+details.g>summary::after{content:'＋';font-weight:400;color:var(--text-muted)}
+details.g[open]>summary::after{content:'－'}
+details.g>.gb{padding:0 16px 14px}
+#needp{margin:0!important}
+.sg{display:grid!important;grid-template-columns:1fr 1fr;gap:10px 14px!important;margin:0 0 12px!important}
+.sg .lb{font-size:12px}
+.rowl{margin:0 0 6px!important;display:flex;flex-wrap:wrap;align-items:center;gap:0}
+.rowl>span{flex:0 0 100%;margin:0 0 4px!important;font-size:12px!important;font-weight:600}
+.ni{grid-template-columns:1fr!important}
+#fvp{margin:0!important;padding:12px 16px 0}
+#lstw{padding:12px 16px 16px}
+#lstw .cd{padding:10px 12px;margin-bottom:8px;cursor:default}
+.cd .cm{font-size:12px;color:var(--text-secondary);margin:4px 0 8px;overflow-wrap:anywhere}
+.cg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:6px}
+.cg>div{background:var(--surface-1);border-radius:8px;padding:6px 8px;min-width:0}
+.cg small{display:block;font-size:11px;color:var(--text-muted)}
+.cg b{font-weight:600;font-size:14px;overflow-wrap:anywhere}
+.cs{font-size:12px;color:var(--text-secondary);margin-bottom:4px}
+.ch2{display:flex;align-items:center;gap:8px;min-width:0}
+.ch2 b{font-weight:600;min-width:0;overflow-wrap:anywhere}
+#lstw .fx{flex-wrap:nowrap;flex:none}
+#lstw .fx button{white-space:nowrap;padding:4px 8px}
+#zinfo{margin:0!important}
+#zinfo>div:first-child{display:none}
+#zinfo .tt{font-size:12px}
+.note{font-size:11px;color:var(--text-muted);line-height:1.6;padding:12px 16px 24px}
+#mtool{position:absolute;top:10px;left:54px;right:10px;z-index:1000;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:2px}
+#mtool::-webkit-scrollbar{display:none}
+#mtool .sm{flex:none;background:var(--surface-2);box-shadow:0 1px 3px rgba(0,0,0,.18);white-space:nowrap;border-radius:999px}
+#lg{position:absolute;left:10px;bottom:24px;z-index:1000;background:var(--surface-2);border:0.5px solid var(--border);border-radius:8px;font-size:12px;color:var(--text-secondary);line-height:1.6;max-width:calc(100% - 20px)}
+#lg>summary{cursor:pointer;padding:6px 10px;font-weight:600;list-style:none}
+#lg>summary::-webkit-details-marker{display:none}
+#lg>div{padding:0 10px 8px}
+:focus-visible{outline:2px solid var(--fill-accent);outline-offset:1px}
+@media (max-width:860px){
+#shell{grid-template-columns:1fr;grid-template-rows:auto auto minmax(0,1fr)}
+#top{flex-wrap:wrap;padding:8px 12px;gap:6px}
+#top h1{font-size:15px;flex:1 0 100%;margin:0}
+#top #q{max-width:none;flex:1 0 100%;order:3}
+#tabs{display:flex;background:var(--surface-2);border-bottom:0.5px solid var(--border)}
+#tabs button{flex:1;border:0;border-radius:0;padding:10px 0;font-size:14px;font-weight:600;color:var(--text-secondary);border-bottom:2px solid transparent}
+#tabs button.on{color:var(--fill-accent);border-bottom-color:var(--fill-accent)}
+body[data-v=map] #side{display:none}
+body[data-v=list] #mapcol{display:none}
+#side{border-right:0}
+#sbar{padding:8px 12px}
+details.g>summary,details.g>.gb,#fvp,#lstw,.note{padding-left:12px;padding-right:12px}
+#mtool{left:50px}
+}
+
 </style>
 </head>
-<body>
-<div id="wrap">
-<h1>JIKS 통학버스 주거지 찾기</h1>
-<div id="app" style="padding:0.5rem 0 1rem">
-<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;align-items:center">
+<body data-v="map">
+<div id="shell">
+<div id="app" style="display:contents">
+<header id="top"><h1>JIKS 통학버스 주거지 찾기</h1>
 <button class="sm" id="preset">내 조건 프리셋 적용</button>
 <button class="sm" id="reset">필터 초기화</button>
 <input type="text" id="q" placeholder="단지 이름 또는 구역 검색" style="flex:1;min-width:180px">
+</header>
+<nav id="tabs"><button data-v="map" class="on">지도</button><button data-v="list">목록·필터</button></nav>
+<aside id="side">
+<div id="sbar">
+<div style="font-size:15px;font-weight:500" id="cnt"></div>
+<label class="lb" style="flex-direction:row;align-items:center;gap:8px">정렬
+<select id="sort"><option value="p">월세 낮은 순</option><option value="s">선호 충족 많은 순</option><option value="m">MRT 가까운 순</option><option value="j">JIKS 가까운 순</option><option value="b">버스 탑승 늦은 순</option><option value="n">번호 순</option></select></label>
 </div>
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px 16px;margin-bottom:12px">
+<details class="g" open><summary>기본 조건</summary><div class="gb">
+<div class="sg">
 <label class="lb">예산(월세 상한) <b id="bv"></b><input type="range" id="budget" min="5" max="60" step="0.5" value="15"></label>
 <label class="lb">MRT까지 직선거리 <b id="mv"></b><input type="range" id="mrt" min="0.5" max="5" step="0.1" value="5"></label>
 <label class="lb">빠델장까지 <b id="pv"></b><input type="range" id="pd" min="0.5" max="5" step="0.1" value="5"></label>
@@ -92,14 +169,14 @@ input[type=range]{width:100%}
 <label class="lb">영어학원까지 <b id="env"></b><input type="range" id="en" min="0.5" max="5" step="0.1" value="5"></label>
 <label class="lb">버스 탑승 시각 <b id="busv"></b><input type="range" id="bus" min="0" max="60" step="5" value="0"></label>
 </div>
-<div style="margin-bottom:4px">
+<div class="rowl">
 <span style="font-size:13px;color:var(--text-secondary);margin-right:6px">방 구성</span>
 <label class="ch"><input type="checkbox" data-t="S"> 스튜디오</label>
 <label class="ch"><input type="checkbox" data-t="1"> 1BR</label>
 <label class="ch"><input type="checkbox" data-t="2"> 2BR</label>
 <label class="ch"><input type="checkbox" data-t="3"> 3BR 이상</label>
 </div>
-<div style="margin-bottom:4px">
+<div class="rowl">
 <span style="font-size:13px;color:var(--text-secondary);margin-right:6px">조건</span>
 <label class="ch"><input type="checkbox" data-f="gym"> 헬스장</label>
 <label class="ch"><input type="checkbox" data-f="pool"> 수영장</label>
@@ -112,8 +189,10 @@ input[type=range]{width:100%}
 <label class="ch"><input type="checkbox" data-f="coach"> 빠델 코칭 있는 곳</label>
 <label class="ch"><input type="checkbox" id="unk" checked> 가격 미확인 단지 포함</label>
 </div>
-<details id="needp" open style="margin:6px 0 10px">
-<summary style="cursor:pointer;font-size:14px;font-weight:500;margin-bottom:6px">생활 조건 (필수·선호) <span id="ncnt" style="font-weight:400;font-size:12px;color:var(--text-muted)"></span></summary>
+</div></details>
+<details id="needp" class="g">
+<summary>생활 조건 (필수·선호) <span id="ncnt" style="font-weight:400;font-size:12px;color:var(--text-muted)"></span></summary>
+<div class="gb">
 <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0">
 <button class="sm" id="npreset">추천 생활 조건 적용</button>
 <button class="sm" id="nclear">생활 조건 해제</button>
@@ -125,8 +204,10 @@ input[type=range]{width:100%}
 <div style="margin:6px 0 2px"><span style="font-size:13px;color:var(--text-secondary);margin-right:6px">인프라 지도 표시</span><span id="ilay"></span></div>
 <div id="inote" style="font-size:12px;color:var(--text-muted)"></div>
 <div id="nlist"></div>
+</div>
 </details>
-<div style="margin-bottom:8px">
+<details class="g"><summary>지도 표시</summary><div class="gb">
+<div class="rowl">
 <span style="font-size:13px;color:var(--text-secondary);margin-right:6px">지도 표시</span>
 <label class="ch"><input type="checkbox" data-l="zn" checked> 구역 범위</label>
 <label class="ch"><input type="checkbox" data-l="zl" checked> 구역 이름</label>
@@ -138,8 +219,24 @@ input[type=range]{width:100%}
 <label class="ch"><input type="checkbox" data-l="bl" checked> 발레</label>
 <label class="ch"><input type="checkbox" data-l="en" checked> 영어학원</label>
 <label class="ch"><input type="checkbox" data-l="bus" checked> 버스 시각</label>
+</div></div></details>
+<div id="fvp" style="margin-bottom:14px"></div>
+<input type="file" id="fimp" accept="application/json,.json" style="display:none">
+<div id="lstw">
+<div id="list"></div>
 </div>
-<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">
+<details class="g"><summary>구역·동네 안내</summary><div class="gb">
+<div id="zinfo" style="margin-bottom:14px"></div>
+</div></details>
+<details class="g"><summary>버스 시간표 (S2 2026-2027)</summary><div class="gb">
+<input type="text" id="tq" placeholder="정류장 이름 검색" style="width:100%;margin-bottom:8px">
+<div id="tt"></div>
+<div style="font-size:12px;color:var(--text-muted);margin-top:8px;line-height:1.6">시간표 텍스트가 뒤섞여 있어 정류장과 시각의 짝은 읽은 순서입니다. 노선 번호는 원문에서 확인되는 경우만 적었습니다. 학교 원본 PDF로 대조하세요. 가격은 사이트 표기 그대로이며 문의 때 최종 확인이 필요합니다.</div>
+</div></details>
+<div class="note">OpenStreetMap 실제 지도입니다. 단지·학원·JIKS 팝업마다 구글 지도 링크와 부동산 사이트 검색 링크가 있습니다. 거리는 모두 직선거리입니다. 매물 링크는 각 사이트의 검색 결과이며 가격은 사이트에서 최종 확인하세요. 구역 원은 대략적인 범위이며 행정 경계가 아닙니다. 한국 비유는 분위기 기준의 대략적 대응입니다.</div>
+</aside>
+<main id="mapcol">
+<div id="mtool">
 <button class="sm" data-pre="all">JIKS 포함 전체</button>
 <button class="sm" data-pre="fit">단지 전체</button>
 <button class="sm" data-pre="kem">끄망</button>
@@ -148,30 +245,15 @@ input[type=range]{width:100%}
 <button class="sm" data-pre="gan">Gandaria · Pakubuwono</button>
 <button class="sm" data-pre="jk">자카르타 전체</button>
 <button class="sm" data-pre="jiks">JIKS 주변</button>
-<button class="sm" id="msz">지도 크게</button>
+
 </div>
-<div id="mw" style="position:relative;height:620px;border:0.5px solid var(--border);border-radius:12px;overflow:hidden;background:var(--surface-1)">
-<div id="map" style="position:absolute;inset:0"></div>
-<div style="position:absolute;left:10px;bottom:24px;z-index:1000;background:var(--surface-2);border:0.5px solid var(--border);border-radius:8px;padding:6px 10px;font-size:12px;color:var(--text-secondary);line-height:1.6">
+<div id="mw"><div id="map" style="position:absolute;inset:0"></div></div>
+<details id="lg" open><summary>범례</summary><div>
 <span style="color:var(--fill-accent)">●</span> 조건 통과 · <span style="color:var(--text-muted)">●</span> 제외 · <span style="color:var(--fill-danger)">★</span> JIKS<br>
 <span style="color:#D85A30">◆</span> 빠델 · <span style="color:#D4537E">▲</span> 발레 · <span style="color:#378ADD">■</span> 영어학원 · <span style="color:#7F77DD">●</span> MRT<br>
 점선 원 · <span style="color:#5D6D7E">중부</span> <span style="color:#1F618D">남부</span> <span style="color:#148F77">북부</span> <span style="color:#CA6F1E">서부</span> <span style="color:#239B56">동부</span> <span style="color:#6C3483">섬</span>
-</div>
-</div>
-<div style="font-size:12px;color:var(--text-muted);margin:6px 0 14px;line-height:1.6">OpenStreetMap 실제 지도입니다. 단지·학원·JIKS 팝업마다 구글 지도 링크와 부동산 사이트 검색 링크가 있습니다. 거리는 모두 직선거리입니다. 매물 링크는 각 사이트의 검색 결과이며 가격은 사이트에서 최종 확인하세요. 구역 원은 대략적인 범위이며 행정 경계가 아닙니다. 한국 비유는 분위기 기준의 대략적 대응입니다.</div>
-<div id="fvp" style="margin-bottom:14px"></div>
-<input type="file" id="fimp" accept="application/json,.json" style="display:none">
-<div id="zinfo" style="margin-bottom:14px"></div>
-<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">
-<div style="font-size:15px;font-weight:500" id="cnt"></div>
-<label class="lb" style="flex-direction:row;align-items:center;gap:8px">정렬
-<select id="sort"><option value="p">월세 낮은 순</option><option value="s">선호 충족 많은 순</option><option value="m">MRT 가까운 순</option><option value="j">JIKS 가까운 순</option><option value="b">버스 탑승 늦은 순</option><option value="n">번호 순</option></select></label>
-</div>
-<div id="list"></div>
-<div style="font-size:15px;font-weight:500;margin:20px 0 8px">버스 시간표 (S2 2026-2027, 원문 정리)</div>
-<input type="text" id="tq" placeholder="정류장 이름 검색" style="width:100%;margin-bottom:8px">
-<div id="tt"></div>
-<div style="font-size:12px;color:var(--text-muted);margin-top:8px;line-height:1.6">시간표 텍스트가 뒤섞여 있어 정류장과 시각의 짝은 읽은 순서입니다. 노선 번호는 원문에서 확인되는 경우만 적었습니다. 학교 원본 PDF로 대조하세요. 가격은 사이트 표기 그대로이며 문의 때 최종 확인이 필요합니다.</div>
+</div></details>
+</main>
 </div>
 </div>
 <script src="vendor/leaflet/leaflet.js"></script>
@@ -399,7 +481,7 @@ return '<div style="display:flex;justify-content:space-between;align-items:start
 function popJ(){const l=R.slice().sort((a,b)=>a.jd-b.jd);
 return '<div style="display:flex;justify-content:space-between;align-items:start;gap:8px"><div><span style="color:var(--fill-danger)">★</span> <b style="font-weight:500;font-size:15px">'+JK.n+'</b><div style="color:var(--text-secondary)">Jl. Bina Marga No.24, Ceger, Cipayung, Jakarta Timur 13820</div></div><button class="sm" id="px" aria-label="닫기">닫기</button></div><div style="margin-top:6px"><a href="https://www.google.com/maps/search/?api=1&query=Jakarta+International+Korean+School&query_place_id='+JK.pid+'" target="_blank" rel="noopener">구글 지도에서 열기</a></div><h4>운영 정보(구글)</h4><div>월~금 06:30~15:00 · 토·일 휴무</div><div>전화 +62 21 8444958</div><h4>단지별 직선거리</h4>'+l.map(r=>'<div>'+r.i+'. '+r.sn+' · <b style="font-weight:500">'+fd1(r.jd)+'</b> · 버스 '+r.b[0]+'</div>').join('')}
 
-function go(id){const r=R.find(q=>q.id===id);map.setView([r.lat,r.lng],Math.max(map.getZoom(),16));$('mw').scrollIntoView({block:'nearest',behavior:'smooth'});setTimeout(()=>rm[id]&&rm[id].openPopup(),250)}
+function go(id){const r=R.find(q=>q.id===id);map.setView([r.lat,r.lng],Math.max(map.getZoom(),16));setView('map');setTimeout(()=>rm[id]&&rm[id].openPopup(),250)}
 function bounds(a){map.fitBounds(L.latLngBounds(a),{padding:[40,40]})}
 function fit(){bounds(R.map(r=>[r.lat,r.lng]).concat(ST.map(s=>[s.lat,s.lng])))}
 function fitAll(){bounds(R.map(r=>[r.lat,r.lng]).concat(ST.map(s=>[s.lat,s.lng]),[[JK.lat,JK.lng]]))}
@@ -408,7 +490,7 @@ function lst(){const f=F();let a=R.filter(r=>pass[r.id]&&(!fonly()||FV[r.id]));c
 a.sort((p,q)=>so==='s'?(q.nd.pm-p.nd.pm||(lo(p,f)==null?999:lo(p,f))-(lo(q,f)==null?999:lo(q,f))):so==='p'?((lo(p,f)==null?999:lo(p,f))-(lo(q,f)==null?999:lo(q,f))):so==='m'?p.mrt[0].d-q.mrt[0].d:so==='j'?p.jd-q.jd:so==='b'?tm(q.b[0])-tm(p.b[0]):p.i-q.i);
 $('cnt').textContent='조건에 맞는 단지 '+a.length+' / '+R.length;
 if(!a.length){$('list').innerHTML='<div class="cd" style="color:var(--text-secondary)">조건에 맞는 단지가 없습니다. 예산이나 거리 제한을 늘려 보세요.</div>';return}
-$('list').innerHTML=a.map(r=>{const l=lo(r,f);return '<div class="cd'+(FV[r.id]?' fc':'')+'"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap"><div style="display:flex;align-items:center;gap:8px"><span class="nb">'+r.i+'</span><b style="font-weight:500">'+r.nm+'</b></div><div class="fx" style="margin:0"><button class="sm" data-go="'+r.id+'">지도에서 보기</button>'+fbtn(r.id)+'</div></div><div style="font-size:13px;color:var(--text-secondary);margin:6px 0 4px">'+r.z+' · '+r.pt+'</div><div><span class="bd ok">버스 '+r.b[0]+'</span><span class="bd">'+r.b[1]+'</span><span class="bd">최저 '+fm(l)+'</span><span class="bd">JIKS '+fd1(r.jd)+'</span><span class="bd">MRT '+r.mrt[0].s.n+' '+fd(r.mrt[0].d)+'</span><span class="bd">빠델 '+fd(r.nb.pd[0].d)+'</span><span class="bd">발레 '+fd(r.nb.bl[0].d)+'</span><span class="bd">영어 '+fd(r.nb.en[0].d)+'</span><span class="bd">'+(GRL[r.gr]||'뷰 미확인')+'</span></div>'+cardNeed(r)+links(r)+'</div>'}).join('')}
+$('list').innerHTML=a.map(r=>{const l=lo(r,f);return '<div class="cd'+(FV[r.id]?' fc':'')+'"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><div class="ch2"><span class="nb">'+r.i+'</span><b>'+r.nm+'</b></div><div class="fx" style="margin:0"><button class="sm" data-go="'+r.id+'">지도에서 보기</button>'+fbtn(r.id)+'</div></div><div class="cm">'+r.z+' · '+r.pt+'</div><div class="cg"><div><small>최저 월세</small><b>'+fm(l)+'</b></div><div><small>버스</small><b>'+r.b[0]+'</b></div><div><small>JIKS</small><b>'+fd1(r.jd)+'</b></div></div><div class="cs">MRT '+r.mrt[0].s.n+' '+fd(r.mrt[0].d)+' · 빠델 '+fd(r.nb.pd[0].d)+' · 발레 '+fd(r.nb.bl[0].d)+' · 영어 '+fd(r.nb.en[0].d)+'</div><div><span class="bd">'+r.b[1]+'</span><span class="bd">'+(GRL[r.gr]||'뷰 미확인')+'</span></div>'+cardNeed(r)+links(r)+'</div>'}).join('')}
 function ttb(){const q=$('tq').value.trim().toLowerCase();
 const rows=R.map(r=>[r.b[0],r.nm,r.b[1],r.z,r.b[2],r.i]).concat(X.map(x=>[x[1],x[0],x[2],x[3],'-',0]));
 rows.sort((a,b)=>tm(a[0])-tm(b[0])||a[1].localeCompare(b[1]));
@@ -416,7 +498,6 @@ const f=rows.filter(x=>!q||(x[1]+x[3]).toLowerCase().includes(q));
 $('tt').innerHTML='<table class="tt"><thead><tr><th style="width:15%">시각</th><th style="width:27%">정류장</th><th style="width:24%">승차 지점</th><th style="width:20%">구역</th><th style="width:14%">지도</th></tr></thead><tbody>'+f.map(x=>'<tr><td><b style="font-weight:500">'+x[0]+'</b></td><td>'+x[1]+'</td><td>'+x[2]+'</td><td>'+x[3]+(x[4]!=='-'?'<div style="color:var(--text-muted)">'+x[4]+'</div>':'')+'</td><td>'+(x[5]?'<button class="sm" data-go="'+R[x[5]-1].id+'">'+x[5]+'번</button>':'<span class="un">없음</span>')+'</td></tr>').join('')+'</tbody></table>'}
 function all(){labels();const f=F();pass={};R.forEach(r=>{r.nd=need(r);pass[r.id]=ok(r,f)});render();lst();fpan()}
 
-$('msz').onclick=()=>{HT=HT===620?860:620;$('mw').style.height=HT+'px';$('msz').textContent=HT===620?'지도 크게':'지도 작게';map.invalidateSize()};
 const PRE={kem:[-6.2605,106.8095,15],cil:[-6.2840,106.7920,15],pi:[-6.2720,106.7830,15],jiks:[JK.lat,JK.lng,14],gan:[-6.2395,106.7860,15],jk:[-6.2,106.83,11]};
 document.querySelectorAll('[data-pre]').forEach(b=>b.onclick=()=>{const k=b.dataset.pre;if(k==='fit')fit();else if(k==='all')fitAll();else map.setView([PRE[k][0],PRE[k][1]],PRE[k][2])});
 $('app').addEventListener('input',e=>{const t=e.target;if(t.closest('#needp')){needInput(e);return}if(t.dataset&&t.dataset.fn){FV[t.dataset.fn]&&(FV[t.dataset.fn].n=t.value,fsv());return}if(t.dataset&&t.dataset.fs){if(FV[t.dataset.fs]){FV[t.dataset.fs].s=t.value;fsv();fpan();lst()}return}if(t.id==='fo'){render();lst();fpan();return}if(t.id==='fimp')return;if(e.target.id==='tq'){ttb();return}if(e.target.closest('[data-l]')){render();return}if(e.target.id==='sort'){lst();return}all()});
@@ -507,6 +588,11 @@ const setv=(id,v)=>{$(id).value=v};
 $('preset').onclick=()=>{setv('budget',15);setv('mrt',1.5);setv('pd',3);setv('bl',3);setv('en',2);setv('bus',0);document.querySelectorAll('[data-t],[data-f]').forEach(c=>{c.checked=['gym','pool','green'].includes(c.dataset.f)});$('unk').checked=false;$('q').value='';all()};
 $('reset').onclick=()=>{setv('budget',60);setv('mrt',5);setv('pd',5);setv('bl',5);setv('en',5);setv('bus',0);document.querySelectorAll('[data-t],[data-f]').forEach(c=>{c.checked=false});$('unk').checked=true;$('q').value='';needReset();all()};
 initMap();fitAll();all();ttb();
+
+function setView(v){document.body.dataset.v=v;document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));if(map)setTimeout(()=>map.invalidateSize(),60)}
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>setView(b.dataset.v));
+addEventListener('resize',()=>{if(map)map.invalidateSize()});
+addEventListener('load',()=>{if(map)map.invalidateSize()});
 </script>
 </body>
 </html>
