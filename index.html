@@ -57,8 +57,8 @@ input[type=range]{width:100%}
 .leaflet-tooltip.bt{background:var(--surface-2);color:var(--text-primary);border:0.5px solid var(--border-strong);font-size:12px;font-weight:500;padding:1px 6px}
 .leaflet-tooltip.dt{background:var(--surface-2);color:var(--text-primary);border:0.5px solid var(--border-strong);font-size:12px;padding:1px 5px}
 .zlow .bt{display:none}
-.tri{width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:5px;color:#fff;font-size:11px;font-weight:700;line-height:1;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.45)}
-.tri.x{border-radius:50%;box-shadow:0 0 0 3px #111}
+.tri{width:100%;height:100%;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border-radius:4px;color:#fff;font-size:8px;font-weight:700;line-height:1;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.3)}
+.tri.x{border-radius:50%;font-size:9px;box-shadow:0 0 0 2px #333}
 .leaflet-tooltip.trn{background:var(--surface-2);color:var(--text-primary);border:0.5px solid var(--border-strong);font-size:11px;font-weight:500;padding:0 5px}
 .ztl .trn{display:none}
 .ztl .zt,.ztl .zt *{display:none}
@@ -295,10 +295,10 @@ details.g>summary,details.g>.gb,#fvp,#lstw,.note{padding-left:12px;padding-right
 <div class="rowl">
 <label class="ch"><input type="checkbox" data-l="st" checked> <span style="color:#5B3FD0">■</span> MRT</label>
 <label class="ch"><input type="checkbox" data-l="lrt"> <span style="color:#5B3FD0">■</span> LRT</label>
-<label class="ch"><input type="checkbox" data-l="krl"> <span style="color:#57534E">■</span> KRL·철도</label>
-<label class="ch"><input type="checkbox" data-l="apt"> <span style="color:#57534E">■</span> 공항철도</label>
-<label class="ch"><input type="checkbox" data-l="hsr"> <span style="color:#57534E">■</span> 고속철</label>
-<label class="ch"><input type="checkbox" data-l="mrp"> <span style="color:#9A8CE0">■</span> MRT 2단계(미개통)</label>
+<label class="ch"><input type="checkbox" data-l="krl"> <span style="color:#78716C">■</span> KRL·철도</label>
+<label class="ch"><input type="checkbox" data-l="apt"> <span style="color:#78716C">■</span> 공항철도</label>
+<label class="ch"><input type="checkbox" data-l="hsr"> <span style="color:#78716C">■</span> 고속철</label>
+<label class="ch"><input type="checkbox" data-l="mrp"> <span style="color:#5B3FD0;opacity:.55">■</span> MRT 2단계(미개통)</label>
 <label class="ch"><input type="checkbox" data-l="brt"> <span style="color:#1565C0">■</span> BRT 노선</label>
 <label class="ch"><input type="checkbox" data-l="bst"> <span style="color:#1565C0">●</span> BRT 정류장</label>
 <label class="ch"><input type="checkbox" data-l="stn"> 역 이름</label>
@@ -796,7 +796,8 @@ const setv=(id,v)=>{$(id).value=v};
 $('preset').onclick=()=>{setv('budget',15);setv('mrt',1.5);setv('pd',3);setv('bl',3);setv('en',2);setv('bus',0);document.querySelectorAll('[data-t],[data-f]').forEach(c=>{c.checked=['gym','pool','green'].includes(c.dataset.f)});$('unk').checked=false;$('q').value='';all()};
 $('reset').onclick=()=>{setv('budget',60);setv('mrt',5);setv('pd',5);setv('bl',5);setv('en',5);setv('bus',0);document.querySelectorAll('[data-t],[data-f]').forEach(c=>{c.checked=false});$('unk').checked=true;$('q').value='';needReset();all()};
 /* 교통: MRT·LRT·KRL·공항철도·고속철·BRT (노선·역은 OpenStreetMap에서 불러옴) */
-const TC={mrt:{l:'MRT',c:'#5B3FD0',ch:'M',w:5},lrt:{l:'LRT',c:'#5B3FD0',ch:'L',w:4},krl:{l:'KRL·철도',c:'#57534E',ch:'K',w:3},apt:{l:'공항철도',c:'#57534E',ch:'A',w:4},hsr:{l:'고속철',c:'#57534E',ch:'H',w:4},brt:{l:'BRT',c:'#1565C0',ch:'B',w:3},mrp:{l:'MRT 2단계(미개통)',c:'#9A8CE0',ch:'M',w:3}};
+/* 색은 두 가지만: 도시철도(MRT·LRT) 보라, 일반철도(KRL·공항·고속철) 회색. 미개통은 보라 점선. */
+const TC={mrt:{l:'MRT',c:'#5B3FD0',ch:'M',w:4},lrt:{l:'LRT',c:'#5B3FD0',ch:'L',w:3},krl:{l:'KRL·철도',c:'#78716C',ch:'K',w:2.5},apt:{l:'공항철도',c:'#78716C',ch:'A',w:2.5},hsr:{l:'고속철',c:'#78716C',ch:'H',w:2.5},brt:{l:'BRT',c:'#1565C0',ch:'B',w:2.5},mrp:{l:'MRT 2단계(미개통)',c:'#5B3FD0',ch:'M',w:3,d:'5 6',o:.55}};
 const TRK=['st','lrt','krl','apt','hsr','mrp','brt','bst','stn'];
 const MT=[['Lebak Bulus',-6.289254,106.774937,'M01'],['Fatmawati',-6.292429,106.792466,'M02'],['Cipete Raya',-6.2774,106.7975,'M03'],['Haji Nawi',-6.2667982,106.7973162,'M04'],['Blok A',-6.2555837,106.797134,'M05'],['Blok M BCA',-6.2445265,106.7982103,'M06'],['ASEAN',-6.239085,106.7985954,'M07'],['Senayan',-6.226683,106.802456,'M08'],['Istora',-6.222331,106.808573,'M09'],['Bendungan Hilir',-6.2154465,106.8173187,'M10'],['Setiabudi Astra',-6.2091,106.8217,'M11'],['Dukuh Atas BNI',-6.200786,106.822746,'M12'],['Bundaran HI',-6.1934095,106.8228579,'M13']];
 let TRD={l:TRS.l.filter(x=>TC[x.c]),s:TRS.s.filter(x=>TC[x.c])},BSD=null,TRL=false;
@@ -825,9 +826,9 @@ if(BSD&&BSD.length){let b=null,bd=1e9;BSD.forEach(p=>{const x=hav(r.lat,r.lng,p[
 return h}
 function drawTr(){if(!trg)return;trg.clearLayers();const d=trData(),nm=lay('stn');
 Object.keys(TC).forEach(c=>{if(!trOn(c))return;const k=TC[c];
-d.l.filter(x=>x.c===c).forEach(x=>{const cs=L.polyline(x.p,{color:'#fff',weight:k.w+3,opacity:.85,interactive:false,lineJoin:'round'}),pl=L.polyline(x.p,{color:k.c,weight:k.w,opacity:.95,lineJoin:'round'});pl.bindTooltip(k.l+(x.n?' · '+esc(x.n):''),{sticky:true});trg.addLayer(cs);trg.addLayer(pl);
+d.l.filter(x=>x.c===c).forEach(x=>{const cs=L.polyline(x.p,{color:'#fff',weight:k.w+2,opacity:k.d?0:.7,interactive:false,lineJoin:'round'}),pl=L.polyline(x.p,{color:k.c,weight:k.w,opacity:k.o||.9,dashArray:k.d||null,lineJoin:'round',lineCap:k.d?'butt':'round'});pl.bindTooltip(k.l+(x.n?' · '+esc(x.n):''),{sticky:true});trg.addLayer(cs);trg.addLayer(pl);
 const nm0=shortN(x.n);if(nm0&&c!=='brt'&&lay('stn')){const w=x.p.reduce((a,b)=>b.length>a.length?b:a,x.p[0]);const q=w[w.length>>1];trg.addLayer(L.marker(q,{icon:L.divIcon({html:'',className:'',iconSize:[0,0]}),interactive:false,keyboard:false,zIndexOffset:-50}).bindTooltip('<span style="color:'+k.c+'">'+esc(nm0)+'</span>',{permanent:true,direction:'center',className:'trn trl'}))}});
-d.s.filter(s=>s.c===c).forEach(s=>{const z=s.x?26:20,m=L.marker([s.lat,s.lng],{icon:L.divIcon({html:'<div class="tri'+(s.x?' x':'')+'" style="background:'+k.c+'">'+k.ch+'</div>',className:'',iconSize:[z,z],iconAnchor:[z/2,z/2]}),zIndexOffset:s.x?200:100,title:s.n});
+d.s.filter(s=>s.c===c).forEach(s=>{const z=s.x?18:14,m=L.marker([s.lat,s.lng],{icon:L.divIcon({html:'<div class="tri'+(s.x?' x':'')+'" style="background:'+k.c+'">'+k.ch+'</div>',className:'',iconSize:[z,z],iconAnchor:[z/2,z/2]}),zIndexOffset:s.x?200:100,title:s.n});
 if(nm)m.bindTooltip(esc(s.n)+(s.x?' · 환승':''),{permanent:true,direction:'right',offset:[z/2,0],className:'trn'});
 m.bindPopup(()=>trPop(s),{maxWidth:320});trg.addLayer(m)})});
 updLg();trCount(d)}
@@ -837,7 +838,7 @@ function drawBus(){if(!bsg)return;bsg.clearLayers();const n=$('tnote');n.textCon
 if(map.getZoom()<15){n.textContent='BRT 정류장은 지도를 확대(줌 15 이상)하면 표시됩니다.';return}
 const b=map.getBounds();let c=0;for(const p of BSD){if(!b.contains([p[0],p[1]]))continue;if(c>=700){n.textContent='정류장이 많아 일부만 표시합니다. 더 확대하세요.';break}c++;
 bsg.addLayer(L.circleMarker([p[0],p[1]],{radius:5,color:'#fff',weight:1.5,fillColor:TC.brt.c,fillOpacity:1}).bindTooltip(p[2]||'BRT 정류장'))}}
-function buildLg(){$('tlg').innerHTML='<div style="font-weight:500;color:var(--text-primary)">교통 (눌러서 켜기·끄기)</div>'+Object.keys(TC).map(c=>'<div class="lgr" data-lg="'+(c==='mrt'?'st':c)+'"><i style="border-color:'+TC[c].c+'"></i>'+TC[c].l+(c==='brt'?' 노선':'')+'</div>').join('')+'<div class="lgr" data-lg="bst"><span style="color:'+TC.brt.c+';width:20px;text-align:center">●</span>BRT 정류장</div><div style="margin-top:2px">M·L·K·A·H 상자 = 역 · 검은 테두리 원 = 환승역</div>'}
+function buildLg(){$('tlg').innerHTML='<div style="font-weight:500;color:var(--text-primary)">교통 (눌러서 켜기·끄기)</div>'+Object.keys(TC).map(c=>'<div class="lgr" data-lg="'+(c==='mrt'?'st':c)+'"><i style="border-color:'+TC[c].c+';border-top-width:'+Math.max(3,TC[c].w)+'px'+(TC[c].d?';border-top-style:dashed;opacity:.6':'')+'"></i>'+TC[c].l+(c==='brt'?' 노선':'')+'</div>').join('')+'<div class="lgr" data-lg="bst"><span style="color:'+TC.brt.c+';width:20px;text-align:center">●</span>BRT 정류장</div><div style="margin-top:2px">보라 = 도시철도(MRT·LRT) · 회색 = 일반철도(KRL·공항·고속철) · 점선 = 미개통 · 테두리 원 = 환승역</div>'}
 function updLg(){document.querySelectorAll('[data-lg]').forEach(e=>e.classList.toggle('off',!lay(e.dataset.lg)))}
 $('tlg').addEventListener('click',e=>{const r=e.target.closest('[data-lg]');if(!r)return;const c=document.querySelector('[data-l="'+r.dataset.lg+'"]');c.checked=!c.checked;drawTr();drawBus()});
 const trSet=on=>{TRK.forEach(k=>{if(k!=='stn')document.querySelector('[data-l="'+k+'"]').checked=on});drawTr();drawBus()};
@@ -876,11 +877,13 @@ TRD.l=TRD.l.filter(x=>x.c!=='brt').concat(bl);drawTr();drawBus();
 sv('where.tr4',{t:Date.now(),bl,b:BSD})}
 catch(e){drawTr();tstat('BRT 데이터를 불러오지 못했습니다('+String(e.message||e)+'). 철도는 내장 데이터로 표시 중입니다. "교통 다시 불러오기"를 눌러 보세요.')}
 finally{TRL=false}}
+/* 통학버스 노선은 한 색(청록)으로 통일하고, 마우스를 올린 노선만 굵게 강조한다. */
+const BUS_C='#0F766E';BUSR.forEach(r=>{r.c=BUS_C});
 const RTO={};BUSR.forEach(r=>RTO[r.id]=true);
 function drawRt(){if(!rtg)return;rtg.clearLayers();const lb=$('rtlab').checked&&map.getZoom()>=14;
 BUSR.forEach(r=>{if(!RTO[r.id])return;
 rtg.addLayer(L.polyline(r.g,{color:'#fff',weight:7,opacity:.85,interactive:false,lineJoin:'round'}));
-rtg.addLayer(L.polyline(r.g,{color:r.c,weight:4,opacity:.9,lineJoin:'round'}).bindTooltip(esc(r.n)+' · '+r.km+'km · 약 '+r.min+'분 (도로 기준)',{sticky:true}));
+const bp=L.polyline(r.g,{color:r.c,weight:3.5,opacity:.85,lineJoin:'round'}).bindTooltip(esc(r.n)+' · '+r.km+'km · 약 '+r.min+'분 (도로 기준)',{sticky:true});bp.on('mouseover',()=>{bp.setStyle({weight:7,opacity:1});bp.bringToFront()}).on('mouseout',()=>bp.setStyle({weight:3.5,opacity:.85}));rtg.addLayer(bp);
 r.st.forEach((p,i)=>{if(p.id)return;const m=L.circleMarker([p.lat,p.lng],{radius:7,color:'#fff',weight:2,fillColor:r.c,fillOpacity:p.ap?.55:1,dashArray:p.ap?'3 2':null});
 m.bindPopup('<b style="font-size:15px">'+esc(p.n)+'</b><div>'+esc(r.n)+' · '+(i+1)+'번째 정류장</div><div>탑승 '+p.t+' · '+esc(p.p)+'</div>'+(p.ap?'<div style="color:var(--mute)">대략 위치 (단지 좌표 미확인)</div>':'')+'<div class="lk"><a href="'+gm(p.lat,p.lng)+'" target="_blank" rel="noopener">구글 지도</a><a href="'+gd(p.lat,p.lng)+'" target="_blank" rel="noopener">JIKS 경로</a></div>',{maxWidth:340,maxHeight:430});
 if(lb)m.bindTooltip(esc(p.n)+' '+p.t,{permanent:true,direction:'right',offset:[8,0],className:'rn'});
