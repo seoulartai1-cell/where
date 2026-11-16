@@ -56,6 +56,14 @@ input[type=range]{width:100%}
 .leaflet-tooltip.bt{background:var(--surface-2);color:var(--text-primary);border:0.5px solid var(--border-strong);font-size:12px;font-weight:500;padding:1px 6px}
 .leaflet-tooltip.dt{background:var(--surface-2);color:var(--text-primary);border:0.5px solid var(--border-strong);font-size:12px;padding:1px 5px}
 .zlow .bt{display:none}
+.tri{width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:5px;color:#fff;font-size:11px;font-weight:700;line-height:1;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.45)}
+.tri.x{border-radius:50%;box-shadow:0 0 0 3px #111}
+.leaflet-tooltip.trn{background:var(--surface-2);color:var(--text-primary);border:0.5px solid var(--border-strong);font-size:11px;font-weight:500;padding:0 5px}
+.ztl .trn{display:none}
+.lgr{display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none;padding:1px 0}
+.lgr i{display:inline-block;width:20px;height:0;border-top:4px solid}
+.lgr.off{opacity:.35;text-decoration:line-through}
+#tlg{margin-top:6px;border-top:0.5px solid var(--border);padding-top:6px}
 .zc{border-left:4px solid var(--border-strong);cursor:pointer}
 .kt{font-size:11px;line-height:1.15;text-align:center;white-space:nowrap;color:var(--text-primary);text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 4px #fff;pointer-events:none}
 .kt small{display:block;font-size:10px;color:#444}
@@ -229,12 +237,28 @@ details.g>summary,details.g>.gb,#fvp,#lstw,.note{padding-left:12px;padding-right
 <label class="ch"><input type="checkbox" data-l="nm" checked> 통칭→소속 동 표시</label>
 <label class="ch"><input type="checkbox" data-l="zk" checked> 한국 비유</label>
 <label class="ch"><input type="checkbox" data-l="jd" checked> 자카르타 동네</label>
-<label class="ch"><input type="checkbox" data-l="st" checked> MRT</label>
 <label class="ch"><input type="checkbox" data-l="pd" checked> 빠델</label>
 <label class="ch"><input type="checkbox" data-l="bl" checked> 발레</label>
 <label class="ch"><input type="checkbox" data-l="en" checked> 영어학원</label>
 <label class="ch"><input type="checkbox" data-l="bus" checked> 버스 시각</label>
 </div></div></details>
+<details class="g" open><summary>교통 표시</summary><div class="gb">
+<div class="rowl">
+<button class="sm" id="tall">교통 전체 켜기</button><button class="sm" id="tnone">교통 전체 끄기</button><button class="sm" id="trl">교통 다시 불러오기</button>
+</div>
+<div class="rowl">
+<label class="ch"><input type="checkbox" data-l="st" checked> <span style="color:#5B3FD0">■</span> MRT</label>
+<label class="ch"><input type="checkbox" data-l="lrt" checked> <span style="color:#00897B">■</span> LRT</label>
+<label class="ch"><input type="checkbox" data-l="krl" checked> <span style="color:#E53935">■</span> KRL·철도</label>
+<label class="ch"><input type="checkbox" data-l="apt" checked> <span style="color:#F57C00">■</span> 공항철도</label>
+<label class="ch"><input type="checkbox" data-l="hsr" checked> <span style="color:#37474F">■</span> 고속철</label>
+<label class="ch"><input type="checkbox" data-l="brt" checked> <span style="color:#1565C0">■</span> BRT 노선</label>
+<label class="ch"><input type="checkbox" data-l="bst" checked> <span style="color:#1565C0">●</span> BRT 정류장</label>
+<label class="ch"><input type="checkbox" data-l="stn" checked> 역 이름</label>
+</div>
+<div id="tstat" style="font-size:12px;color:var(--text-muted);line-height:1.6">교통 노선과 역을 불러오는 중…</div>
+<div id="tnote" style="font-size:12px;color:var(--text-muted)"></div>
+</div></details>
 <div id="fvp" style="margin-bottom:14px"></div>
 <input type="file" id="fimp" accept="application/json,.json" style="display:none">
 <div id="lstw">
@@ -266,9 +290,9 @@ details.g>summary,details.g>.gb,#fvp,#lstw,.note{padding-left:12px;padding-right
 <div id="mw"><div id="map" style="position:absolute;inset:0"></div></div>
 <details id="lg" open><summary>범례</summary><div>
 <span style="color:var(--fill-accent)">●</span> 조건 통과 · <span style="color:var(--text-muted)">●</span> 제외 · <span style="color:var(--fill-danger)">★</span> JIKS<br>
-<span style="color:#D85A30">◆</span> 빠델 · <span style="color:#D4537E">▲</span> 발레 · <span style="color:#378ADD">■</span> 영어학원 · <span style="color:#7F77DD">●</span> MRT<br>
+<span style="color:#D85A30">◆</span> 빠델 · <span style="color:#D4537E">▲</span> 발레 · <span style="color:#378ADD">■</span> 영어학원<br>
 점선 원 · <span style="color:#5D6D7E">중부</span> <span style="color:#1F618D">남부</span> <span style="color:#148F77">북부</span> <span style="color:#CA6F1E">서부</span> <span style="color:#239B56">동부</span> <span style="color:#6C3483">섬</span>
-</div></details>
+<div id="tlg"></div></div></details>
 </main>
 </div>
 </div>
@@ -340,7 +364,7 @@ const fd1=d=>d.toFixed(1)+'km';
 const tm=t=>{const a=t.split(':');return +a[0]*60+ +a[1]};
 const GRL={golf:'골프장 뷰',garden:'정원·녹지',city:'도시 뷰'};
 const SMIN=12,SMAX=500;
-let sel=null,HT=620,map,mk,ln,zg,ig,lg,rm={},pass={};
+let sel=null,HT=620,map,mk,ln,zg,ig,lg,trg,bsg,rm={},pass={};
 const FK='jiks-fav-v1',STS=['관심','방문 예정','연락함','계약 가능','탈락'];
 let FV={};
 try{const o=JSON.parse(localStorage.getItem(FK)||'{}');if(o&&typeof o==='object')FV=o}catch(e){}
@@ -498,10 +522,10 @@ if(lay('nm'))TG.forEach(t=>{if(!t.c0)return;lg.addLayer(L.marker(t.c0,{icon:L.di
 function initMap(){
 map=L.map('map',{zoomControl:true});
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(map);
-zg=L.layerGroup().addTo(map);lg=L.layerGroup().addTo(map);ig=L.layerGroup().addTo(map);mk=L.layerGroup().addTo(map);ln=L.layerGroup().addTo(map);
+zg=L.layerGroup().addTo(map);lg=L.layerGroup().addTo(map);trg=L.layerGroup().addTo(map);bsg=L.layerGroup().addTo(map);ig=L.layerGroup().addTo(map);mk=L.layerGroup().addTo(map);ln=L.layerGroup().addTo(map);
 map.on('popupclose',()=>{ln.clearLayers();sel=null});
-map.on('zoomend',()=>{zc();labelsUpd()});map.on('moveend',drawInfra);}
-function zc(){$('map').classList.toggle('zlow',map.getZoom()<15)}
+map.on('zoomend',()=>{zc();labelsUpd()});map.on('moveend',()=>{drawInfra();drawBus()});}
+function zc(){$('map').classList.toggle('zlow',map.getZoom()<15);$('map').classList.toggle('ztl',map.getZoom()<13)}
 function lines(r){ln.clearLayers();
 ln.addLayer(L.circle([r.lat,r.lng],{radius:+$('ir').value,color:'#2E8B57',weight:1,dashArray:'3 4',fillColor:'#2E8B57',fillOpacity:.05,interactive:false}));
 const tg=[[r.mrt[0].s,r.mrt[0].d,'#7F77DD']];['pd','bl','en'].forEach(k=>{const n=r.nb[k][0];tg.push([n.p,n.d,KN[k].c])});
@@ -520,8 +544,6 @@ if(lay('jd'))JD.forEach(d=>{const c=CITY[d.c].c;
 if(lay('zn')){const o=L.circle([d.lat,d.lng],{radius:d.r,color:c,weight:1.5,dashArray:'2 5',fillColor:c,fillOpacity:.08,interactive:lay('zd')});if(lay('zd'))o.bindPopup(()=>jdHtml(d),{maxWidth:340,maxHeight:430});zg.addLayer(o)}
 if(lay('zl'))zg.addLayer(L.marker([d.lat,d.lng],{icon:L.divIcon({html:'<div class="zt jt" style="color:'+c+'">'+d.n+(lay('zk')?'<small>≈ '+d.kr+'</small>':'')+'</div>',className:'',iconSize:[0,0]}),interactive:false,keyboard:false,zIndexOffset:-1000}))});
 zinfo();
-if(lay('st')){mk.addLayer(L.polyline(ST.map(t=>[t.lat,t.lng]),{color:'#7F77DD',weight:3,opacity:.55}));
-ST.forEach(t=>mk.addLayer(L.circleMarker([t.lat,t.lng],{radius:6,color:'#fff',weight:2,fillColor:'#7F77DD',fillOpacity:1}).bindTooltip('MRT '+t.n)))}
 PO.forEach((p,i)=>{if(!lay(p.k))return;const c=KN[p.k].c,s=p.k==='pd'?'◆':p.k==='bl'?'▲':'■';
 const m=L.marker([p.lat,p.lng],{icon:mkIcon('<span style="color:'+c+'">'+s+'</span>','pin',22),title:p.n});
 m.bindPopup(()=>strip(popP(p)),{maxWidth:340,maxHeight:430});m.on('popupopen',()=>{sel={k:'p',id:i}});mk.addLayer(m)});
@@ -549,6 +571,7 @@ h+='<h4>시설</h4>'+chip(r.f.gym,'헬스장','없음')+chip(r.f.pool,'수영장
 h+='<div style="margin-top:4px">뷰: <b style="font-weight:500">'+(GRL[r.gr]||'미확인')+'</b> · '+r.vw+'</div><div>6개월 계약 표기: '+(r.t6===1?'있음':r.t6===0?'없음(12개월만 표기)':'미확인')+'</div>';
 h+=needPop(r);
 h+='<h4>MRT (직선거리)</h4>';r.mrt.slice(0,3).forEach(m=>{h+='<div>'+m.s.n+' · <b style="font-weight:500">'+fd(m.d)+'</b></div>'});
+h+=trNear(r);
 ['pd','bl','en'].forEach(k=>{h+='<h4>가까운 '+KN[k].l+'</h4>';r.nb[k].slice(0,2).forEach(n=>{h+='<div><span style="color:'+KN[k].c+'">●</span> '+n.p.n+' · <b style="font-weight:500">'+fd(n.d)+'</b>'+(n.p.coach?' <span class="bd ok">코칭</span>':'')+'</div>'})});
 if(r.ex)h+='<div style="margin-top:4px;color:var(--text-secondary)">'+r.ex+'</div>';
 h+='<h4>장점</h4>'+r.pro.map(x=>'<div>+ '+x+'</div>').join('')+'<h4>단점·주의</h4>'+r.con.map(x=>'<div>- '+x+'</div>').join('');
@@ -577,7 +600,7 @@ function all(){labels();const f=F();pass={};R.forEach(r=>{r.nd=need(r);pass[r.id
 
 const PRE={kem:[-6.2605,106.8095,15],cil:[-6.2840,106.7920,15],pi:[-6.2720,106.7830,15],jiks:[JK.lat,JK.lng,14],gan:[-6.2395,106.7860,15],jk:[-6.2,106.83,11]};
 document.querySelectorAll('[data-pre]').forEach(b=>b.onclick=()=>{const k=b.dataset.pre;if(k==='fit')fit();else if(k==='all')fitAll();else map.setView([PRE[k][0],PRE[k][1]],PRE[k][2])});
-$('app').addEventListener('input',e=>{const t=e.target;if(t.closest('#needp')){needInput(e);return}if(t.dataset&&t.dataset.fn){FV[t.dataset.fn]&&(FV[t.dataset.fn].n=t.value,fsv());return}if(t.dataset&&t.dataset.fs){if(FV[t.dataset.fs]){FV[t.dataset.fs].s=t.value;fsv();fpan();lst()}return}if(t.id==='fo'){render();lst();fpan();return}if(t.id==='fimp')return;if(e.target.id==='kq'){kq=e.target.value;study();return}if(e.target.id==='tq'){ttb();return}if(e.target.closest('[data-l]')){render();return}if(e.target.id==='sort'){lst();return}all()});
+$('app').addEventListener('input',e=>{const t=e.target;if(t.closest('#needp')){needInput(e);return}if(t.dataset&&t.dataset.fn){FV[t.dataset.fn]&&(FV[t.dataset.fn].n=t.value,fsv());return}if(t.dataset&&t.dataset.fs){if(FV[t.dataset.fs]){FV[t.dataset.fs].s=t.value;fsv();fpan();lst()}return}if(t.id==='fo'){render();lst();fpan();return}if(t.id==='fimp')return;if(e.target.id==='kq'){kq=e.target.value;study();return}if(e.target.id==='tq'){ttb();return}if(e.target.closest('[data-l]')){if(TRK.includes(e.target.dataset.l)){drawTr();drawBus()}else render();return}if(e.target.id==='sort'){lst();return}all()});
 $('app').addEventListener('click',e=>{const kz=e.target.closest('[data-kz]');if(kz){e.preventDefault();const pl=kpoly[kz.dataset.kz];if(pl){map.fitBounds(pl.getBounds(),{padding:[30,30],maxZoom:16});setTimeout(()=>pl.openPopup(),400)}return}const fb=e.target.closest('[data-fv]');if(fb){ftog(+fb.dataset.fv||fb.dataset.fv);return}if(e.target.id==='fexp'){fexp();return}if(e.target.id==='fimb'){$('fimp').click();return}if(e.target.id==='fclr'){if(Object.keys(FV).length&&confirm('즐겨찾기와 메모를 모두 지울까요?')){FV={};fsv();all()}return}const b=e.target.closest('[data-go]');if(b)go(b.dataset.go);const q=e.target.closest('[data-z]');if(q){const z=ZN.concat(JD).find(x=>x.id===q.dataset.z);map.fitBounds(L.latLng(z.lat,z.lng).toBounds(z.r*2),{padding:[20,20]});$('mw').scrollIntoView({block:'nearest',behavior:'smooth'})}});
 
 /* 생활 조건: 필수·선호, 주변 인프라(OSM), 단지별 직접 기록 */
@@ -664,7 +687,81 @@ $('fimp').onchange=e=>{const f=e.target.files[0];if(f)fimp(f);e.target.value=''}
 const setv=(id,v)=>{$(id).value=v};
 $('preset').onclick=()=>{setv('budget',15);setv('mrt',1.5);setv('pd',3);setv('bl',3);setv('en',2);setv('bus',0);document.querySelectorAll('[data-t],[data-f]').forEach(c=>{c.checked=['gym','pool','green'].includes(c.dataset.f)});$('unk').checked=false;$('q').value='';all()};
 $('reset').onclick=()=>{setv('budget',60);setv('mrt',5);setv('pd',5);setv('bl',5);setv('en',5);setv('bus',0);document.querySelectorAll('[data-t],[data-f]').forEach(c=>{c.checked=false});$('unk').checked=true;$('q').value='';needReset();all()};
-initKel();initMap();fitAll();all();ttb();
+/* 교통: MRT·LRT·KRL·공항철도·고속철·BRT (노선·역은 OpenStreetMap에서 불러옴) */
+const TC={mrt:{l:'MRT',c:'#5B3FD0',ch:'M',w:5},lrt:{l:'LRT',c:'#00897B',ch:'L',w:4},krl:{l:'KRL·철도',c:'#E53935',ch:'K',w:3},apt:{l:'공항철도',c:'#F57C00',ch:'A',w:4},hsr:{l:'고속철',c:'#37474F',ch:'H',w:4},brt:{l:'BRT',c:'#1565C0',ch:'B',w:3}};
+const TRK=['st','lrt','krl','apt','hsr','brt','bst','stn'];
+const MT=[['Lebak Bulus',-6.2892828,106.7749906],['Fatmawati',-6.2927419,106.7920872],['Cipete Raya',-6.2782646,106.797322],['Haji Nawi',-6.2666813,106.7973327],['Blok A',-6.2557533,106.7971347],['Blok M BCA',-6.24447,106.7981],['ASEAN',-6.2381,106.7983],['Senayan',-6.2271,106.8019],['Istora',-6.2220,106.8049],['Bendungan Hilir',-6.2152,106.8186],['Setiabudi Astra',-6.2093,106.8216],['Dukuh Atas BNI',-6.2018,106.8227],['Bundaran HI',-6.1931,106.8229]];
+let TRD={l:[],s:[]},BSD=null,TRL=false;
+const trOn=c=>lay(c==='mrt'?'st':c);
+const tstat=t=>{$('tstat').textContent=t};
+function trData(){const s=TRD.s.slice(),l=TRD.l.slice();
+if(!s.some(x=>x.c==='mrt'))MT.forEach(m=>s.push({c:'mrt',n:m[0],lat:m[1],lng:m[2],e:1}));
+if(!l.some(x=>x.c==='mrt'))l.push({c:'mrt',n:'MRT 남북선',p:[MT.map(m=>[m[1],m[2]])]});
+s.forEach(a=>{a.x=s.some(b=>b!==a&&b.c!==a.c&&hav(a.lat,a.lng,b.lat,b.lng)<0.3)});
+return{l,s}}
+function trPop(s){const c=TC[s.c],l=R.map(r=>({r,d:hav(r.lat,r.lng,s.lat,s.lng)})).sort((a,b)=>a.d-b.d).slice(0,3);
+return '<div><span class="bd" style="background:'+c.c+';color:#fff">'+c.l+'</span> <b style="font-weight:500;font-size:15px">'+esc(s.n)+'</b></div>'+(s.x?'<div><span class="bd ok">환승 가능 · 300m 이내에 다른 종류 역</span></div>':'')+'<div style="margin-top:6px">JIKS까지 직선 <b style="font-weight:500">'+fd1(hav(s.lat,s.lng,JK.lat,JK.lng))+'</b></div><div><a href="'+gm(s.lat,s.lng)+'" target="_blank" rel="noopener">구글 지도에서 열기</a></div><h4>가까운 단지</h4>'+l.map(x=>'<div>'+x.r.i+'. '+x.r.nm+' · <b style="font-weight:500">'+fd(x.d)+'</b></div>').join('')+(s.e?'<div class="un" style="margin-top:4px">내장 좌표(근사)입니다. 노선 데이터를 불러오면 OpenStreetMap 좌표로 바뀝니다.</div>':'')}
+function trNear(r){const d=trData().s;if(!d.length)return '';let h='<h4>가까운 역 (직선거리, 종류별)</h4>';
+Object.keys(TC).forEach(c=>{if(c==='brt')return;let b=null,bd=1e9;d.forEach(s=>{if(s.c!==c)return;const x=hav(r.lat,r.lng,s.lat,s.lng);if(x<bd){bd=x;b=s}});if(b)h+='<div><span style="color:'+TC[c].c+'">■</span> '+TC[c].l+' '+esc(b.n)+' · <b style="font-weight:500">'+fd(bd)+'</b></div>'});
+if(BSD&&BSD.length){let b=null,bd=1e9;BSD.forEach(p=>{const x=hav(r.lat,r.lng,p[0],p[1]);if(x<bd){bd=x;b=p}});if(b)h+='<div><span style="color:'+TC.brt.c+'">●</span> BRT 정류장 '+esc(b[2]||'')+' · <b style="font-weight:500">'+fd(bd)+'</b></div>'}
+return h}
+function drawTr(){if(!trg)return;trg.clearLayers();const d=trData(),nm=lay('stn');
+Object.keys(TC).forEach(c=>{if(!trOn(c))return;const k=TC[c];
+d.l.filter(x=>x.c===c).forEach(x=>{const cs=L.polyline(x.p,{color:'#fff',weight:k.w+3,opacity:.85,interactive:false,lineJoin:'round'}),pl=L.polyline(x.p,{color:k.c,weight:k.w,opacity:.95,lineJoin:'round'});pl.bindTooltip(k.l+(x.n?' · '+esc(x.n):''),{sticky:true});trg.addLayer(cs);trg.addLayer(pl)});
+d.s.filter(s=>s.c===c).forEach(s=>{const z=s.x?26:20,m=L.marker([s.lat,s.lng],{icon:L.divIcon({html:'<div class="tri'+(s.x?' x':'')+'" style="background:'+k.c+'">'+k.ch+'</div>',className:'',iconSize:[z,z],iconAnchor:[z/2,z/2]}),zIndexOffset:s.x?200:100,title:s.n});
+if(nm)m.bindTooltip(esc(s.n)+(s.x?' · 환승':''),{permanent:true,direction:'right',offset:[z/2,0],className:'trn'});
+m.bindPopup(()=>trPop(s),{maxWidth:320});trg.addLayer(m)})});
+updLg();trCount(d)}
+function trCount(d){const n={};d.s.forEach(s=>{n[s.c]=(n[s.c]||0)+1});const t=Object.keys(TC).filter(c=>c!=='brt').map(c=>TC[c].l+' '+(n[c]||0)+'역').join(' · ');
+tstat(t+(BSD?' · BRT 정류장 '+BSD.length+'곳':'')+' · © OpenStreetMap contributors. 노선이 비어 있으면 OpenStreetMap에 해당 노선이 없거나 불러오지 못한 것입니다.')}
+function drawBus(){if(!bsg)return;bsg.clearLayers();const n=$('tnote');n.textContent='';if(!lay('bst')||!BSD)return;
+if(map.getZoom()<15){n.textContent='BRT 정류장은 지도를 확대(줌 15 이상)하면 표시됩니다.';return}
+const b=map.getBounds();let c=0;for(const p of BSD){if(!b.contains([p[0],p[1]]))continue;if(c>=700){n.textContent='정류장이 많아 일부만 표시합니다. 더 확대하세요.';break}c++;
+bsg.addLayer(L.circleMarker([p[0],p[1]],{radius:5,color:'#fff',weight:1.5,fillColor:TC.brt.c,fillOpacity:1}).bindTooltip(p[2]||'BRT 정류장'))}}
+function buildLg(){$('tlg').innerHTML='<div style="font-weight:500;color:var(--text-primary)">교통 (눌러서 켜기·끄기)</div>'+Object.keys(TC).map(c=>'<div class="lgr" data-lg="'+(c==='mrt'?'st':c)+'"><i style="border-color:'+TC[c].c+'"></i>'+TC[c].l+(c==='brt'?' 노선':'')+'</div>').join('')+'<div class="lgr" data-lg="bst"><span style="color:'+TC.brt.c+';width:20px;text-align:center">●</span>BRT 정류장</div><div style="margin-top:2px">M·L·K·A·H 상자 = 역 · 검은 테두리 원 = 환승역</div>'}
+function updLg(){document.querySelectorAll('[data-lg]').forEach(e=>e.classList.toggle('off',!lay(e.dataset.lg)))}
+$('tlg').addEventListener('click',e=>{const r=e.target.closest('[data-lg]');if(!r)return;const c=document.querySelector('[data-l="'+r.dataset.lg+'"]');c.checked=!c.checked;drawTr();drawBus()});
+const trSet=on=>{TRK.forEach(k=>{if(k!=='stn')document.querySelector('[data-l="'+k+'"]').checked=on});drawTr();drawBus()};
+$('tall').onclick=()=>trSet(true);$('tnone').onclick=()=>trSet(false);$('trl').onclick=()=>loadTr(true);
+const BB='-6.40,106.65,-6.08,107.05';
+const QL='[out:json][timeout:100];relation["route"~"^(subway|light_rail|train|monorail)$"]('+BB+');out tags geom;';
+const QS='[out:json][timeout:100];(node["railway"~"^(station|halt)$"]('+BB+');node["station"~"^(subway|light_rail)$"]('+BB+'););out tags;';
+const BR='["ref"~"^([1-9]|1[0-3])$"]';
+const QBL='[out:json][timeout:100];(relation["route"="bus"]["network"~"transjakarta",i]'+BR+'('+BB+');relation["route"="bus"]["operator"~"transjakarta",i]'+BR+'('+BB+'););out tags geom;';
+const QBS='[out:json][timeout:100];(node["highway"="bus_stop"]["network"~"transjakarta",i]('+BB+');node["public_transport"="platform"]["network"~"transjakarta",i]('+BB+');node["amenity"="bus_station"]["network"~"transjakarta",i]('+BB+');node["highway"="bus_stop"]["operator"~"transjakarta",i]('+BB+'););out tags;';
+function lcat(t){const s=[t.name,t.network,t.operator,t.ref].join(' ');
+if(/whoosh|kcic|kereta cepat/i.test(s))return 'hsr';
+if(/railink|bandara|airport/i.test(s))return 'apt';
+if(t.route==='subway'||/\bMRT\b/i.test(s))return 'mrt';
+if(t.route==='light_rail'||/\bLRT\b/i.test(s))return 'lrt';
+if(t.route==='train'||t.route==='monorail'){if(t.service==='long_distance'||t.service==='tourism'||/\b(argo|ekonomi|bisnis|eksekutif|executive)\b|antar ?kota/i.test(s))return null;return 'krl'}
+return null}
+function scat(t){const s=[t.name,t.operator,t.network,t.brand].join(' ');
+if(/whoosh|kcic|kereta cepat/i.test(s))return 'hsr';
+if(/railink|bandara|airport/i.test(s))return 'apt';
+if(t.station==='subway'||t.subway==='yes'||/\bMRT\b/i.test(s))return 'mrt';
+if(t.station==='light_rail'||t.light_rail==='yes'||/\bLRT\b/i.test(s))return 'lrt';
+return 'krl'}
+function parseL(j,fix){const seen=new Set(),out=[];(j.elements||[]).forEach(e=>{if(e.type!=='relation')return;const t=e.tags||{},c=fix||lcat(t);if(!c)return;const p=[];
+(e.members||[]).forEach(m=>{if(m.type!=='way'||!m.geometry||seen.has(m.ref))return;seen.add(m.ref);p.push(m.geometry.map(g=>[+g.lat.toFixed(5),+g.lon.toFixed(5)]))});
+if(p.length)out.push({c,n:(t.name||t.ref||'').slice(0,70),p})});return out}
+function parseS(j){const m=new Map();(j.elements||[]).forEach(e=>{const t=e.tags||{};if(e.type!=='node'||!t.name||e.lat==null||t.disused||t.abandoned||t.railway==='proposed')return;
+const c=scat(t),k=c+'|'+t.name.toLowerCase();if(!m.has(k))m.set(k,{c,n:t.name.replace(/^Stasiun\s+/i,'').slice(0,40),lat:+(+e.lat).toFixed(5),lng:+(+e.lon).toFixed(5)})});return[...m.values()]}
+function parseB(j){const m=new Map();(j.elements||[]).forEach(e=>{if(e.type!=='node'||e.lat==null)return;const t=e.tags||{},k=(+e.lat).toFixed(4)+','+(+e.lon).toFixed(4);if(!m.has(k))m.set(k,[+(+e.lat).toFixed(5),+(+e.lon).toFixed(5),(t.name||t['name:en']||'').slice(0,40)])});return[...m.values()]}
+async function ovq(q){let err='';for(const u of OV){try{const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),110000);const res=await fetch(u,{method:'POST',body:'data='+encodeURIComponent(q),headers:{'Content-Type':'application/x-www-form-urlencoded'},signal:ctl.signal});clearTimeout(to);if(!res.ok)throw new Error('HTTP '+res.status);return await res.json()}catch(e){err=e.name==='AbortError'?'시간 초과':String(e.message||e)}}throw new Error(err)}
+async function loadTr(force){if(TRL)return;TRL=true;let step='철도';
+try{if(!force){const c=ld('where.tr',null);if(c&&c.v===2&&Date.now()-c.t<6048e5&&c.s&&c.s.length){TRD={l:c.l||[],s:c.s};BSD=c.b||null;drawTr();drawBus();return}}
+tstat('철도 노선과 역 불러오는 중…');
+const l=parseL(await ovq(QL)),s=parseS(await ovq(QS));
+if(!l.length&&!s.length)throw new Error('빈 결과');
+TRD={l,s};drawTr();
+step='BRT';tstat('BRT 노선과 정류장 불러오는 중…');
+const bl=parseL(await ovq(QBL),'brt');BSD=parseB(await ovq(QBS));
+TRD.l=TRD.l.concat(bl);drawTr();drawBus();
+sv('where.tr',{v:2,t:Date.now(),l:TRD.l,s:TRD.s,b:BSD})}
+catch(e){drawTr();tstat(step+' 데이터를 불러오지 못했습니다('+String(e.message||e)+'). '+(step==='BRT'?'철도는 표시 중이고 BRT만 빠졌습니다.':'MRT 남북선만 내장 좌표로 표시 중입니다.')+' "교통 다시 불러오기"를 눌러 보세요.')}
+finally{TRL=false}}
+initKel();buildLg();initMap();fitAll();all();ttb();drawTr();loadTr(false);
 
 function setView(v){document.body.dataset.v=v;document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));if(map)setTimeout(()=>map.invalidateSize(),60)}
 document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>setView(b.dataset.v));
