@@ -329,7 +329,7 @@ const hav=(a,b,c,d)=>{const t=Math.PI/180,x=(c-a)*t,y=(d-b)*t,q=Math.sin(x/2)**2
 const JK={n:'Jakarta International Korean School (JIKS)',lat:-6.316718,lng:106.8925189,pid:'ChIJRSCSj0DtaS4RMkHZg6CdzYA'};
 const gm=(lat,lng)=>'https://www.google.com/maps/search/?api=1&query='+lat+','+lng;
 const gd=(lat,lng)=>'https://www.google.com/maps/dir/?api=1&origin='+lat+','+lng+'&destination='+JK.lat+','+JK.lng+'&destination_place_id='+JK.pid;
-const ST=[{n:'Lebak Bulus',lat:-6.2892828,lng:106.7749906},{n:'Fatmawati',lat:-6.2927419,lng:106.7920872},{n:'Cipete Raya',lat:-6.2782646,lng:106.797322},{n:'Haji Nawi',lat:-6.2666813,lng:106.7973327},{n:'Blok A',lat:-6.2557533,lng:106.7971347},{n:'Blok M BCA',lat:-6.24447,lng:106.7981}];
+const ST=[{n:'Lebak Bulus',lat:-6.289254,lng:106.774937},{n:'Fatmawati',lat:-6.292429,lng:106.792466},{n:'Cipete Raya',lat:-6.2774,lng:106.7975},{n:'Haji Nawi',lat:-6.2667982,lng:106.7973162},{n:'Blok A',lat:-6.2555837,lng:106.797134},{n:'Blok M BCA',lat:-6.2445265,lng:106.7982103}];
 const KN={pd:{l:'빠델장',c:'#D85A30'},bl:{l:'발레학원',c:'#D4537E'},en:{l:'영어학원',c:'#378ADD'}};
 const PO=[
 {k:'pd',n:'Padel Pro Kemang',lat:-6.2560128,lng:106.8137738,coach:1,d:'Jl. Kemang II No.35 · 실내 6면 · 06:00~24:00 · 평일 31.5만/주말 45만 루피아(시간당) · 개인·세미·그룹 코칭 패키지 · 구글 4.5(185)'},
@@ -741,24 +741,35 @@ $('reset').onclick=()=>{setv('budget',60);setv('mrt',5);setv('pd',5);setv('bl',5
 /* 교통: MRT·LRT·KRL·공항철도·고속철·BRT (노선·역은 OpenStreetMap에서 불러옴) */
 const TC={mrt:{l:'MRT',c:'#5B3FD0',ch:'M',w:5},lrt:{l:'LRT',c:'#00897B',ch:'L',w:4},krl:{l:'KRL·철도',c:'#E53935',ch:'K',w:3},apt:{l:'공항철도',c:'#F57C00',ch:'A',w:4},hsr:{l:'고속철',c:'#37474F',ch:'H',w:4},brt:{l:'BRT',c:'#1565C0',ch:'B',w:3}};
 const TRK=['st','lrt','krl','apt','hsr','brt','bst','stn'];
-const MT=[['Lebak Bulus',-6.2892828,106.7749906],['Fatmawati',-6.2927419,106.7920872],['Cipete Raya',-6.2782646,106.797322],['Haji Nawi',-6.2666813,106.7973327],['Blok A',-6.2557533,106.7971347],['Blok M BCA',-6.24447,106.7981],['ASEAN',-6.2381,106.7983],['Senayan',-6.2271,106.8019],['Istora',-6.2220,106.8049],['Bendungan Hilir',-6.2152,106.8186],['Setiabudi Astra',-6.2093,106.8216],['Dukuh Atas BNI',-6.2018,106.8227],['Bundaran HI',-6.1931,106.8229]];
+const MT=[['Lebak Bulus',-6.289254,106.774937,'M01'],['Fatmawati',-6.292429,106.792466,'M02'],['Cipete Raya',-6.2774,106.7975,'M03'],['Haji Nawi',-6.2667982,106.7973162,'M04'],['Blok A',-6.2555837,106.797134,'M05'],['Blok M BCA',-6.2445265,106.7982103,'M06'],['ASEAN',-6.239085,106.7985954,'M07'],['Senayan',-6.226683,106.802456,'M08'],['Istora',-6.222331,106.808573,'M09'],['Bendungan Hilir',-6.2154465,106.8173187,'M10'],['Setiabudi Astra',-6.2091,106.8217,'M11'],['Dukuh Atas BNI',-6.200786,106.822746,'M12'],['Bundaran HI',-6.1934095,106.8228579,'M13']];
 let TRD={l:[],s:[]},BSD=null,TRL=false;
 const trOn=c=>lay(c==='mrt'?'st':c);
 const tstat=t=>{$('tstat').textContent=t};
 function trData(){const s=TRD.s.slice(),l=TRD.l.slice();
-if(!s.some(x=>x.c==='mrt'))MT.forEach(m=>s.push({c:'mrt',n:m[0],lat:m[1],lng:m[2],e:1}));
+if(!s.some(x=>x.c==='mrt'))MT.forEach(m=>s.push({c:'mrt',n:m[0],lat:m[1],lng:m[2],cd:m[3],e:1}));
 if(!l.some(x=>x.c==='mrt'))l.push({c:'mrt',n:'MRT 남북선',p:[MT.map(m=>[m[1],m[2]])]});
 s.forEach(a=>{a.x=s.some(b=>b!==a&&b.c!==a.c&&hav(a.lat,a.lng,b.lat,b.lng)<0.3)});
 return{l,s}}
+const shortN=n=>String(n||'').split(':')[0].replace(/KRL Commuter ?Line\s*/i,'KRL ').replace(/\s+/g,' ').trim().slice(0,40);
+const KM=111.32;
+function sd2(lat,lng,a,b){const kx=Math.cos(lat*Math.PI/180)*KM,ax=(a[1]-lng)*kx,ay=(a[0]-lat)*KM,bx=(b[1]-lng)*kx,by=(b[0]-lat)*KM,dx=bx-ax,dy=by-ay,q=dx*dx+dy*dy;let t=q?-(ax*dx+ay*dy)/q:0;t=Math.max(0,Math.min(1,t));const px=ax+t*dx,py=ay+t*dy;return px*px+py*py}
+function wd2(lat,lng,w,lim){let m=1e9;for(let i=1;i<w.length;i++){const a=w[i-1],c=w[i],ya=(a[0]-lat)*KM,yc=(c[0]-lat)*KM;if((ya>lim&&yc>lim)||(ya<-lim&&yc<-lim))continue;const d=sd2(lat,lng,a,c);if(d<m)m=d}return m}
+function trLines(s){const set=new Set();trData().l.forEach(x=>{if(x.c!==s.c)return;const nm=shortN(x.n);if(!nm||set.has(nm))return;if(x.p.some(w=>wd2(s.lat,s.lng,w,0.15)<0.0225))set.add(nm)});return set.size?'<div style="margin-top:4px">노선: '+[...set].map(esc).join(', ')+'</div>':''}
+function snapSt(S,L){const ws={};L.forEach(l=>{if(l.c==='brt')return;(ws[l.c]||(ws[l.c]=[])).push(...l.p)});
+const cats=Object.keys(ws);if(!cats.length)return S;const T=0.0225;
+const near=(s,c)=>{let m=1e9;(ws[c]||[]).forEach(w=>{const d=wd2(s.lat,s.lng,w,0.2);if(d<m)m=d});return m};
+const out=new Map();S.forEach(s=>{let c=s.c;if(ws[c]&&near(s,c)>=T){let bc=null,bd=1e9;cats.forEach(k=>{const d=near(s,k);if(d<bd){bd=d;bc=k}});if(bd>=T)return;c=bc}
+const k=c+'|'+s.n.toLowerCase();if(!out.has(k))out.set(k,Object.assign({},s,{c}))});return[...out.values()]}
 function trPop(s){const c=TC[s.c],l=R.map(r=>({r,d:hav(r.lat,r.lng,s.lat,s.lng)})).sort((a,b)=>a.d-b.d).slice(0,3);
-return '<div><span class="bd" style="background:'+c.c+';color:#fff">'+c.l+'</span> <b style="font-weight:500;font-size:15px">'+esc(s.n)+'</b></div>'+(s.x?'<div><span class="bd ok">환승 가능 · 300m 이내에 다른 종류 역</span></div>':'')+'<div style="margin-top:6px">JIKS까지 직선 <b style="font-weight:500">'+fd1(hav(s.lat,s.lng,JK.lat,JK.lng))+'</b></div><div><a href="'+gm(s.lat,s.lng)+'" target="_blank" rel="noopener">구글 지도에서 열기</a></div><h4>가까운 단지</h4>'+l.map(x=>'<div>'+x.r.i+'. '+x.r.nm+' · <b style="font-weight:500">'+fd(x.d)+'</b></div>').join('')+(s.e?'<div class="un" style="margin-top:4px">내장 좌표(근사)입니다. 노선 데이터를 불러오면 OpenStreetMap 좌표로 바뀝니다.</div>':'')}
+return '<div><span class="bd" style="background:'+c.c+';color:#fff">'+c.l+'</span> <b style="font-weight:500;font-size:15px">'+esc(s.n)+'</b></div>'+(s.x?'<div><span class="bd ok">환승 가능 · 300m 이내에 다른 종류 역</span></div>':'')+'<div style="margin-top:6px">JIKS까지 직선 <b style="font-weight:500">'+fd1(hav(s.lat,s.lng,JK.lat,JK.lng))+'</b></div><div><a href="'+gm(s.lat,s.lng)+'" target="_blank" rel="noopener">구글 지도에서 열기</a></div><h4>가까운 단지</h4>'+l.map(x=>'<div>'+x.r.i+'. '+x.r.nm+' · <b style="font-weight:500">'+fd(x.d)+'</b></div>').join('')+(s.cd?'<div>역 번호 '+s.cd+'</div>':'')+trLines(s)+(s.e?'<div class="un" style="margin-top:4px">좌표 출처: 위키백과 역 문서. OpenStreetMap 데이터를 불러오면 그 좌표로 바뀝니다.</div>':'')}
 function trNear(r){const d=trData().s;if(!d.length)return '';let h='<h4>가까운 역 (직선거리, 종류별)</h4>';
 Object.keys(TC).forEach(c=>{if(c==='brt')return;let b=null,bd=1e9;d.forEach(s=>{if(s.c!==c)return;const x=hav(r.lat,r.lng,s.lat,s.lng);if(x<bd){bd=x;b=s}});if(b)h+='<div><span style="color:'+TC[c].c+'">■</span> '+TC[c].l+' '+esc(b.n)+' · <b style="font-weight:500">'+fd(bd)+'</b></div>'});
 if(BSD&&BSD.length){let b=null,bd=1e9;BSD.forEach(p=>{const x=hav(r.lat,r.lng,p[0],p[1]);if(x<bd){bd=x;b=p}});if(b)h+='<div><span style="color:'+TC.brt.c+'">●</span> BRT 정류장 '+esc(b[2]||'')+' · <b style="font-weight:500">'+fd(bd)+'</b></div>'}
 return h}
 function drawTr(){if(!trg)return;trg.clearLayers();const d=trData(),nm=lay('stn');
 Object.keys(TC).forEach(c=>{if(!trOn(c))return;const k=TC[c];
-d.l.filter(x=>x.c===c).forEach(x=>{const cs=L.polyline(x.p,{color:'#fff',weight:k.w+3,opacity:.85,interactive:false,lineJoin:'round'}),pl=L.polyline(x.p,{color:k.c,weight:k.w,opacity:.95,lineJoin:'round'});pl.bindTooltip(k.l+(x.n?' · '+esc(x.n):''),{sticky:true});trg.addLayer(cs);trg.addLayer(pl)});
+d.l.filter(x=>x.c===c).forEach(x=>{const cs=L.polyline(x.p,{color:'#fff',weight:k.w+3,opacity:.85,interactive:false,lineJoin:'round'}),pl=L.polyline(x.p,{color:k.c,weight:k.w,opacity:.95,lineJoin:'round'});pl.bindTooltip(k.l+(x.n?' · '+esc(x.n):''),{sticky:true});trg.addLayer(cs);trg.addLayer(pl);
+const nm0=shortN(x.n);if(nm0&&c!=='brt'&&lay('stn')){const w=x.p.reduce((a,b)=>b.length>a.length?b:a,x.p[0]);const q=w[w.length>>1];trg.addLayer(L.marker(q,{icon:L.divIcon({html:'',className:'',iconSize:[0,0]}),interactive:false,keyboard:false,zIndexOffset:-50}).bindTooltip('<span style="color:'+k.c+'">'+esc(nm0)+'</span>',{permanent:true,direction:'center',className:'trn trl'}))}});
 d.s.filter(s=>s.c===c).forEach(s=>{const z=s.x?26:20,m=L.marker([s.lat,s.lng],{icon:L.divIcon({html:'<div class="tri'+(s.x?' x':'')+'" style="background:'+k.c+'">'+k.ch+'</div>',className:'',iconSize:[z,z],iconAnchor:[z/2,z/2]}),zIndexOffset:s.x?200:100,title:s.n});
 if(nm)m.bindTooltip(esc(s.n)+(s.x?' · 환승':''),{permanent:true,direction:'right',offset:[z/2,0],className:'trn'});
 m.bindPopup(()=>trPop(s),{maxWidth:320});trg.addLayer(m)})});
@@ -801,15 +812,15 @@ const c=scat(t),k=c+'|'+t.name.toLowerCase();if(!m.has(k))m.set(k,{c,n:t.name.re
 function parseB(j){const m=new Map();(j.elements||[]).forEach(e=>{if(e.type!=='node'||e.lat==null)return;const t=e.tags||{},k=(+e.lat).toFixed(4)+','+(+e.lon).toFixed(4);if(!m.has(k))m.set(k,[+(+e.lat).toFixed(5),+(+e.lon).toFixed(5),(t.name||t['name:en']||'').slice(0,40)])});return[...m.values()]}
 async function ovq(q){let err='';for(const u of OV){try{const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),110000);const res=await fetch(u,{method:'POST',body:'data='+encodeURIComponent(q),headers:{'Content-Type':'application/x-www-form-urlencoded'},signal:ctl.signal});clearTimeout(to);if(!res.ok)throw new Error('HTTP '+res.status);return await res.json()}catch(e){err=e.name==='AbortError'?'시간 초과':String(e.message||e)}}throw new Error(err)}
 async function loadTr(force){if(TRL)return;TRL=true;let step='철도';
-try{if(!force){const c=ld('where.tr',null);if(c&&c.v===2&&Date.now()-c.t<6048e5&&c.s&&c.s.length){TRD={l:c.l||[],s:c.s};BSD=c.b||null;drawTr();drawBus();return}}
+try{if(!force){const c=ld('where.tr',null);if(c&&c.v===3&&Date.now()-c.t<6048e5&&c.s&&c.s.length){TRD={l:c.l||[],s:c.s};BSD=c.b||null;drawTr();drawBus();return}}
 tstat('철도 노선과 역 불러오는 중…');
-const l=parseL(await ovq(QL)),s=parseS(await ovq(QS));
+const l=parseL(await ovq(QL)),s0=parseS(await ovq(QS)),s=snapSt(s0,l);
 if(!l.length&&!s.length)throw new Error('빈 결과');
 TRD={l,s};drawTr();
 step='BRT';tstat('BRT 노선과 정류장 불러오는 중…');
 const bl=parseL(await ovq(QBL),'brt');BSD=parseB(await ovq(QBS));
 TRD.l=TRD.l.concat(bl);drawTr();drawBus();
-sv('where.tr',{v:2,t:Date.now(),l:TRD.l,s:TRD.s,b:BSD})}
+sv('where.tr',{v:3,t:Date.now(),l:TRD.l,s:TRD.s,b:BSD})}
 catch(e){drawTr();tstat(step+' 데이터를 불러오지 못했습니다('+String(e.message||e)+'). '+(step==='BRT'?'철도는 표시 중이고 BRT만 빠졌습니다.':'MRT 남북선만 내장 좌표로 표시 중입니다.')+' "교통 다시 불러오기"를 눌러 보세요.')}
 finally{TRL=false}}
 initKel();buildLg();initMap();fitAll();all();ttb();drawTr();loadTr(false);
