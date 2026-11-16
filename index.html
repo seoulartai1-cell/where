@@ -84,6 +84,8 @@ details.g[open]>summary::after{content:'－'}
 .leaflet-tooltip.bt{font-size:12px;font-weight:600;padding:1px 6px}
 .leaflet-tooltip.dt{font-size:12px;padding:1px 5px}
 .zlow .bt{display:none}
+.rtl{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:3px 0;font-size:13px}.rtl label{display:flex;align-items:center;gap:6px;cursor:pointer;min-width:0}.rtl .sw{width:14px;height:5px;border-radius:3px;flex:none}.rtl small{color:var(--mute);font-size:11px;white-space:nowrap}
+.leaflet-tooltip.rn{font-size:11px;font-weight:600;padding:1px 5px}
 .leaflet-popup-content{margin:12px 14px;width:min(300px,68vw)!important;font-size:13px;line-height:1.55}
 .leaflet-popup-content h4{margin:10px 0 3px;font-size:12px;color:var(--sub)}
 .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--card);color:var(--ink)}
@@ -131,6 +133,18 @@ body[data-v=list] #mapcol{display:none}
 <div class="cl">기타</div>
 <label class="ch"><input type="checkbox" id="unk" checked> 가격 미확인 포함</label><label class="ch"><input type="checkbox" id="fo"> ★ 즐겨찾기만</label>
 </div></details>
+<details class="g" open><summary>통학 버스 노선도</summary><div class="gb">
+<div style="display:flex;gap:6px;margin-bottom:6px"><button class="sm" id="rtall">전체 켜기</button><button class="sm" id="rtnone">전체 끄기</button></div>
+<label class="ch"><input type="checkbox" id="rtlab" checked> 정류장 이름·시각 (확대 시)</label>
+<div id="rtlist"></div>
+<div class="note" style="padding:6px 0 0">정류장을 시간 순서로 이어 JIKS까지 간 도로 경로 추정입니다(OSRM·OpenStreetMap). 실제 경로와 다를 수 있습니다. 노선 번호는 시간표 블록 순서로 추정해 "(추정)"으로 표시했습니다. 점선 원은 단지 위치를 못 찾아 동네 기준으로 둔 대략 위치입니다.</div>
+</div></details>
+<details class="g"><summary>철도·지하철</summary><div class="gb">
+<div style="display:flex;gap:6px;margin-bottom:6px"><button class="sm" id="trall">전체 켜기</button><button class="sm" id="trnone">전체 끄기</button></div>
+<div id="trchips"></div>
+<label class="ch"><input type="checkbox" id="trlab"> 역 이름 (확대 시)</label>
+<div class="note" style="padding:6px 0 0">MRT 남북선은 "지도 표시"의 MRT 칩으로 켭니다. 역 좌표는 Wikidata, 노선선은 역 순서를 추정해 이은 것이라 실제 선로와 다릅니다. 순환선·도심 구간 KRL은 역만 표시합니다.</div>
+</div></details>
 <details class="g"><summary>지도 표시</summary><div class="gb">
 <label class="ch"><input type="checkbox" data-l="zn" checked> 구역</label><label class="ch"><input type="checkbox" data-l="st" checked> MRT</label><label class="ch"><input type="checkbox" data-l="pd" checked> 빠델</label><label class="ch"><input type="checkbox" data-l="bl" checked> 발레</label><label class="ch"><input type="checkbox" data-l="en" checked> 영어학원</label><label class="ch"><input type="checkbox" data-l="bus" checked> 버스 시각</label>
 </div></details>
@@ -148,6 +162,7 @@ body[data-v=list] #mapcol{display:none}
 </div>
 </div>
 <script src="vendor/leaflet/leaflet.js"></script>
+<script src="routes.js"></script>
 <script>
 const $=i=>document.getElementById(i);
 const hav=(a,b,c,d)=>{const t=Math.PI/180,x=(c-a)*t,y=(d-b)*t,q=Math.sin(x/2)**2+Math.cos(a*t)*Math.cos(c*t)*Math.sin(y/2)**2;return 12742*Math.asin(Math.sqrt(q))};
@@ -224,7 +239,7 @@ const ZN=[
 {id:'leb',n:'르박불루스 Lebak Bulus',z:null,lat:-6.2895,lng:106.7752,r:800,c:'#27AE60',d:'MRT 남쪽 종점과 차량기지가 있는 지역. 남쪽으로 이어지는 교통 거점.',pt:['MRT 시발·종착','Parama 단지 가까움']},
 {id:'jik',n:'찌뿌용 Cipayung (JIKS)',z:null,lat:JK.lat,lng:JK.lng,r:1200,c:'#D35400',d:'JIKS가 있는 동자카르타 지역. 남부 거주지에서 버스로 통학하며 이른 시각에 탑승함.',pt:['학교 주변 거주 가능 단지는 조사 목록에 없음']}
 ];
-let map,mk,ln,zg,rm={},pass={};
+let map,mk,ln,zg,trg,rtg,rm={},pass={};
 let FV=new Set();try{FV=new Set(JSON.parse(localStorage.getItem('jiks_fav')||'[]'))}catch(e){}
 const fsv=()=>{try{localStorage.setItem('jiks_fav',JSON.stringify([...FV]))}catch(e){}};
 function F(){return{b:+$('budget').value,ty:[...document.querySelectorAll('[data-t]:checked')].map(x=>x.dataset.t),fc:[...document.querySelectorAll('[data-f]:checked')].map(x=>x.dataset.f),mrt:+$('mrt').value,pd:+$('pd').value,bl:+$('bl').value,en:+$('en').value,bus:+$('bus').value,unk:$('unk').checked,q:$('q').value.trim().toLowerCase()}}
@@ -254,9 +269,9 @@ const znHtml=z=>{const s=znStat(z);return '<b style="font-size:15px">'+z.n+'</b>
 function initMap(){
 map=L.map('map',{zoomControl:true});
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(map);
-zg=L.layerGroup().addTo(map);mk=L.layerGroup().addTo(map);ln=L.layerGroup().addTo(map);
+zg=L.layerGroup().addTo(map);trg=L.layerGroup().addTo(map);rtg=L.layerGroup().addTo(map);mk=L.layerGroup().addTo(map);ln=L.layerGroup().addTo(map);
 map.on('popupclose',()=>ln.clearLayers());
-map.on('zoomend',zc)}
+map.on('zoomend',()=>{zc();drawTr();drawRt()})}
 function zc(){$('map').classList.toggle('zlow',map.getZoom()<15)}
 const PO_={maxHeight:340,autoPanPaddingTopLeft:[20,70],autoPanPaddingBottomRight:[20,20]};
 const LC='#57534e';
@@ -319,7 +334,7 @@ $('tt').innerHTML='<table class="tt"><thead><tr><th>시각</th><th>정류장</th
 function all(){labels();const f=F();pass={};R.forEach(r=>{pass[r.id]=ok(r,f)});render();lst()}
 const PRE={kem:[-6.2605,106.8095,15],cil:[-6.2840,106.7920,15],pi:[-6.2720,106.7830,15],jiks:[JK.lat,JK.lng,14],gan:[-6.2395,106.7860,15]};
 document.querySelectorAll('[data-pre]').forEach(b=>b.onclick=()=>{const k=b.dataset.pre;if(k==='all')fitAll();else map.setView([PRE[k][0],PRE[k][1]],PRE[k][2])});
-$('app').addEventListener('input',e=>{const t=e.target;if(t.id==='tq'){ttb();return}if(t.closest('[data-l]')){render();return}if(t.id==='sort'){lst();return}all()});
+$('app').addEventListener('input',e=>{const t=e.target;if(t.dataset&&(t.dataset.br!==undefined||t.dataset.tr!==undefined)||t.id==='rtlab'||t.id==='trlab')return;if(t.id==='tq'){ttb();return}if(t.closest('[data-l]')){render();return}if(t.id==='sort'){lst();return}all()});
 function toggleFav(id){FV.has(id)?FV.delete(id):FV.add(id);fsv();const open=rm[id]&&rm[id].isPopupOpen();all();if(open&&rm[id])rm[id].openPopup()}
 document.addEventListener('click',e=>{const s=e.target.closest('[data-fv]');if(s){toggleFav(s.dataset.fv);return}const b=e.target.closest('[data-go]');if(b)go(b.dataset.go)});
 const setv=(id,v)=>{$(id).value=v};
@@ -328,7 +343,35 @@ $('reset').onclick=()=>{setv('budget',60);setv('mrt',5);setv('pd',5);setv('bl',5
 function setView(v){document.body.dataset.v=v;document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));if(map)setTimeout(()=>map.invalidateSize(),60)}
 document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>setView(b.dataset.v));
 addEventListener('resize',()=>map&&map.invalidateSize());
-initMap();fitAll();all();ttb();
+
+/* 통학 버스 노선·철도 레이어 (내장 데이터, 외부 요청 없음) */
+const TCL={lrt:['LRT','#0f766e'],krl:['KRL·통근철도','#b91c1c'],apt:['공항철도','#ea580c'],hsr:['고속철(Halim)','#334155'],mrp:['MRT 2단계(미개통)','#7c3aed']};
+const RTO={},TRO={};BUSR.forEach(r=>RTO[r.id]=true);Object.keys(TCL).forEach(k=>TRO[k]=false);
+const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function drawRt(){if(!rtg)return;rtg.clearLayers();const lb=$('rtlab').checked&&map.getZoom()>=14;
+BUSR.forEach(r=>{if(!RTO[r.id])return;
+rtg.addLayer(L.polyline(r.g,{color:'#fff',weight:7,opacity:.85,interactive:false,lineJoin:'round'}));
+rtg.addLayer(L.polyline(r.g,{color:r.c,weight:4,opacity:.9,lineJoin:'round'}).bindTooltip(esc(r.n)+' · '+r.km+'km · 약 '+r.min+'분 (도로 기준)',{sticky:true}));
+r.st.forEach((p,i)=>{if(p.id)return;const m=L.circleMarker([p.lat,p.lng],{radius:7,color:'#fff',weight:2,fillColor:r.c,fillOpacity:p.ap?.55:1,dashArray:p.ap?'3 2':null});
+m.bindPopup('<b style="font-size:15px">'+esc(p.n)+'</b><div>'+esc(r.n)+' · '+(i+1)+'번째 정류장</div><div>탑승 '+p.t+' · '+esc(p.p)+'</div>'+(p.ap?'<div style="color:var(--mute)">대략 위치 (단지 좌표 미확인)</div>':'')+'<div class="lk"><a href="'+gm(p.lat,p.lng)+'" target="_blank" rel="noopener">구글 지도</a><a href="'+gd(p.lat,p.lng)+'" target="_blank" rel="noopener">JIKS 경로</a></div>',PO_);
+if(lb)m.bindTooltip(esc(p.n)+' '+p.t,{permanent:true,direction:'right',offset:[8,0],className:'rn'});
+rtg.addLayer(m)})})}
+function trPop(s){const c=TCL[s.c],l=R.map(r=>({r,d:hav(r.lat,r.lng,s.lat,s.lng)})).sort((a,b)=>a.d-b.d).slice(0,3);
+return '<b style="font-size:15px">'+esc(s.n)+'</b><div>'+c[0]+'</div><div>JIKS까지 직선 <b>'+fd1(hav(s.lat,s.lng,JK.lat,JK.lng))+'</b></div><h4>가까운 단지</h4>'+l.map(x=>'<div>'+x.r.i+'. '+esc(x.r.nm)+' · <b>'+fd(x.d)+'</b></div>').join('')+'<div class="lk"><a href="'+gm(s.lat,s.lng)+'" target="_blank" rel="noopener">구글 지도</a></div>'}
+function drawTr(){if(!trg)return;trg.clearLayers();const lb=$('trlab').checked&&map.getZoom()>=14;
+Object.keys(TCL).forEach(k=>{if(!TRO[k])return;const c=TCL[k][1];
+TRS.l.filter(x=>x.c===k).forEach(x=>trg.addLayer(L.polyline(x.p,{color:c,weight:3,opacity:.7,dashArray:k==='mrp'?'6 6':null,lineJoin:'round'}).bindTooltip(esc(x.n),{sticky:true})));
+TRS.s.filter(x=>x.c===k).forEach(x=>{const m=L.circleMarker([x.lat,x.lng],{radius:5,color:'#fff',weight:1.5,fillColor:c,fillOpacity:k==='mrp'?.45:1});
+m.bindPopup(()=>trPop(x),PO_);m.bindTooltip(esc(x.n),lb?{permanent:true,direction:'right',offset:[6,0],className:'rn'}:{className:'rn'});trg.addLayer(m)})})}
+function buildRt(){$('rtlist').innerHTML=BUSR.map(r=>'<div class="rtl"><label><input type="checkbox" data-br="'+r.id+'"'+(RTO[r.id]?' checked':'')+'><span class="sw" style="background:'+r.c+'"></span>'+esc(r.n)+'</label><small>'+r.st[0].t+'~'+r.st[r.st.length-1].t+' · '+r.km+'km</small></div>').join('')}
+function buildTr(){$('trchips').innerHTML=Object.keys(TCL).map(k=>'<label class="ch"><input type="checkbox" data-tr="'+k+'"'+(TRO[k]?' checked':'')+'><span style="color:'+TCL[k][1]+'">■</span> '+TCL[k][0]+' '+TRS.s.filter(x=>x.c===k).length+'</label>').join('')}
+buildRt();buildTr();
+$('rtlist').addEventListener('change',e=>{const t=e.target;if(t.dataset.br){RTO[t.dataset.br]=t.checked;drawRt()}});
+$('trchips').addEventListener('change',e=>{const t=e.target;if(t.dataset.tr){TRO[t.dataset.tr]=t.checked;drawTr()}});
+$('rtlab').addEventListener('change',drawRt);$('trlab').addEventListener('change',drawTr);
+$('rtall').onclick=()=>{BUSR.forEach(r=>RTO[r.id]=true);buildRt();drawRt()};$('rtnone').onclick=()=>{BUSR.forEach(r=>RTO[r.id]=false);buildRt();drawRt()};
+$('trall').onclick=()=>{Object.keys(TCL).forEach(k=>TRO[k]=true);buildTr();drawTr()};$('trnone').onclick=()=>{Object.keys(TCL).forEach(k=>TRO[k]=false);buildTr();drawTr()};
+initMap();fitAll();all();ttb();drawRt();drawTr();
 </script>
 </body>
 </html>
