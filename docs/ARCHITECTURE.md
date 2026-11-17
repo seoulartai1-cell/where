@@ -53,6 +53,9 @@ js/main.js                     초기화 순서
 data/listings.json             매물 자동 확인 결과(배포 때 생성)
 scripts/update-listings.mjs    매물 확인기
 scripts/build-boundaries.py    자카르타 전체 구·동 경계 생성(GADM 4.1 + BPS 코드)
+scripts/update-nearby.mjs      통학버스 정류장 주변 매물 수집(Jendela360·Pinhome 자동 + nearby-manual.json)
+scripts/nearby-manual.json     자동 수집이 막힌 사이트(Rumah123·99.co·Travelio 등)에서 직접 찾은 매물
+data/nearby.json               정류장 주변 매물 결과(배포 때 생성, 단지 좌표 캐시 포함)
 .github/workflows/pages.yml    확인 + 배포(6시간마다, 푸시 때)
 housing-guide/index.html       예전 주소 넘김
 docs/ARCHITECTURE.md           이 문서
@@ -82,3 +85,18 @@ GitHub Actions (6시간마다, 수동 실행 가능)
       4. 헤더에 "매물 n시간 전 확인" 표시, 찾기 탭 "매물 자동 확인 현황"에 사이트별 결과
 ```
 수집이 실패한 사이트는 이전 값을 유지하고 실패로 표시한다. 사이트 구조가 바뀌면 `scripts/update-listings.mjs`의 추출 규칙(`extract*`)을 고친다.
+
+## 4. 통학버스 정류장 주변 매물
+
+```
+scripts/update-nearby.mjs (Actions 6시간마다)
+  1. js/data/routes.js의 모든 탑승 지점(BUSR) 좌표
+  2. Jendela360 지역 페이지 → 단지 목록, 단지 페이지의 좌표로 정류장 거리 계산(좌표는 30일 캐시)
+  3. 반경 1.2km 안 단지: Jendela360 임대 매물 + Pinhome 단지 페이지(JSON-LD) 임대 매물
+  4. scripts/nearby-manual.json(Rumah123·99.co·Travelio·properti1 직접 조사, 확인 날짜 포함) 합치기
+  5. data/nearby.json
+js/features/nearby.js
+  "찾기" 탭 "버스 정류장 주변 매물": 반경·노선·정렬, 예산·방 조건, 지도 표시
+  단지마다 Rumah123·99.co·Travelio·Mamikos·Pinhome·OLX 실시간 검색 링크
+```
+Rumah123·99.co는 자동 접속을 막아(Cloudflare) 자동 수집하지 않는다. 직접 찾은 매물은 수동 파일에 넣고 확인 날짜를 표시한다.

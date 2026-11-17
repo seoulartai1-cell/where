@@ -9,7 +9,7 @@ const rows=R.filter(r=>!r.nob).map(r=>[r.b[0],r.nm,r.b[1],r.z,r.b[2],r.i]).conca
 rows.sort((a,b)=>tm(a[0])-tm(b[0])||a[1].localeCompare(b[1]));
 const f=rows.filter(x=>!q||(x[1]+x[3]).toLowerCase().includes(q));
 $('tt').innerHTML='<table class="tt"><thead><tr><th style="width:15%">시각</th><th style="width:27%">정류장</th><th style="width:24%">승차 지점</th><th style="width:20%">구역</th><th style="width:14%">지도</th></tr></thead><tbody>'+f.map(x=>'<tr><td><b style="font-weight:500">'+x[0]+'</b></td><td>'+x[1]+'</td><td>'+x[2]+'</td><td>'+x[3]+(x[4]!=='-'?'<div style="color:var(--text-muted)">'+x[4]+'</div>':'')+'</td><td>'+(x[5]?'<button class="sm" data-go="'+R[x[5]-1].id+'">'+x[5]+'번</button>':'<span class="un">없음</span>')+'</td></tr>').join('')+'</tbody></table>'}
-function all(){labels();const f=F();pass={};R.forEach(r=>{r.nd=need(r);pass[r.id]=ok(r,f)});render();lst();fpan()}
+function all(){labels();const f=F();pass={};R.forEach(r=>{r.nd=need(r);pass[r.id]=ok(r,f)});render();lst();fpan();if(typeof nbRender==='function')nbRender()}
 
 const PRE={kem:[-6.2605,106.8095,15],cil:[-6.2840,106.7920,15],pi:[-6.2720,106.7830,15],jiks:[JK.lat,JK.lng,14],gan:[-6.2395,106.7860,15],jk:[-6.2,106.83,11]};
 document.querySelectorAll('[data-pre]').forEach(b=>b.onclick=()=>{const k=b.dataset.pre;if(k==='fit')fit();else if(k==='all')fitAll();else map.setView([PRE[k][0],PRE[k][1]],PRE[k][2])});

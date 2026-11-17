@@ -31,6 +31,12 @@ jobs:
         env:
           PREV_URL: ${{ steps.pages.outputs.base_url }}/data/listings.json
         run: node scripts/update-listings.mjs
+      - name: 정류장 주변 매물 (data/nearby.json)
+        continue-on-error: true
+        timeout-minutes: 40
+        env:
+          PREV_URL: ${{ steps.pages.outputs.base_url }}/data/nearby.json
+        run: node scripts/update-nearby.mjs
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .

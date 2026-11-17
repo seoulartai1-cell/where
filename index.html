@@ -40,6 +40,12 @@
 <label class="lb" style="flex-direction:row;align-items:center;gap:8px">정렬
 <select id="sort"><option value="p">월세 낮은 순</option><option value="s">선호 충족 많은 순</option><option value="m">MRT 가까운 순</option><option value="j">JIKS 가까운 순</option><option value="b">버스 탑승 늦은 순</option><option value="n">번호 순</option></select></label>
 </div>
+<details class="g" id="nbd" open><summary>버스 정류장 주변 매물 <span id="nbsum" style="font-weight:400;font-size:12px;color:var(--text-muted)"></span></summary><div class="gb">
+<div class="fx" style="flex-wrap:wrap;gap:6px;margin-bottom:6px"><label class="sm">반경 <select id="nbr"><option value="0.5">500m</option><option value="0.8">800m</option><option value="1.2" selected>1.2km</option></select></label>
+<label class="sm">노선 <select id="nbrt"><option value="">전체 노선</option></select></label>
+<label class="sm">정렬 <select id="nbs"><option value="km">정류장 가까운 순</option><option value="price">월세 낮은 순</option></select></label>
+<label class="ch"><input type="checkbox" id="nbb" checked> 예산·방 조건 적용</label><label class="ch"><input type="checkbox" id="nbm"> 지도에 표시</label></div>
+<div id="nbl"></div></div></details>
 <details class="g" id="lvd"><summary>매물 자동 확인 현황 <span id="lvsum" style="font-weight:400;font-size:12px;color:var(--text-muted)"></span></summary><div class="gb" id="lvp"></div></details>
 <details class="g" open><summary>기본 조건</summary><div class="gb">
 <div class="sgr">
@@ -440,6 +446,7 @@
 <script src="js/features/transit.js"></script>
 <script src="js/features/busroutes.js"></script>
 <script src="js/features/listings.js"></script>
+<script src="js/features/nearby.js"></script>
 <script src="js/features/guide.js"></script>
 <!-- 화면 전환·초기화 -->
 <script src="js/core/router.js"></script>
