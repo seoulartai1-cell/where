@@ -9,13 +9,14 @@ if(!known){if(!f.unk)return false}else{const m=keys.map(k=>P[k]).filter(v=>v!=nu
 for(const c of f.fc){
 if(c==='green'){if(r.gr!=='golf'&&r.gr!=='garden')return false}
 else if(c==='t6'){if(r.t6!==1)return false}
+else if(c==='tod'){if(!r.tod||r.tod[2]!==1)return false}
 else if(c==='coach'){const x=r.nbc[0];if(f.pd<5?x.d>f.pd:false)return false}
 else if(r.f[c]!==1)return false}
 if(f.mrt<5&&r.mrt[0].d>f.mrt)return false;
 if(f.pd<5&&r.nb.pd[0].d>f.pd)return false;
 if(f.bl<5&&r.nb.bl[0].d>f.bl)return false;
 if(f.en<5&&r.nb.en[0].d>f.en)return false;
-if(tm(r.b[0])<300+f.bus)return false;
+if(r.nob){if(f.bus>0)return false}else if(tm(r.b[0])<300+f.bus)return false;
 if(r.nd){if(r.nd.bad)return false;if(r.nd.unk&&!$('nu').checked)return false}
 return true}
 function lo(r,f){const keys=f.ty.length?f.ty:['S','1','2','3'],P=ep(r);const m=keys.map(k=>P[k]).filter(v=>v!=null);return m.length?Math.min(...m):null}

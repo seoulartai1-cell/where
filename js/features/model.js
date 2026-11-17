@@ -3,7 +3,9 @@ R.forEach((r,i)=>{r.i=i+1;r.jd=hav(r.lat,r.lng,JK.lat,JK.lng);r.mrt=ST.map(s=>({
 const fm=p=>p==null?'미확인':Math.round(p*100).toLocaleString('en-US')+'만';
 const fd=d=>d.toFixed(2)+'km';
 const fd1=d=>d.toFixed(1)+'km';
-const tm=t=>{const a=t.split(':');return +a[0]*60+ +a[1]};
+const tm=t=>{const a=String(t).split(':');return a.length<2?NaN:+a[0]*60+ +a[1]};
+const bt=r=>r.nob?-1:tm(r.b[0]);
+const TODL=r=>r.tod?(r.tod[2]===1?'역·몰 직결':'몰 직결·역 도보')+' · '+r.tod[0]:'';
 const GRL={golf:'골프장 뷰',garden:'정원·녹지',city:'도시 뷰'};
 const SMIN=12,SMAX=500;
 let sel=null,HT=620,map,mk,ln,zg,ig,lg,trg,bsg,rtg,rm={},pass={};
