@@ -15,7 +15,7 @@ function render(){
 mk.clearLayers();ln.clearLayers();zg.clearLayers();rm={};
 kpoly={};
 if(lay('kc'))KCG.forEach(g=>zg.addLayer(L.polygon(g.g,{color:'#8a8a8a',weight:1.8,opacity:.75,fill:false,interactive:false})));
-KEL.forEach(k=>{const kl=lay('kl'),zd=lay('zd');const tp=lay('tp');const pl=L.polygon(k.g,{color:kl?'#777':'transparent',weight:kl?.7:0,opacity:.5,fillColor:tp?CAT[k.cat][1]:'#000',fillOpacity:tp&&catOn(k.cat)?.4:0.01,interactive:zd});if(zd)pl.bindPopup(()=>kelHtml(k),{maxWidth:340,maxHeight:430});kpoly[kkey(k)]=pl;zg.addLayer(pl)});
+KEL.forEach(k=>{const kl=lay('kl'),zd=lay('zd');const tp=lay('tp');const pl=L.polygon(k.g,{color:kl?'#777':'transparent',weight:kl?.7:0,opacity:.5,fillColor:tp?ACAT[k.cat][1]:'#000',fillOpacity:tp&&catOn(k.cat)?.4:0.01,interactive:zd});if(zd)pl.bindPopup(()=>kelHtml(k),{maxWidth:340,maxHeight:430});kpoly[kkey(k)]=pl;zg.addLayer(pl)});
 if(lay('nm'))TG.forEach(t=>{if(!catOn(t.cat))return;t.ks.forEach(k=>zg.addLayer(L.polygon(k.g,{color:'#555',weight:2,dashArray:'2 5',opacity:.8,fill:false,interactive:false})))});
 $('clg').innerHTML=lay('tp')?'<div style="margin-top:4px">지역 특징 · '+Object.keys(lay('jd')?ACAT:CAT).map(c=>'<span class="sw" style="background:'+ACAT[c][1]+'"></span>'+ACAT[c][0]).join(' ')+'</div>':'';
 labelsUpd();study();

@@ -47,11 +47,12 @@ index.html                     화면 뼈대(맨 위 주석에 사이트 맵)
 css/app.css · css/guide.css    스타일(가이드는 #gv 안에서만)
 js/core/base.js                공통 도우미·기준점
 js/core/router.js              # 경로 → 화면 전환
-js/data/                       데이터만: places(단지·매물), regions(지역), kelurahan(경계), routes(버스·철도), photos(사진)
+js/data/                       데이터만: places(단지·매물), districts(자카르타 전체 시·구·동 설명), regions(통칭·동네·특징 분류), kelurahan(경계), routes(버스·철도), photos(사진)
 js/features/                   기능: model, favorites, filter, regions, map, list, needs, transit, busroutes, photos, listings, guide
 js/main.js                     초기화 순서
 data/listings.json             매물 자동 확인 결과(배포 때 생성)
 scripts/update-listings.mjs    매물 확인기
+scripts/build-boundaries.py    자카르타 전체 구·동 경계 생성(GADM 4.1 + BPS 코드)
 .github/workflows/pages.yml    확인 + 배포(6시간마다, 푸시 때)
 housing-guide/index.html       예전 주소 넘김
 docs/ARCHITECTURE.md           이 문서

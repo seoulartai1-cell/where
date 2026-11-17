@@ -26,6 +26,7 @@
 - 철도(LRT·KRL·공항철도·고속철·MRT 2단계)는 "지역·교통" 탭에서 켜고 끈다. 선로는 OpenStreetMap 노선 관계(2026-09-05 기준)의 실제 선로 형상을 단순화한 것이고, 역 좌표도 OSM으로 보정했다. LRT Jakarta는 Manggarai 연장(2026-09-16 개통)까지 포함한다. 역·노선은 `routes.js`의 내장 데이터(`TRS`)이고, BRT 노선·정류장만 Overpass API(키 불필요)로 불러와 7일간 저장한다. 실패하면 안내 문구가 뜬다.
 - 데이터는 `js/data/routes.js`(`BUSR`, `TRS`). 갱신하려면 해당 변수를 수정한다.
 - 단지·학원 데이터는 `js/data/places.js`, 지역 데이터는 `js/data/regions.js`.
+- 자카르타 전체(5개 시 + 천 개의 섬, 구 44개·동 267개) 경계는 `js/data/kelurahan.js`(`scripts/build-boundaries.py`로 GADM 4.1에서 생성), 시·구·동 설명·한글 표기·특징 분류는 `js/data/districts.js`. 구 이름표·동 경계를 누르면 설명이 뜨고, "지역·교통" 탭의 지역 공부 패널에서 시 → 구 → 동 순으로 찾는다.
 
 ## 기능
 생활 조건(필수·선호, 주변 인프라), 자카르타 동네와 한국 비유, 행정구역(Kecamatan·Kelurahan) 경계, 즐겨찾기 메모·상태·내보내기, 통학 버스 노선도, 매물 즐겨찾기·환율·공과금 추정이 모두 한 웹앱에 있다. 헤더의 "계약 가이드"는 `housing-guide/`로 이동한다.
