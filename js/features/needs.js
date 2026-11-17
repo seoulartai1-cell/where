@@ -8,7 +8,12 @@ const INF_CATS=[
 {l:'세탁소',c:'#6C5CE7',g:'laundry',h:'세탁·드라이클리닝'},
 {l:'공원',c:'#4CAF50',g:'park',h:'산책·아이 놀이'},
 {l:'한식당',c:'#C0392B',g:'Korean restaurant',h:'식사'},
-{l:'은행·ATM',c:'#607D8B',g:'ATM bank',h:'현금 인출'}];
+{l:'은행·ATM',c:'#607D8B',g:'ATM bank',h:'현금 인출'},
+{l:'발레·댄스',c:'#E84393',g:'ballet school',h:'발레·무용 학원'},
+{l:'영어학원',c:'#0984E3',g:'English course',h:'어학원·영어 과외'},
+{l:'스케이트파크',c:'#2D3436',g:'skatepark',h:'보드·인라인'},
+{l:'음악학원',c:'#A0522D',g:'music school',h:'피아노·악기'},
+{l:'태권도·무술',c:'#F39C12',g:'taekwondo',h:'태권도·무술 도장'}];
 const mi=(id,l,h)=>({id,l,h,t:'m'});
 const NG=[
 {g:'주변 생활 · 반경 안 자동 집계',i:INF_CATS.map((c,k)=>({id:'i'+k,l:c.l,h:c.h,t:'i',ci:k}))},
@@ -46,17 +51,23 @@ function refresh(id){const f=F();R.forEach(r=>{r.nd=need(r);pass[r.id]=ok(r,f)})
 R.forEach(r=>{const m=rm[r.id];if(m){const on=pass[r.id];m.setIcon(rIcon(r));m.setZIndexOffset(FV[r.id]?700:on?600:300)}});
 lst();const m=rm[id],p=m&&m.getPopup();if(p&&p.isOpen()){const c=p.getElement().querySelector('.leaflet-popup-content'),y=c.scrollTop;p.update();c.scrollTop=y}}
 const OV=['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter','https://overpass.private.coffee/api/interpreter'];
-const OQ=['["shop"="supermarket"]','["shop"="convenience"]','["amenity"~"^(hospital|clinic|doctors)$"]','["amenity"="pharmacy"]','["shop"~"^(laundry|dry_cleaning)$"]','["leisure"="park"]','["amenity"="restaurant"]["cuisine"~"korean"]','["amenity"~"^(bank|atm)$"]'];
+const OQ=['["shop"="supermarket"]','["shop"="convenience"]','["amenity"~"^(hospital|clinic|doctors)$"]','["amenity"="pharmacy"]','["shop"~"^(laundry|dry_cleaning)$"]','["leisure"="park"]','["amenity"="restaurant"]["cuisine"~"korean"]','["amenity"~"^(bank|atm)$"]','["amenity"="dancing_school"]','["leisure"="dance"]','["name"~"ballet|balet",i]','["amenity"="language_school"]','["name"~"english|bahasa inggris|wall street english|^EF ",i]','["leisure"="skatepark"]','["sport"~"skateboard"]','["amenity"="music_school"]','["name"~"music school|sekolah musik|kursus musik|piano",i]','["sport"~"taekwondo|martial_arts|karate|judo"]','["name"~"taekwondo",i]'];
 function bbox(){const m=0.0145,a=R.map(r=>r.lat),o=R.map(r=>r.lng);return[Math.min(...a)-m,Math.min(...o)-m,Math.max(...a)+m,Math.max(...o)+m].map(x=>+x.toFixed(4)).join(',')}
-function icat(t){if(t.shop==='supermarket')return 0;if(t.shop==='convenience')return 1;if(/^(hospital|clinic|doctors)$/.test(t.amenity||''))return 2;if(t.amenity==='pharmacy')return 3;if(/^(laundry|dry_cleaning)$/.test(t.shop||''))return 4;if(t.leisure==='park')return 5;if(t.amenity==='restaurant'&&/korean/i.test(t.cuisine||''))return 6;if(/^(bank|atm)$/.test(t.amenity||''))return 7;return -1}
+function icat(t){if(t.shop==='supermarket')return 0;if(t.shop==='convenience')return 1;if(/^(hospital|clinic|doctors)$/.test(t.amenity||''))return 2;if(t.amenity==='pharmacy')return 3;if(/^(laundry|dry_cleaning)$/.test(t.shop||''))return 4;if(t.leisure==='park')return 5;if(t.amenity==='restaurant'&&/korean/i.test(t.cuisine||''))return 6;if(/^(bank|atm)$/.test(t.amenity||''))return 7;
+const nm=(t.name||'')+' '+(t['name:en']||''),sp=t.sport||'';
+if(t.amenity==='dancing_school'||t.leisure==='dance'||/ballet|balet/i.test(nm))return 8;
+if(t.amenity==='language_school'||/english|bahasa inggris|^EF /i.test(nm))return 9;
+if(t.leisure==='skatepark'||/skateboard/.test(sp))return 10;
+if(t.amenity==='music_school'||/music school|sekolah musik|kursus musik|piano/i.test(nm))return 11;
+if(/taekwondo|martial_arts|karate|judo/.test(sp)||/taekwondo/i.test(nm))return 12;return -1}
 function iparse(j){return(j.elements||[]).map(e=>{const t=e.tags||{},c=icat(t),la=e.lat!=null?e.lat:e.center&&e.center.lat,lo2=e.lon!=null?e.lon:e.center&&e.center.lon;if(c<0||la==null||lo2==null)return null;return[+(+la).toFixed(5),+(+lo2).toFixed(5),c,(t.name||t['name:en']||'').slice(0,40)]}).filter(Boolean)}
 const istat=t=>{$('istat').textContent=t};
 function calcInfra(){const rad=+$('ir').value/1000;R.forEach(r=>{r.ic=INF_CATS.map(()=>0);r.in=INF_CATS.map(()=>null);INF.forEach(p=>{const d=hav(r.lat,r.lng,p[0],p[1]);if(d<=rad)r.ic[p[2]]++;if(r.in[p[2]]==null||d<r.in[p[2]])r.in[p[2]]=d})})}
 function setInf(d,src){INF=d;calcInfra();$('iload').textContent='인프라 다시 불러오기';istat('집계 완료 '+d.length+'곳 · '+src+' · © OpenStreetMap contributors. 반경 안 개수는 직선거리 기준이며 이름 없는 점포도 포함합니다.');all();drawInfra()}
 async function loadInfra(force){if(INFL)return;INFL=true;const bb=bbox();
-try{if(!force){const c=ld('where.inf',null);if(c&&c.v===1&&c.k===bb&&Date.now()-c.t<6048e5&&c.d&&c.d.length){setInf(c.d,'저장본');return}}
+try{if(!force){const c=ld('where.inf',null);if(c&&c.v===2&&c.k===bb&&Date.now()-c.t<6048e5&&c.d&&c.d.length){setInf(c.d,'저장본');return}}
 istat('주변 인프라 불러오는 중…');const q='[out:json][timeout:60];('+OQ.map(t=>'nwr'+t+'('+bb+');').join('')+');out tags center;';let err='';
-for(const u of OV){try{const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),75000);const res=await fetch(u,{method:'POST',body:'data='+encodeURIComponent(q),headers:{'Content-Type':'application/x-www-form-urlencoded'},signal:ctl.signal});clearTimeout(to);if(!res.ok)throw new Error('HTTP '+res.status);const d=iparse(await res.json());if(!d.length)throw new Error('빈 결과');sv('where.inf',{v:1,k:bb,t:Date.now(),d});setInf(d,'OpenStreetMap(Overpass)');return}catch(e){err=e.name==='AbortError'?'시간 초과':String(e.message||e)}}
+for(const u of OV){try{const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),75000);const res=await fetch(u,{method:'POST',body:'data='+encodeURIComponent(q),headers:{'Content-Type':'application/x-www-form-urlencoded'},signal:ctl.signal});clearTimeout(to);if(!res.ok)throw new Error('HTTP '+res.status);const d=iparse(await res.json());if(!d.length)throw new Error('빈 결과');sv('where.inf',{v:2,k:bb,t:Date.now(),d});setInf(d,'OpenStreetMap(Overpass)');return}catch(e){err=e.name==='AbortError'?'시간 초과':String(e.message||e)}}
 istat('인프라를 불러오지 못했습니다('+err+'). 버튼으로 다시 시도하거나 팝업의 구글 지도 링크를 쓰세요.')}
 finally{INFL=false}}
 function ensureInfra(){if(!INF&&!INFL)loadInfra(false)}
