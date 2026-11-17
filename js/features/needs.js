@@ -45,7 +45,7 @@ $('ilay').innerHTML=INF_CATS.map((c,k)=>'<label class="ch"><input type="checkbox
 function refresh(id){const f=F();R.forEach(r=>{r.nd=need(r);pass[r.id]=ok(r,f)});
 R.forEach(r=>{const m=rm[r.id];if(m){const on=pass[r.id];m.setIcon(rIcon(r));m.setZIndexOffset(FV[r.id]?700:on?600:300)}});
 lst();const m=rm[id],p=m&&m.getPopup();if(p&&p.isOpen()){const c=p.getElement().querySelector('.leaflet-popup-content'),y=c.scrollTop;p.update();c.scrollTop=y}}
-const OV=['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter'];
+const OV=['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter','https://overpass.private.coffee/api/interpreter'];
 const OQ=['["shop"="supermarket"]','["shop"="convenience"]','["amenity"~"^(hospital|clinic|doctors)$"]','["amenity"="pharmacy"]','["shop"~"^(laundry|dry_cleaning)$"]','["leisure"="park"]','["amenity"="restaurant"]["cuisine"~"korean"]','["amenity"~"^(bank|atm)$"]'];
 function bbox(){const m=0.0145,a=R.map(r=>r.lat),o=R.map(r=>r.lng);return[Math.min(...a)-m,Math.min(...o)-m,Math.max(...a)+m,Math.max(...o)+m].map(x=>+x.toFixed(4)).join(',')}
 function icat(t){if(t.shop==='supermarket')return 0;if(t.shop==='convenience')return 1;if(/^(hospital|clinic|doctors)$/.test(t.amenity||''))return 2;if(t.amenity==='pharmacy')return 3;if(/^(laundry|dry_cleaning)$/.test(t.shop||''))return 4;if(t.leisure==='park')return 5;if(t.amenity==='restaurant'&&/korean/i.test(t.cuisine||''))return 6;if(/^(bank|atm)$/.test(t.amenity||''))return 7;return -1}

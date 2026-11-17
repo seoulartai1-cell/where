@@ -13,7 +13,7 @@ const h=(location.hash||'').replace(/^#\/?/,'').split('/'),r=h[0]||'find',B=docu
 if(r==='guide'){B.dataset.m='guide';guideShow(h[1]);document.title='계약 가이드 · JIKS 통학버스 주거지 찾기';tabUi();return}
 B.dataset.m='app';document.title='JIKS 통학버스 주거지 찾기';
 if(r==='c'&&R.some(x=>x.id===h[1])){if(!PANELS.includes(B.dataset.p))B.dataset.p='find';go(h[1]);return}
-if(r==='map'){setView('map');return}
+if(r==='map'||(!h[0]&&mob())){setView('map');return}
 B.dataset.p=PANELS.includes(r)?r:'find';$('side').scrollTop=0;setView('list')}
 // 같은 탭을 다시 눌러도(주소 그대로) 화면이 바뀌도록
 $('ptabs').addEventListener('click',e=>{const a=e.target.closest('a');if(a&&a.getAttribute('href')===location.hash){e.preventDefault();route()}});

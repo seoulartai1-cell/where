@@ -1,7 +1,7 @@
 // 지도·마커·팝업
 function initMap(){
 map=L.map('map',{zoomControl:true});
-L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:20,attribution:'© OpenStreetMap contributors © CARTO'}).addTo(map);
+addBase();
 zg=L.layerGroup().addTo(map);lg=L.layerGroup().addTo(map);trg=L.layerGroup().addTo(map);rtg=L.layerGroup().addTo(map);bsg=L.layerGroup().addTo(map);ig=L.layerGroup().addTo(map);mk=L.layerGroup().addTo(map);ln=L.layerGroup().addTo(map);
 map.on('popupclose',()=>{ln.clearLayers();sel=null});
 map.on('zoomend',()=>{zc();labelsUpd()});map.on('moveend',()=>{drawInfra();drawBus()});}
@@ -67,3 +67,16 @@ function bounds(a){map.fitBounds(L.latLngBounds(a),{padding:[40,40]})}
 function fit(){bounds(R.map(r=>[r.lat,r.lng]).concat(ST.map(s=>[s.lat,s.lng])))}
 function fitAll(){bounds(R.map(r=>[r.lat,r.lng]).concat(ST.map(s=>[s.lat,s.lng]),[[JK.lat,JK.lng]]))}
 
+
+// 배경 지도: 키 없이 쓰는 타일. CARTO는 2026-11부터 API 키를 요구해 뺐다.
+// 고른 배경은 저장하고, 타일이 계속 실패하면 다음 배경으로 넘긴다.
+const BASES=[
+['기본(OpenStreetMap)','https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}],
+['밝은 회색(Esri)','https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',{maxZoom:16,attribution:'Esri, HERE, Garmin, © OpenStreetMap contributors'},'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}'],
+['거리(Esri)','https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Esri, HERE, Garmin, © OpenStreetMap contributors'}],
+['인도주의(OSM HOT)','https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',{subdomains:'abc',maxZoom:19,attribution:'© OpenStreetMap contributors, HOT, OSM France'}]];
+function addBase(){const L0={},lay=BASES.map(b=>{const t=L.tileLayer(b[1],b[2]);const g=b[3]?L.layerGroup([t,L.tileLayer(b[3],{maxZoom:b[2].maxZoom,pane:'shadowPane'})]):t;g._bt=t;L0[b[0]]=g;return g});
+let i=0;try{i=Math.max(0,BASES.findIndex(b=>b[0]===localStorage.getItem('where.tile')))}catch(e){}
+lay[i].addTo(map);L.control.layers(L0,null,{position:'bottomright'}).addTo(map);
+map.on('baselayerchange',e=>{try{localStorage.setItem('where.tile',e.name)}catch(x){}});
+lay.forEach((g,k)=>{let n=0;g._bt.on('tileload',()=>{n=0});g._bt.on('tileerror',()=>{if(++n===6&&map.hasLayer(g)){const nx=lay[(k+1)%lay.length];map.removeLayer(g);nx.addTo(map)}})})}
