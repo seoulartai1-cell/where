@@ -9,13 +9,14 @@ const INF_CATS=[
 {l:'공원',c:'#4CAF50',g:'park',h:'산책·아이 놀이'},
 {l:'한식당',c:'#C0392B',g:'Korean restaurant',h:'식사'},
 {l:'은행·ATM',c:'#607D8B',g:'ATM bank',h:'현금 인출'},
-{l:'발레·댄스',c:'#E84393',g:'ballet school',h:'발레·무용 학원'},
+{l:'댄스',c:'#E84393',g:'dance school',h:'무용·댄스 학원 (발레 제외)'},
 {l:'영어학원',c:'#0984E3',g:'English course adult',h:'일반·성인 영어 (아동 영어 제외)'},
 {l:'스케이트파크',c:'#2D3436',g:'skatepark',h:'보드·인라인'},
 {l:'음악학원',c:'#A0522D',g:'music school',h:'피아노·악기'},
 {l:'태권도·무술',c:'#F39C12',g:'taekwondo',h:'태권도·무술 도장'},
 {l:'인도네시아어 학원',c:'#00A884',g:'Bahasa Indonesia course for foreigners',h:'외국인 대상, 영어로 수업'},
-{l:'필라테스',c:'#B983FF',g:'pilates studio',h:'필라테스 스튜디오'}];
+{l:'필라테스',c:'#B983FF',g:'pilates studio',h:'필라테스 스튜디오'},
+{l:'발레학원',c:'#FF7EB6',g:'ballet school',h:'발레 학원·스튜디오'}];
 const mi=(id,l,h)=>({id,l,h,t:'m'});
 const NG=[
 {g:'주변 생활 · 반경 안 자동 집계',i:INF_CATS.map((c,k)=>({id:'i'+k,l:c.l,h:c.h,t:'i',ci:k}))},
@@ -57,7 +58,8 @@ const OQ=['["shop"="supermarket"]','["shop"="convenience"]','["amenity"~"^(hospi
 function bbox(){const m=0.0145,a=R.map(r=>r.lat),o=R.map(r=>r.lng);return[Math.min(...a)-m,Math.min(...o)-m,Math.max(...a)+m,Math.max(...o)+m].map(x=>+x.toFixed(4)).join(',')}
 function icat(t){if(t.shop==='supermarket')return 0;if(t.shop==='convenience')return 1;if(/^(hospital|clinic|doctors)$/.test(t.amenity||''))return 2;if(t.amenity==='pharmacy')return 3;if(/^(laundry|dry_cleaning)$/.test(t.shop||''))return 4;if(t.leisure==='park')return 5;if(t.amenity==='restaurant'&&/korean/i.test(t.cuisine||''))return 6;if(/^(bank|atm)$/.test(t.amenity||''))return 7;
 const nm=(t.name||'')+' '+(t['name:en']||''),sp=t.sport||'';
-if(t.amenity==='dancing_school'||t.leisure==='dance'||/ballet|balet/i.test(nm))return 8;
+if(/ballet|balet/i.test(nm)||/ballet/.test(t.dance||'')||/ballet/.test(t['dance:style']||''))return 15;
+if(t.amenity==='dancing_school'||t.leisure==='dance')return 8;
 if(/indonesian|bahasa indonesia|\bbipa\b|wisma bahasa|cinta bahasa|bahasa kita/i.test(nm)&&(t.amenity==='language_school'||/school|course|kursus|sekolah|bahasa|language|bipa/i.test(nm)))return 13;
 if((t.amenity==='language_school'&&/english|inggris|^EF |wall street|\bLIA\b|\bELTI\b|\bTBI\b|\bILP\b|british|ielts|toefl/i.test(nm))||/english|bahasa inggris|^EF |wall street english/i.test(nm)){if(/kid|child|anak|junior|little|toddler|tots|early|baby|balita|preschool/i.test(nm))return -1;return 9}
 if(t.leisure==='skatepark'||/skateboard/.test(sp))return 10;
@@ -69,9 +71,9 @@ const istat=t=>{$('istat').textContent=t};
 function calcInfra(){const rad=+$('ir').value/1000;R.forEach(r=>{r.ic=INF_CATS.map(()=>0);r.in=INF_CATS.map(()=>null);INF.forEach(p=>{const d=hav(r.lat,r.lng,p[0],p[1]);if(d<=rad)r.ic[p[2]]++;if(r.in[p[2]]==null||d<r.in[p[2]])r.in[p[2]]=d})})}
 function setInf(d,src){INF=d;calcInfra();$('iload').textContent='인프라 다시 불러오기';istat('집계 완료 '+d.length+'곳 · '+src+' · © OpenStreetMap contributors. 반경 안 개수는 직선거리 기준이며 이름 없는 점포도 포함합니다.');all();drawInfra()}
 async function loadInfra(force){if(INFL)return;INFL=true;const bb=bbox();
-try{if(!force){const c=ld('where.inf',null);if(c&&c.v===3&&c.k===bb&&Date.now()-c.t<6048e5&&c.d&&c.d.length){setInf(c.d,'저장본');return}}
+try{if(!force){const c=ld('where.inf',null);if(c&&c.v===4&&c.k===bb&&Date.now()-c.t<6048e5&&c.d&&c.d.length){setInf(c.d,'저장본');return}}
 istat('주변 인프라 불러오는 중…');const q='[out:json][timeout:60];('+OQ.map(t=>'nwr'+t+'('+bb+');').join('')+');out tags center;';let err='';
-for(const u of OV){try{const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),75000);const res=await fetch(u,{method:'POST',body:'data='+encodeURIComponent(q),headers:{'Content-Type':'application/x-www-form-urlencoded'},signal:ctl.signal});clearTimeout(to);if(!res.ok)throw new Error('HTTP '+res.status);const d=iparse(await res.json());if(!d.length)throw new Error('빈 결과');sv('where.inf',{v:3,k:bb,t:Date.now(),d});setInf(d,'OpenStreetMap(Overpass)');return}catch(e){err=e.name==='AbortError'?'시간 초과':String(e.message||e)}}
+for(const u of OV){try{const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),75000);const res=await fetch(u,{method:'POST',body:'data='+encodeURIComponent(q),headers:{'Content-Type':'application/x-www-form-urlencoded'},signal:ctl.signal});clearTimeout(to);if(!res.ok)throw new Error('HTTP '+res.status);const d=iparse(await res.json());if(!d.length)throw new Error('빈 결과');sv('where.inf',{v:4,k:bb,t:Date.now(),d});setInf(d,'OpenStreetMap(Overpass)');return}catch(e){err=e.name==='AbortError'?'시간 초과':String(e.message||e)}}
 istat('인프라를 불러오지 못했습니다('+err+'). 버튼으로 다시 시도하거나 팝업의 구글 지도 링크를 쓰세요.')}
 finally{INFL=false}}
 function ensureInfra(){if(!INF&&!INFL)loadInfra(false)}
