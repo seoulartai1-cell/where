@@ -37,6 +37,8 @@ input[type=range]{width:100%}
 .rm{position:relative;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;border:1.5px solid var(--border-stronger);background:var(--surface-2);color:var(--text-muted)}
 .rm.on{background:var(--fill-accent);border-color:var(--fill-accent);color:var(--on-accent)}
 .rm.fv{box-shadow:0 0 0 3px #F5C518}
+.rm.nw::before{content:'N';position:absolute;bottom:-6px;left:-6px;width:14px;height:14px;border-radius:50%;background:#0E9F6E;color:#fff;font-size:9px;line-height:14px;text-align:center;font-weight:600;box-shadow:0 0 0 1.5px #fff}
+.bd.nw{background:#E6F6EF;color:#0B7A55}
 .rm.fv::after{content:'★';position:absolute;top:-12px;right:-9px;font-size:15px;line-height:1;color:#E0A800;text-shadow:0 0 2px #fff,0 0 2px #fff}
 .fb{font-size:15px;line-height:1;padding:4px 10px;color:var(--text-secondary)}
 .fb.on{color:#B8860B;border-color:#E0A800;background:rgba(245,197,24,.18)}

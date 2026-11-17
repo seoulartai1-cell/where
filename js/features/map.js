@@ -46,6 +46,7 @@ function nearStop(r){let b=null;BUSR.forEach(t=>t.st.forEach(x=>{const d=hav(r.l
 function popR(r){const f=F();
 let h='<div style="display:flex;justify-content:space-between;align-items:start;gap:8px"><div><span class="nb" style="margin-right:6px">'+r.i+'</span><b style="font-weight:500;font-size:15px">'+r.nm+'</b><div style="color:var(--text-secondary)">'+r.z+(r.kl?' · 행정구역 '+r.kl.k+' / '+r.kl.kc:'')+(r.rt?' · 구글 '+r.rt[0]+'점('+r.rt[1].toLocaleString('en-US')+')':' · 구글 평점 미확인')+'</div></div><button class="sm" id="px" aria-label="닫기">닫기</button></div>';
 h+=phGal(r)+'<div style="margin-top:6px">'+fbtn(r.id)+'</div>'+fform(r.id)+'<div style="margin-top:6px"><a href="'+gm(r.lat,r.lng)+'" target="_blank" rel="noopener">구글 지도(좌표)</a> · <a href="'+gmn(r.nm)+'" target="_blank" rel="noopener">구글 지도(이름)</a> · <a href="'+gd(r.lat,r.lng)+'" target="_blank" rel="noopener">JIKS까지 경로</a></div><h4>매물 검색(부동산 사이트)</h4>'+links(r);
+if(r.nw)h+='<h4>신축</h4><div><span class="bd nw">'+r.nw[0]+'</span></div>';
 if(r.tod)h+='<h4>역·몰 연결</h4><div><span class="bd ok">'+TODL(r)+'</span></div><div>'+r.tod[1]+'</div>';
 h+='<h4>버스 승차</h4>'+(r.nob?'<div style="font-size:16px;font-weight:500">통학버스 정류장 없음</div><div>'+nearStop(r)+'</div>':'<div style="font-size:18px;font-weight:500">'+r.b[0]+'</div><div>승차 지점: '+r.b[1]+'</div><div style="color:var(--text-secondary)">노선: '+r.b[2]+'</div>')+'<div>JIKS까지 직선 <b style="font-weight:500">'+fd1(r.jd)+'</b></div>';
 h+='<h4>월세 (루피아, 만 단위)</h4><div>'+r.pt+'</div>';

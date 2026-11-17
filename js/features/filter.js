@@ -10,6 +10,7 @@ for(const c of f.fc){
 if(c==='green'){if(r.gr!=='golf'&&r.gr!=='garden')return false}
 else if(c==='t6'){if(r.t6!==1)return false}
 else if(c==='tod'){if(!r.tod||r.tod[2]!==1)return false}
+else if(c==='nw'){if(!r.nw)return false}
 else if(c==='coach'){const x=r.nbc[0];if(f.pd<5?x.d>f.pd:false)return false}
 else if(r.f[c]!==1)return false}
 if(f.mrt<5&&r.mrt[0].d>f.mrt)return false;
