@@ -37,13 +37,22 @@ function loadData() {
   return { stops, R: ctx.R };
 }
 async function loadPrev() {
+  // 배포본(PREV_URL)과 저장소 파일을 합친다. 한쪽이 수집 실패로 비어 있어도 좌표·매물을 잃지 않게 한다.
+  const list = [];
   const u = process.env.PREV_URL;
-  if (u) { try { const r = await fetch(u + '?t=' + Date.now()); if (r.ok) { const j = await r.json(); if (j && j.v === 1) return j; } } catch (e) {} }
-  try { const j = JSON.parse(fs.readFileSync(OUT, 'utf8')); if (j && j.v === 1) return j; } catch (e) {}
-  return { v: 1, complexes: {} };
+  if (u) { try { const r = await fetch(u + '?t=' + Date.now()); if (r.ok) { const j = await r.json(); if (j && j.v === 1) list.push(j); } } catch (e) {} }
+  try { const j = JSON.parse(fs.readFileSync(OUT, 'utf8')); if (j && j.v === 1) list.push(j); } catch (e) {}
+  const out = { v: 1, complexes: {}, pinhome: {}, near: [] };
+  list.forEach(j => {
+    Object.entries(j.complexes || {}).forEach(([k, c]) => { const o = out.complexes[k]; if (!o || (!o.lat && c.lat) || (c.lat && Date.parse(c.at || 0) > Date.parse(o.at || 0))) out.complexes[k] = c; });
+    Object.entries(j.pinhome || {}).forEach(([k, c]) => { if (!out.pinhome[k] || (c.slug && !out.pinhome[k].slug)) out.pinhome[k] = c; });
+    if ((j.near || []).length > out.near.length) out.near = j.near;
+  });
+  return out;
 }
 
 async function get(url) {
+  if (process.env.FETCH === 'none') return { status: 0, html: '' };
   if (process.env.FETCH === 'curl') {
     try { return { status: 200, html: execFileSync('curl', ['-sSL', '-m', '90', '-A', UA, '-H', 'Accept-Language: id-ID,id;q=0.9', '--fail', url], { maxBuffer: 3e7 }).toString() }; }
     catch (e) { return { status: 0, html: '' }; }
@@ -113,7 +122,9 @@ async function pinhome(n, cache) {
   const tries = hit && hit.slug ? [hit.slug] : hit && hit.miss && Date.now() - Date.parse(hit.at) < COORD_DAYS * 864e5 ? [] : phSlugs(n);
   for (const slug of tries) {
     const r = await get(PH + slug + '/properti'); await sleep(DELAY);
-    if (!r.html || r.status === 404 || !/ItemList/.test(r.html)) continue;
+    if (r.status === 404) continue;
+    if (!r.html || r.status >= 400) return { fail: true };
+    if (!/ItemList/.test(r.html)) continue;
     let { items, total } = phParse(r.html);
     const all = +((/dari\s+(\d+)\s+properti/.exec(r.html) || [])[1] || 0);
     for (let pg = 2, last = items.length; last >= 40 && pg <= 5 && (!all || items.length < all); pg++) { const r2 = await get(PH + slug + '/properti?page=' + pg); await sleep(DELAY); const x = phParse(r2.html || ''); last = x.items.length; if (!last) break; items = items.concat(x.items); }
@@ -133,7 +144,8 @@ async function main() {
   R.forEach(r => [...r.ls.map(l => l[3]), ...r.src.map(s => s[1])].forEach(u => { const m = /sewa-apartemen-([a-z0-9-]+)/.exec(u || ''); if (m) known.add(m[1] + '|' + r.id); }));
   const knownSlug = {}; known.forEach(k => { const [s, id] = k.split('|'); knownSlug[s] = id; });
   const queue = new Set(Object.keys(C));
-  let pages = 0;
+  let pages = 0, fails = 0;
+  const prevNear = Object.fromEntries((prev.near || []).map(c => [c.slug, c]));
   // 지역 페이지에서 단지 목록 모으기
   for (const a of AREAS) {
     const r = await get(J + '/apartemen/' + a); pages++; await sleep(DELAY);
@@ -146,8 +158,10 @@ async function main() {
   const done = new Set();
   const visit = async slug => {
     const r = await get(J + '/sewa-apartemen-' + slug); pages++; await sleep(DELAY);
-    const d = nextData(r.html || ''); const pp = d && d.props && d.props.pageProps;
-    if (!pp || pp.latitude == null) { C[slug] = { miss: true, at: NOW }; return null; }
+    if (!r.html || r.status >= 400) { fails++; if (fails <= 5) console.log('실패', r.status, slug); return null; }          // 접속 실패: 이전 기록 유지
+    const d = nextData(r.html); const pp = d && d.props && d.props.pageProps;
+    if (!pp) { fails++; return null; }
+    if (pp.latitude == null) { C[slug] = { miss: true, at: NOW }; return null; }
     (pp.directory_links && pp.directory_links.apartments || []).forEach(x => x.slug && queue.add(x.slug));
     C[slug] = { n: pp.name, lat: +pp.latitude, lng: +pp.longitude, d: pp.breadcrumb && pp.breadcrumb.district ? pp.breadcrumb.district.name : '', a: (pp.breadcrumb && pp.breadcrumb.area ? pp.breadcrumb.area.name : ''), at: NOW };
     return pp;
@@ -168,7 +182,7 @@ async function main() {
       const b = nearest(cc.lat, cc.lng);
       if (b.d > RADIUS) continue;
       if (!pp) { pp = await visit(slug); progress = true; }
-      if (!pp) continue;
+      if (!pp) { const o = prevNear[slug]; if (o) { near.push(Object.assign({}, o, { stale: true, units: (o.units || []).filter(u => u.src !== 'Pinhome') })); console.log('이전 결과 유지', slug); } continue; }
       const us = units(pp, slug);
       near.push({ slug, n: cc.n, lat: cc.lat, lng: cc.lng, dist: cc.d, area: cc.a, url: J + '/sewa-apartemen-' + slug, src: 'Jendela360',
         stop: { n: b.s.n, t: b.s.t, rt: b.s.rt, rn: b.s.rn, km: Math.round(b.d * 100) / 100 },
@@ -180,7 +194,8 @@ async function main() {
   const PC = prev.pinhome || {};
   let phN = 0;
   for (const c of near) {
-    const r = await pinhome(c.n, PC);
+    let r = await pinhome(c.n, PC);
+    if (r && r.fail) { const o = prevNear[c.slug]; r = o ? { slug: (o.ph || '').replace(PH, '').replace('/properti', ''), items: (o.units || []).filter(u => u.src === 'Pinhome') } : null; if (r && !r.items.length) r = null; }
     if (!r) continue;
     const seen = new Set(c.units.map(u => u.url));
     r.items.forEach(u => { if (!seen.has(u.url) && !/TERSEWA/i.test(u.title)) { c.units.push(u); phN++; } });
@@ -193,9 +208,13 @@ async function main() {
   manual.forEach(m => { if (m.lat == null && m.slug && C[m.slug] && C[m.slug].lat) { m.lat = C[m.slug].lat; m.lng = C[m.slug].lng; }
     if (m.lat != null) { const b = nearest(m.lat, m.lng); m.stop = { n: b.s.n, t: b.s.t, rt: b.s.rt, rn: b.s.rn, km: Math.round(b.d * 100) / 100 }; } });
   near.sort((a, b) => a.stop.rt.localeCompare(b.stop.rt) || a.stop.km - b.stop.km);
-  const out = { v: 1, updated: NOW, radius: RADIUS, pages, complexes: C, pinhome: PC, near, manual };
+  if (near.length < (prev.near || []).length * 0.5) {
+    console.log('수집 결과가 이전의 절반 미만(접속 실패 ' + fails + '건) → 이전 결과를 유지');
+    prev.near.forEach(o => { if (!near.some(c => c.slug === o.slug)) near.push(Object.assign({}, o, { stale: true })); });
+  }
+  const out = { v: 1, updated: NOW, fails, radius: RADIUS, pages, complexes: C, pinhome: PC, near, manual };
   fs.mkdirSync(path.dirname(OUT), { recursive: true });
   fs.writeFileSync(OUT, JSON.stringify(out));
-  console.log('완료: 방문', pages, '좌표 아는 단지', Object.values(C).filter(c => c.lat).length, '정류장 근처 단지', near.length, '매물', near.reduce((a, x) => a + x.units.length, 0), 'Pinhome', phN, '수동', manual.length);
+  console.log('완료: 방문', pages, '실패', fails, '좌표 아는 단지', Object.values(C).filter(c => c.lat).length, '정류장 근처 단지', near.length, '매물', near.reduce((a, x) => a + x.units.length, 0), 'Pinhome', phN, '수동', manual.length);
 }
 main().catch(e => { console.error(e); process.exit(1); });
