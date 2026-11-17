@@ -5,7 +5,7 @@ const fd=d=>d.toFixed(2)+'km';
 const fd1=d=>d.toFixed(1)+'km';
 const tm=t=>{const a=String(t).split(':');return a.length<2?NaN:+a[0]*60+ +a[1]};
 const bt=r=>r.nob?-1:tm(r.b[0]);
-const TODL=r=>r.tod?({1:'역·몰 직결',2:'몰 직결·역 도보',3:'역 직결'}[r.tod[2]]||'역 연결')+' · '+r.tod[0]:'';
+const TODL=r=>r.tod?({1:'역·몰 직결',2:'몰 직결·역 도보',3:'역 직결',4:'몰 직결·역 없음',5:'몰 맞은편·역 도보'}[r.tod[2]]||'역 연결')+' · '+r.tod[0]:'';
 const NWL=r=>r.nw?'신축 · '+r.nw[0]:'';
 const GRL={golf:'골프장 뷰',garden:'정원·녹지',city:'도시 뷰'};
 const SMIN=12,SMAX=500;
