@@ -9,14 +9,14 @@ lst();fpan();
 if(open&&!fonly()){mm.closePopup();mm.openPopup()}}
 function fpan(){
 const ids=R.filter(r=>FV[r.id]),n=ids.length,f=F();
-let h='<div class="cd fc"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><div style="font-size:15px;font-weight:500"><span style="color:#E0A800">★</span> 즐겨찾기 '+n+'곳</div><div class="fx" style="margin:0"><label class="ch" style="margin:0"><input type="checkbox" id="fo"'+(fonly()?' checked':'')+'> 즐겨찾기만 보기</label><button class="sm" id="fexp" title="단지·매물 즐겨찾기, 메모, 생활 조건, 설비 기록, 공과금 단가, 계약 체크리스트">전체 백업</button><button class="sm" id="fimb">백업 가져오기</button><button class="sm" id="fclr">전체 해제</button></div></div>';
+let h='<div class="cd fc"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><div style="font-size:15px;font-weight:500"><span style="color:#E0A800">★</span> 즐겨찾기 '+n+'곳</div><div class="fx" style="margin:0"><label class="ch" style="margin:0"><input type="checkbox" id="fo"'+(fonly()?' checked':'')+'> 즐겨찾기만 보기</label><button class="sm" id="fexp" title="단지·매물 즐겨찾기, 매물 선호도·메모, 단지 메모, 생활 조건, 설비 기록, 공과금 단가, 계약 체크리스트">전체 백업</button><button class="sm" id="fimb">백업 가져오기</button><button class="sm" id="fclr">전체 해제</button></div></div>';
 if(!n)h+='<div style="font-size:13px;color:var(--text-secondary);margin-top:8px">지도 마커 팝업이나 "찾기" 목록의 ☆ 버튼을 누르면 여기서 상태와 메모를 관리합니다. 저장은 이 브라우저에만 되며, 다른 기기로 옮길 때는 전체 백업·백업 가져오기를 쓰세요.</div>';
 else{ids.sort((a,b)=>STS.indexOf(FV[a.id].s)-STS.indexOf(FV[b.id].s)||a.i-b.i);
 h+=ids.map(r=>{const v=FV[r.id],l=lo(r,f);return '<div style="border-top:0.5px solid var(--border);margin-top:10px;padding-top:10px"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap"><div style="display:flex;align-items:center;gap:8px"><span class="nb">'+r.i+'</span><b style="font-weight:500">'+esc(r.nm)+'</b><span class="bd'+fsc(v.s)+'">'+esc(v.s)+'</span>'+(pass[r.id]?'':'<span class="bd un">현재 조건 제외</span>')+'</div><div class="fx" style="margin:0"><button class="sm" data-go="'+r.id+'">지도에서 보기</button>'+fbtn(r.id)+'</div></div><div style="font-size:13px;color:var(--text-secondary);margin:4px 0">'+esc(r.z)+' · '+esc(r.pt)+' · 버스 '+r.b[0]+' · 최저 '+fm(l)+' · JIKS '+fd1(r.jd)+'</div>'+links(r)+fform(r.id)+'</div>'}).join('')}
 h+='</div>';$('fvp').innerHTML=h;mcnt()}
 function mcnt(){const e=$('mcnt');if(e)e.textContent=(Object.keys(FV).length+FL.size)||''}
 // 전체 백업: 이 앱이 저장하는 사용자 데이터 키를 한 파일로 내보내고 가져온다
-const BK=['jiks-fav-v1','jiks_fl','jiks_cost','where.ns','where.ck','id-housing-check-v1'];
+const BK=['jiks-fav-v1','jiks_fl','jiks_fln','jiks_cost','where.ns','where.ck','id-housing-check-v1'];
 function fexp(){
 const data={};BK.forEach(k=>{const v=localStorage.getItem(k);if(v!==null)data[k]=v});
 const b=new Blob([JSON.stringify({v:2,app:'where',saved:new Date().toISOString(),data},null,1)],{type:'application/json'});
@@ -42,6 +42,28 @@ try{const v=localStorage.getItem('jiks_fl');if(v!==null){FL=new Set(JSON.parse(v
 {let mv=false;[...FL].forEach(k=>{const m=/^([^:]+):(.+):(\d+)$/.exec(k),r=m&&R.find(x=>x.id===m[1]),l=r&&r.ls[+m[3]];if(l&&l[0]===m[2]){FL.delete(k);FL.add(lk(r,l));mv=true}});if(mv)try{localStorage.setItem('jiks_fl',JSON.stringify([...FL]))}catch(e){}}
 if(!flInit)R.forEach(r=>r.ls.forEach((l,i)=>{if(FSEED.includes(l[0]))FL.add(fkey(r,i))}));
 const flsv=()=>{try{localStorage.setItem('jiks_fl',JSON.stringify([...FL]))}catch(e){}};
+// 매물 선호도(1~5)·메모: 키는 매물 즐겨찾기 키와 같다. 즐겨찾기를 해제해도 기록은 남는다
+const FNK='jiks_fln';let FN={};
+try{const o=JSON.parse(localStorage.getItem(FNK)||'{}');if(o&&typeof o==='object')FN=o}catch(e){}
+const fnsv=()=>{try{localStorage.setItem(FNK,JSON.stringify(FN))}catch(e){}};
+const fnOf=k=>FN[k]||{p:0,n:''};
+const PFL=['','별로','보통','괜찮음','좋음','최고'];
+const prefH=k=>{const p=fnOf(k).p|0;let h='<span class="pf" title="선호도">';for(let i=1;i<=5;i++)h+='<button class="pv'+(i<=p?' on':'')+'" data-pf="'+k+'" data-pv="'+i+'" aria-label="선호도 '+i+' '+PFL[i]+'">♥</button>';return h+'<small class="pfl" data-pfl="'+k+'">'+PFL[p]+'</small></span>'};
+const memoBtn=k=>{const n=fnOf(k).n;return '<button class="sm mb'+(n?' on':'')+'" data-lmb="'+k+'">'+(n?'메모 ✎':'메모 +')+'</button>'};
+const memoH=(k,open)=>{const n=fnOf(k).n;return '<textarea class="fn ln" data-lnm="'+k+'" placeholder="매물 메모 (방문 후기, 층·향, 연락처, 협상 가격 등)"'+(open||n?'':' hidden')+'>'+esc(n)+'</textarea>'};
+const lmeta=k=>'<div class="lm">'+prefH(k)+memoBtn(k)+'</div>';
+// 선호도나 메모를 남기면 매물 즐겨찾기에 함께 넣어 "내 후보"에서 모아 본다
+function flAdd(k){if(FL.has(k))return;FL.add(k);nbSnap(k);flsv();mcnt();favPanel();document.querySelectorAll('[data-fl="'+k+'"]').forEach(b=>{b.classList.add('on');b.textContent='★'})}
+function fnClean(k){const o=FN[k];if(o&&!o.p&&!o.n&&!(o.m&&FL.has(k)))delete FN[k]}
+// 정류장 주변 매물(nb:)은 단지 데이터에 없으므로 요약을 FN에 남긴다
+function nbSnap(k){if(k.indexOf('nb:')||typeof NBM==='undefined'||!NBM[k])return;const o=FN[k]||(FN[k]={p:0,n:''});o.m=NBM[k];fnsv()}
+function setPref(k,v){nbSnap(k);const o=FN[k]||(FN[k]={p:0,n:''});o.p=o.p===v?0:v;fnClean(k);fnsv();
+if(o.p&&!FL.has(k))flAdd(k);else favPanel();
+const p=fnOf(k).p;document.querySelectorAll('[data-pf="'+k+'"]').forEach(b=>b.classList.toggle('on',+b.dataset.pv<=p));document.querySelectorAll('[data-pfl="'+k+'"]').forEach(s=>s.textContent=PFL[p]);}
+function setMemo(k,t){nbSnap(k);const o=FN[k]||(FN[k]={p:0,n:''});o.n=t;fnClean(k);fnsv();
+if(t.trim())flAdd(k);
+document.querySelectorAll('[data-lmb="'+k+'"]').forEach(b=>{b.classList.toggle('on',!!t);b.textContent=t?'메모 ✎':'메모 +'});
+document.querySelectorAll('[data-lnm="'+k+'"]').forEach(a=>{if(a!==document.activeElement)a.value=t})}
 const fw=p=>p==null?'미확인':(Math.round(p*1e6*FX.v/1000)/10).toLocaleString('ko-KR')+'만원';
 const area=l=>{const m=/(\d+(?:\.\d+)?)㎡/.exec(l[1]);return m?+m[1]:null};
 function est(l){const a=area(l);if(a==null)return null;const ipl=l[0]==='AREUM'?0:CP.ipl*a/1e6;const kwh=Math.round(a*5.2);const el=kwh*CP.kwh/1e6;const w=(100000+a*1500)/1e6;const u=ipl+el+w;return{a,ipl,kwh,el,w,u,t:l[2]==null?null:l[2]+u}}
@@ -56,10 +78,15 @@ const d=new Date(j.time_last_update_unix*1000).toISOString().slice(0,10);FX={v,d
 catch(e){FX=c?{v:c.v,d:c.d,live:false}:{v:FXF.v,d:FXF.d,live:false}}
 fxUi()}
 function favPanel(){const a=[];R.forEach(r=>r.ls.forEach((l,i)=>{const k=fkey(r,i);if(FL.has(k))a.push({r,l,k,e:est(l)})}));
-a.sort((x,y)=>(x.e&&x.e.t!=null?x.e.t:999)-(y.e&&y.e.t!=null?y.e.t:999));
+FL.forEach(k=>{const m=!k.indexOf('nb:')&&FN[k]&&FN[k].m;if(m){const l=[m.t,(m.a?m.a+'㎡ ':'')+m.d,m.p,m.u];a.push({nb:m,l,k,e:m.a?est(l):null})}});
+a.sort((x,y)=>(fnOf(y.k).p|0)-(fnOf(x.k).p|0)||(x.e&&x.e.t!=null?x.e.t:999)-(y.e&&y.e.t!=null?y.e.t:999));
 $('fpl').innerHTML=a.length?a.map(x=>{const e=x.e,l=x.l;
+if(x.nb){const m=x.nb;return '<div class="cd fv"><div class="hd"><div class="t"><b>'+esc(m.c)+' · '+esc(m.t)+'</b></div><div style="display:flex;gap:4px;flex:none"><button class="st on" data-fl="'+x.k+'" aria-label="즐겨찾기 해제">★</button></div></div><div class="sub">'+esc(m.d)+' · <span class="bd">'+esc(m.src)+'</span> 정류장 주변 매물</div>'+(m.img?phLink(m.img,'fi',m.u):'')
++'<div class="cg"><div><small>월세</small><b>'+(m.p==null?'가격 문의':fw(m.p))+'</b><small>'+fm(m.p)+'</small></div><div><small>공과금 추정</small><b>'+(e?fw(e.u):'면적 미확인')+'</b></div><div><small>월 총액</small><b>'+(e&&e.t!=null?fw(e.t):'월세 확인 필요')+'</b></div></div>'
++'<div class="lm">'+prefH(x.k)+'</div>'+memoH(x.k,true)+'<div class="lk"><a href="'+m.u+'" target="_blank" rel="noopener">매물 페이지</a></div></div>'}
 return '<div class="cd fv"><div class="hd"><div class="t"><b>'+x.r.sn+' · '+l[0]+'</b></div><div style="display:flex;gap:4px;flex:none"><button class="sm" data-go="'+x.r.id+'">지도</button><button class="st on" data-fl="'+x.k+'" aria-label="즐겨찾기 해제">★</button></div></div><div class="sub">'+esc(l[1])+lvBadge(l)+'</div>'+(phOf(x.r,l)?phLink(phOf(x.r,l),'fi',l[3]):'')
 +'<div class="cg"><div><small>월세</small><b>'+(l[2]==null?'미표시':fw(l[2]))+'</b><small>'+fm(l[2])+'</small></div><div><small>공과금 추정</small><b>'+(e?fw(e.u):'면적 미확인')+'</b></div><div><small>월 총액</small><b>'+(e&&e.t!=null?fw(e.t):'월세 확인 필요')+'</b></div></div>'
 +(e?'<div class="sub" style="margin:0 0 4px">관리비 '+(l[0]==='AREUM'?'무료 안내':fw(e.ipl))+' · 전기 '+e.kwh+'kWh '+fw(e.el)+' · 물 '+fw(e.w)+'</div>':'')
-+'<div class="lk"><a href="'+l[3]+'" target="_blank" rel="noopener">매물 페이지</a></div></div>'}).join(''):'<div class="sub">지도 팝업의 매물 옆 ☆를 눌러 추가하세요.</div>'}
-function toggleFl(k){FL.has(k)?FL.delete(k):FL.add(k);flsv();favPanel();mcnt();document.querySelectorAll('[data-fl="'+k+'"]').forEach(b=>{b.classList.toggle('on',FL.has(k));b.textContent=FL.has(k)?'★':'☆'})}
++'<div class="lm">'+prefH(x.k)+'</div>'+memoH(x.k,true)
++'<div class="lk"><a href="'+l[3]+'" target="_blank" rel="noopener">매물 페이지</a></div></div>'}).join(''):'<div class="sub">지도 팝업의 매물 옆 ☆를 누르거나 선호도 ♥·메모를 남기면 여기 모입니다. 선호도 높은 순으로 정렬합니다.</div>'}
+function toggleFl(k){FL.has(k)?FL.delete(k):FL.add(k);if(FL.has(k))nbSnap(k);else{fnClean(k);fnsv()}flsv();favPanel();mcnt();document.querySelectorAll('[data-fl="'+k+'"]').forEach(b=>{b.classList.toggle('on',FL.has(k));b.textContent=FL.has(k)?'★':'☆'})}

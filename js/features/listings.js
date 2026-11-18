@@ -44,7 +44,7 @@ function lsBlock(r,f){if(!r.ls.length)return '<div class="un">링크할 매물�
 const a=r.ls.map((l,i)=>({l,i})).sort((x,y)=>(x.l.dead?1:0)-(y.l.dead?1:0)||(y.l.nw?1:0)-(x.l.nw?1:0));
 return a.map(({l,i})=>{const k=fkey(r,i),e=est(l),on=FL.has(k),u=phU(l);
 return '<div class="lr'+(l.dead?' dd':'')+'"><button class="st'+(on?' on':'')+'" data-fl="'+k+'" aria-label="매물 즐겨찾기">'+(on?'★':'☆')+'</button> '+(u?phLink(u,'lt',l[3]):'')+'<a href="'+l[3]+'" target="_blank" rel="noopener">'+esc(l[0])+'</a> '+esc(l[1])+' <span class="bd'+(l[2]!=null&&l[2]<=f.b&&!l.dead?' ok':'')+'">'+fm(l[2])+'</span>'+(l[2]!=null?' <span class="bd">≈'+fw(l[2])+'</span>':'')+lvBadge(l)
-+(e&&e.t!=null&&!l.dead?'<div class="sub" style="margin:0 0 2px 30px">월 총 추정 '+fw(e.t)+' (관리비 '+(l[0]==='AREUM'?'무료 안내':fw(e.ipl))+' + 전기 '+fw(e.el)+' + 물 '+fw(e.w)+')</div>':'')+'</div>'}).join('')
++(e&&e.t!=null&&!l.dead?'<div class="sub" style="margin:0 0 2px 30px">월 총 추정 '+fw(e.t)+' (관리비 '+(l[0]==='AREUM'?'무료 안내':fw(e.ipl))+' + 전기 '+fw(e.el)+' + 물 '+fw(e.w)+')</div>':'')+lmeta(k)+memoH(k,false)+'</div>'}).join('')
 +(LIVE&&LIVE.updated?'<div class="sub">매물 상태 자동 확인 '+ago(LIVE.updated)+'</div>':'')}
 function lvCard(r){if(!LIVE)return '';const n=r.ls.filter(l=>!l.dead).length,nw=r.ls.filter(l=>l.nw).length,d=r.ls.filter(l=>l.dead).length;
 return '<div style="margin-top:2px"><span class="bd">매물 '+n+'</span>'+(nw?'<span class="bd ok">새 '+nw+'</span>':'')+(d?'<span class="bd no">내려감 '+d+'</span>':'')+'</div>'}
