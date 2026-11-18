@@ -1,6 +1,7 @@
 // 지도·마커·팝업
 function initMap(){
 map=L.map('map',{zoomControl:true});
+L.control.scale({position:'topleft',metric:true,imperial:false,maxWidth:140}).addTo(map);
 addBase();
 zg=L.layerGroup().addTo(map);lg=L.layerGroup().addTo(map);trg=L.layerGroup().addTo(map);rtg=L.layerGroup().addTo(map);bsg=L.layerGroup().addTo(map);ig=L.layerGroup().addTo(map);mk=L.layerGroup().addTo(map);ln=L.layerGroup().addTo(map);
 map.on('popupclose',()=>{ln.clearLayers();sel=null});
